@@ -1,23 +1,23 @@
-class ZCL_REVIEW definition
-  public
-  final
-  create public .
+CLASS zcl_review DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  methods RELEASE
-    importing
-      !REQUEST type TRKORR
-    raising
-      CX_STATIC_CHECK .
-protected section.
+    METHODS release
+      IMPORTING
+        !request TYPE trkorr
+      RAISING
+        cx_static_check .
+  PROTECTED SECTION.
 
-  methods CREATE_HTTP_CLIENT
-    returning
-      value(RI_CLIENT) type ref to IF_HTTP_CLIENT
-    raising
-      ZCX_ABAPGIT_EXCEPTION .
-private section.
+    METHODS create_http_client
+      RETURNING
+        VALUE(ri_client) TYPE REF TO if_http_client
+      RAISING
+        zcx_abapgit_exception .
+  PRIVATE SECTION.
 ENDCLASS.
 
 
