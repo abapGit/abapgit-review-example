@@ -33,7 +33,7 @@ CLASS ZCL_REVIEW IMPLEMENTATION.
 
     li_client = zcl_abapgit_exit=>get_instance( )->create_http_client( lv_url ).
     IF li_client IS INITIAL.
-      CREATE OBJECT lo_proxy_configuration.
+      lo_proxy_configuration = NEW #( ).
       cl_http_client=>create_by_url(
         EXPORTING
           url           = lv_url
