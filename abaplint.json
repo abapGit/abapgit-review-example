@@ -175,7 +175,7 @@
       "shlp": "^Z"
     },
     "obsolete_statement": true,
-    "omit_parameter_name": false,
+    "omit_parameter_name": true,
     "omit_receiving": true,
     "parser_702_chaining": true,
     "parser_error": true,
@@ -205,7 +205,7 @@
     "try_without_catch": true,
     "type_form_parameters": true,
     "types_naming": false,
-    "uncaught_exception": false,
+    "uncaught_exception": true,
     "unknown_types": true,
     "unreachable_code": true,
     "unused_methods": false,
