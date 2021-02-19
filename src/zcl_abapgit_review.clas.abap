@@ -53,7 +53,9 @@ CLASS zcl_abapgit_review DEFINITION
       IMPORTING
         !iv_trkorr     TYPE trkorr
       RETURNING
-        VALUE(ro_repo) TYPE REF TO zcl_abapgit_repo_online .
+        VALUE(ro_repo) TYPE REF TO zcl_abapgit_repo_online
+      RAISING
+        cx_static_check .
     METHODS find_request
       IMPORTING
         !iv_trkorr        TYPE trkorr
@@ -162,6 +164,37 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
   METHOD find_abapgit_repo.
 
     DATA(lt_objects) = list_objects( find_request( iv_trkorr ) ).
+    IF lines( lt_objects ) = 0.
+      RETURN.
+    ENDIF.
+
+    SELECT DISTINCT devclass FROM tadir INTO TABLE @DATA(lt_packages)
+      FOR ALL ENTRIES IN @lt_objects
+      WHERE pgmid = @lt_objects-pgmid
+      AND object = @lt_objects-object
+      AND obj_name = @lt_objects-obj_name.
+
+    DATA(lt_repos) = zcl_abapgit_repo_srv=>get_instance( )->list( ).
+    LOOP AT lt_packages INTO DATA(lv_package).
+      DATA(lt_supers) = zcl_abapgit_factory=>get_sap_package( lv_package-devclass )->list_superpackages( ).
+      LOOP AT lt_supers INTO DATA(lv_super).
+        LOOP AT lt_repos INTO DATA(lo_repo).
+          IF lo_repo->is_offline( ) = abap_true.
+            CONTINUE.
+          ELSEIF lo_repo->get_package( ) = lv_super.
+            IF ro_repo IS INITIAL.
+              ro_repo ?= lo_repo.
+            ELSEIF ro_repo->get_package( ) = lo_repo->get_package( ).
+              CONTINUE.
+            ELSE.
+* the transport spans multiple repos
+              ASSERT 0 = 1.
+            ENDIF.
+          ENDIF.
+        ENDLOOP.
+      ENDLOOP.
+    ENDLOOP.
+
     BREAK-POINT.
 
 * todo
