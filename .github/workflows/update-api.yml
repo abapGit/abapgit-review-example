@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: git status
+      - name: wget
         run: |
           cd src
           wget -O zif_githubcom.intf.abap https://raw.githubusercontent.com/abap-openapi/generated-github/main/zif_githubcom.intf.abap
