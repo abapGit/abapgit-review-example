@@ -187,17 +187,12 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
             ELSEIF ro_repo->get_package( ) = lo_repo->get_package( ).
               CONTINUE.
             ELSE.
-* the transport spans multiple repos
-              ASSERT 0 = 1.
+              ASSERT 0 = 'the transport spans multiple repos'.
             ENDIF.
           ENDIF.
         ENDLOOP.
       ENDLOOP.
     ENDLOOP.
-
-    BREAK-POINT.
-
-* todo
 
   ENDMETHOD.
 
