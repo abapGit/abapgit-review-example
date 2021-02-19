@@ -1,4 +1,4 @@
-REPORT zreview.
+REPORT zabapgit_review.
 
 PARAMETERS p_trkorr TYPE trkorr OBLIGATORY.
 
