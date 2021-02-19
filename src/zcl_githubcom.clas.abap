@@ -4822,7 +4822,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD parse_code_scanning_alert_inst.
-* todo, handle type array, no item_ref 
+* todo, handle type array, no item_ref
   ENDMETHOD.
 
   METHOD parse_code_scanning_alert_co01.
@@ -5119,7 +5119,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD parse_content_directory.
-* todo, handle type array, no item_ref 
+* todo, handle type array, no item_ref
   ENDMETHOD.
 
   METHOD parse_content_file.
@@ -6007,7 +6007,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD parse_code_frequency_stat.
-* todo, handle type array, no item_ref 
+* todo, handle type array, no item_ref
   ENDMETHOD.
 
   METHOD parse_commit_activity.
@@ -6153,7 +6153,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD parse_search_result_text_match.
-* todo, handle type array, no item_ref 
+* todo, handle type array, no item_ref
   ENDMETHOD.
 
   METHOD parse_code_search_result_item.
@@ -6778,7 +6778,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD parse_gitignore_get_all_templa.
-* todo, handle type array, no item_ref 
+* todo, handle type array, no item_ref
   ENDMETHOD.
 
   METHOD parse_apps_list_repos_accessib.
@@ -7445,19 +7445,19 @@ CLASS zcl_githubcom IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD parse_repos_get_all_status_che.
-* todo, handle type array, no item_ref 
+* todo, handle type array, no item_ref
   ENDMETHOD.
 
   METHOD parse_repos_add_status_check_c.
-* todo, handle type array, no item_ref 
+* todo, handle type array, no item_ref
   ENDMETHOD.
 
   METHOD parse_repos_set_status_check_c.
-* todo, handle type array, no item_ref 
+* todo, handle type array, no item_ref
   ENDMETHOD.
 
   METHOD parse_repos_remove_status_chec.
-* todo, handle type array, no item_ref 
+* todo, handle type array, no item_ref
   ENDMETHOD.
 
   METHOD parse_repos_get_apps_with_acce.
