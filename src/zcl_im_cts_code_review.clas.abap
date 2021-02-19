@@ -31,7 +31,7 @@ CLASS ZCL_IM_CTS_CODE_REVIEW IMPLEMENTATION.
 
 
   METHOD if_ex_cts_request_check~check_before_release.
-    NEW zcl_review( )->release( request ).
+    NEW zcl_abapgit_review( )->release( request ).
   ENDMETHOD.
 
 

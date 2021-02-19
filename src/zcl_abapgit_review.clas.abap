@@ -1,4 +1,4 @@
-CLASS zcl_review DEFINITION
+CLASS zcl_abapgit_review DEFINITION
   PUBLIC
   FINAL
   CREATE PUBLIC .
@@ -22,7 +22,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_REVIEW IMPLEMENTATION.
+CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
 
   METHOD create_http_client.
@@ -49,14 +49,14 @@ CLASS ZCL_REVIEW IMPLEMENTATION.
 
   METHOD release.
 
-    DATA(li_github) = CAST zif_github( NEW zcl_github( create_http_client( ) ) ).
+    DATA(li_github) = CAST zif_githubcom( NEW zcl_githubcom( create_http_client( ) ) ).
 
 *    DATA(lt_pulls) =
     li_github->pulls_list(
       owner = 'abapGit'
       repo  = 'abapGit' ).
 
-    BREAK-POINT.
+* todo
 
   ENDMETHOD.
 ENDCLASS.
