@@ -12,8 +12,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: ls
-        run: ls -salh
       - name: git status
         run: |
+          cd src
+          wget https://raw.githubusercontent.com/abap-openapi/generated-github/main/zif_githubcom.intf.abap
+          wget https://raw.githubusercontent.com/abap-openapi/generated-github/main/zcl_githubcom.clas.abap
           git status
