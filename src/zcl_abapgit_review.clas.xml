@@ -5,7 +5,7 @@
    <VSEOCLASS>
     <CLSNAME>ZCL_ABAPGIT_REVIEW</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Review Testing</DESCRIPT>
+    <DESCRIPT>abapGit Code Review Example</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

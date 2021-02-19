@@ -125,8 +125,8 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 * todo, there must be commits on the branch for it to be possible to create the PR?
 
     DATA(lt_pulls) = zcl_abapgit_pr_enumerator=>new( io_repo )->get_pulls( ).
-    READ TABLE lt_pulls WITH KEY head_branch = iv_branch_name TRANSPORTING NO FIELDS.
-    IF sy-subrc <> 0.
+
+    IF NOT line_exists( lt_pulls[ head_branch = iv_branch_name ] ).
       create_pull_request(
         iv_url         = io_repo->get_url( )
         iv_branch_name = iv_branch_name ).
@@ -137,11 +137,17 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
   METHOD create_pull_request.
 
+* todo, add more allowed characters,
+    FIND REGEX 'github.com/(\d\w)+/(\d\w)+' IN iv_url SUBMATCHES DATA(lv_owner) DATA(lv_repo).
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
     DATA(li_github) = CAST zif_githubcom( NEW zcl_githubcom( create_http_client( ) ) ).
-*    DATA(ls_created) = li_github->pulls_create(
-*      owner = 'abapGit'
-*      repo  = 'abapGit'
-*      body  = VALUE #( ) ).
+    DATA(ls_created) = li_github->pulls_create(
+      owner = lv_owner
+      repo  = lv_repo
+      body  = VALUE #( ) ). " todo
 
   ENDMETHOD.
 
