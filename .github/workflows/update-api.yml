@@ -1,0 +1,23 @@
+name: update-api
+
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: wget
+        run: |
+          cd src
+          wget -O zif_githubcom.intf.abap https://raw.githubusercontent.com/abap-openapi/generated-github/main/zif_githubcom.intf.abap
+          wget -O zcl_githubcom.clas.abap https://raw.githubusercontent.com/abap-openapi/generated-github/main/zcl_githubcom.clas.abap
+          git status
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          title: Update Github API
