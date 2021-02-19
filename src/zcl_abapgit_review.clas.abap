@@ -27,6 +27,11 @@ CLASS zcl_abapgit_review DEFINITION
         !iv_branch_name TYPE string
       RAISING
         cx_static_check .
+    METHODS create_http_client
+      RETURNING
+        VALUE(ri_client) TYPE REF TO if_http_client
+      RAISING
+        zcx_abapgit_exception .
     METHODS create_pr_if_missing
       IMPORTING
         !io_repo        TYPE REF TO zcl_abapgit_repo_online
@@ -39,41 +44,36 @@ CLASS zcl_abapgit_review DEFINITION
         !iv_branch_name TYPE string
       RAISING
         cx_static_check .
-    METHODS release_task
-      IMPORTING
-        !iv_task TYPE trkorr
-      RAISING
-        cx_static_check .
-    METHODS release_request
-      IMPORTING
-        !iv_request TYPE trkorr
-      RAISING
-        cx_static_check .
-    METHODS find_abapgit_repo
-      IMPORTING
-        !iv_trkorr     TYPE trkorr
-      RETURNING
-        VALUE(ro_repo) TYPE REF TO zcl_abapgit_repo_online .
-    METHODS list_objects
-      IMPORTING
-        !iv_request     TYPE trkorr
-      RETURNING
-        VALUE(rt_tadir) TYPE ty_tadir_tt .
     METHODS determine_branch_name
       IMPORTING
         !iv_trkorr            TYPE trkorr
       RETURNING
         VALUE(rv_branch_name) TYPE string .
+    METHODS find_abapgit_repo
+      IMPORTING
+        !iv_trkorr     TYPE trkorr
+      RETURNING
+        VALUE(ro_repo) TYPE REF TO zcl_abapgit_repo_online .
     METHODS find_request
       IMPORTING
         !iv_trkorr        TYPE trkorr
       RETURNING
         VALUE(rv_request) TYPE trkorr .
-    METHODS create_http_client
+    METHODS list_objects
+      IMPORTING
+        !iv_request     TYPE trkorr
       RETURNING
-        VALUE(ri_client) TYPE REF TO if_http_client
+        VALUE(rt_tadir) TYPE ty_tadir_tt .
+    METHODS release_request
+      IMPORTING
+        !iv_request TYPE trkorr
       RAISING
-        zcx_abapgit_exception .
+        cx_static_check .
+    METHODS release_task
+      IMPORTING
+        !iv_task TYPE trkorr
+      RAISING
+        cx_static_check .
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -121,6 +121,8 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
 
   METHOD create_pr_if_missing.
+
+* todo, there must be commits on the branch for it to be possible to create the PR?
 
     DATA(lt_pulls) = zcl_abapgit_pr_enumerator=>new( io_repo )->get_pulls( ).
     READ TABLE lt_pulls WITH KEY head_branch = iv_branch_name TRANSPORTING NO FIELDS.
