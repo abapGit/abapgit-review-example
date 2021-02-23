@@ -135,7 +135,7 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
     SELECT SINGLE @abap_true FROM zagr_created_prs
       INTO @DATA(lv_created)
-      WHERE trkorr = @iv_request.
+      WHERE trkorr = @iv_request.                         "#EC CI_SUBRC
     IF lv_created = abap_false.
       create_pull_request(
         iv_url         = io_repo->get_url( )
@@ -173,6 +173,7 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
         pr     = ls_created-number
         url    = ls_created-html_url ).
       INSERT zagr_created_prs FROM @ls_pr.
+      ASSERT sy-subrc = 0.
     ENDIF.
 
   ENDMETHOD.
@@ -332,7 +333,8 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
 * call github api to check if PR is merged
 
-    SELECT SINGLE pr FROM zagr_created_prs INTO @DATA(lv_pr) WHERE trkorr = @iv_request.
+    SELECT SINGLE pr FROM zagr_created_prs INTO @DATA(lv_pr)
+      WHERE trkorr = @iv_request.
     IF sy-subrc <> 0.
       RETURN.
     ENDIF.
