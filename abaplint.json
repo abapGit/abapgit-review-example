@@ -79,9 +79,7 @@
       "spaces": 1
     },
     "cyclomatic_complexity": {
-      "exclude": [],
-      "severity": "Error",
-      "max": 20
+      "exclude": ["github.com"]
     },
     "definitions_top": true,
     "description_empty": true,
