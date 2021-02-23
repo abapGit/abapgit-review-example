@@ -21,6 +21,9 @@ CLASS zcl_abapgit_review DEFINITION
     TYPES:
       ty_tadir_tt TYPE STANDARD TABLE OF ty_tadir WITH EMPTY KEY .
 
+    CONSTANTS gc_workbench TYPE e070-trfunction VALUE 'K' ##NO_TEXT.
+    CONSTANTS gc_development TYPE e070-trfunction VALUE 'S' ##NO_TEXT.
+
     METHODS create_branch_if_missing
       IMPORTING
         !io_repo        TYPE REF TO zcl_abapgit_repo_online
@@ -36,44 +39,48 @@ CLASS zcl_abapgit_review DEFINITION
       IMPORTING
         !io_repo        TYPE REF TO zcl_abapgit_repo_online
         !iv_branch_name TYPE string
+        !iv_request     TYPE trkorr
       RAISING
         cx_static_check .
     METHODS create_pull_request
       IMPORTING
         !iv_url         TYPE string
         !iv_branch_name TYPE string
+        !iv_request     TYPE trkorr
       RAISING
         cx_static_check .
-    METHODS determine_branch_name
-      IMPORTING
-        !iv_trkorr            TYPE trkorr
-      RETURNING
-        VALUE(rv_branch_name) TYPE string .
     METHODS find_abapgit_repo
       IMPORTING
-        !iv_trkorr     TYPE trkorr
+        !it_tadir      TYPE ty_tadir_tt
       RETURNING
         VALUE(ro_repo) TYPE REF TO zcl_abapgit_repo_online
       RAISING
         cx_static_check .
-    METHODS find_request
-      IMPORTING
-        !iv_trkorr        TYPE trkorr
-      RETURNING
-        VALUE(rv_request) TYPE trkorr .
     METHODS list_objects
       IMPORTING
         !iv_request     TYPE trkorr
       RETURNING
         VALUE(rt_tadir) TYPE ty_tadir_tt .
+    METHODS push_changes
+      IMPORTING
+        !io_repo        TYPE REF TO zcl_abapgit_repo_online
+        !iv_task        TYPE trkorr
+        !it_objects     TYPE ty_tadir_tt
+        !iv_branch_name TYPE string
+      RAISING
+        zcx_abapgit_exception .
     METHODS release_request
       IMPORTING
         !iv_request TYPE trkorr
+        !io_repo    TYPE REF TO zcl_abapgit_repo_online
       RAISING
         cx_static_check .
     METHODS release_task
       IMPORTING
-        !iv_task TYPE trkorr
+        !iv_task    TYPE trkorr
+        !io_repo    TYPE REF TO zcl_abapgit_repo_online
+        !it_objects TYPE ty_tadir_tt
+        !iv_request TYPE trkorr
       RAISING
         cx_static_check .
   PRIVATE SECTION.
@@ -124,13 +131,15 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
   METHOD create_pr_if_missing.
 
-* todo, there must be commits on the branch for it to be possible to create the PR?
+* todo, there must be commits on the branch for it to be possible to create the PR
 
-    DATA(lt_pulls) = zcl_abapgit_pr_enumerator=>new( io_repo )->get_pulls( ).
-
-    IF NOT line_exists( lt_pulls[ head_branch = iv_branch_name ] ).
+    SELECT SINGLE @abap_true FROM zagr_created_prs
+      INTO @DATA(lv_created)
+      WHERE trkorr = @iv_request.                         "#EC CI_SUBRC
+    IF lv_created = abap_false.
       create_pull_request(
         iv_url         = io_repo->get_url( )
+        iv_request     = iv_request
         iv_branch_name = iv_branch_name ).
     ENDIF.
 
@@ -139,8 +148,8 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
   METHOD create_pull_request.
 
-* todo, add more allowed characters,
-    FIND REGEX 'https:\/\/github\.com\/([\d\w]+)\/([-\d\w]+)(\.git)?' IN iv_url SUBMATCHES DATA(lv_owner) DATA(lv_repo).
+    FIND REGEX 'https:\/\/github\.com\/([-\d\w]+)\/([-\d\w]+)(\.git)?'
+      IN iv_url SUBMATCHES DATA(lv_owner) DATA(lv_repo).
     IF sy-subrc <> 0.
       RETURN.
     ENDIF.
@@ -150,36 +159,37 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
       owner = lv_owner
       repo  = lv_repo
       body  = VALUE #(
-        title                 = 'title'
+        title                 = |{ sy-sysid } - { iv_request }|
         head                  = iv_branch_name
         base                  = 'master' " todo
         maintainer_can_modify = abap_true
         draft                 = abap_false
         issue                 = cl_abap_math=>max_int4
-        body                  = 'body text' ) ).
+        body                  = |{ sy-sysid } - { iv_request }| ) ).
 
-  ENDMETHOD.
-
-
-  METHOD determine_branch_name.
-
-    rv_branch_name = find_request( iv_trkorr ).
+    IF ls_created-number IS NOT INITIAL.
+      DATA(ls_pr) = VALUE zagr_created_prs(
+        trkorr = iv_request
+        pr     = ls_created-number
+        url    = ls_created-html_url ).
+      INSERT zagr_created_prs FROM @ls_pr.
+      ASSERT sy-subrc = 0.
+    ENDIF.
 
   ENDMETHOD.
 
 
   METHOD find_abapgit_repo.
 
-    DATA(lt_objects) = list_objects( find_request( iv_trkorr ) ).
-    IF lines( lt_objects ) = 0.
+    IF lines( it_tadir ) = 0.
       RETURN.
     ENDIF.
 
     SELECT DISTINCT devclass FROM tadir INTO TABLE @DATA(lt_packages)
-      FOR ALL ENTRIES IN @lt_objects
-      WHERE pgmid = @lt_objects-pgmid
-      AND object = @lt_objects-object
-      AND obj_name = @lt_objects-obj_name.
+      FOR ALL ENTRIES IN @it_tadir
+      WHERE pgmid = @it_tadir-pgmid
+      AND object = @it_tadir-object
+      AND obj_name = @it_tadir-obj_name.
 
     DATA(lt_repos) = zcl_abapgit_repo_srv=>get_instance( )->list( ).
     LOOP AT lt_packages INTO DATA(lv_package).
@@ -200,19 +210,6 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
         ENDLOOP.
       ENDLOOP.
     ENDLOOP.
-
-  ENDMETHOD.
-
-
-  METHOD find_request.
-
-    SELECT SINGLE trkorr, strkorr FROM e070 INTO @DATA(ls_e070) WHERE trkorr = @iv_trkorr.
-    ASSERT sy-subrc = 0.
-    IF ls_e070-strkorr IS NOT INITIAL.
-      rv_request = ls_e070-strkorr.
-    ELSE.
-      rv_request = ls_e070-trkorr.
-    ENDIF.
 
   ENDMETHOD.
 
@@ -252,25 +249,80 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD push_changes.
+
+    io_repo->select_branch( |refs/heads/{ iv_branch_name }| ).
+
+    DATA(ls_files) = zcl_abapgit_factory=>get_stage_logic( )->get( io_repo ).
+    DATA(lt_file_status) = zcl_abapgit_file_status=>status( io_repo ).
+
+    DATA(lo_stage) = NEW zcl_abapgit_stage( ).
+
+    LOOP AT lt_file_status ASSIGNING FIELD-SYMBOL(<ls_status>)
+        WHERE match <> abap_true AND obj_type IS NOT INITIAL.
+* the object must be part of the task's request
+      IF NOT line_exists( it_objects[ object = <ls_status>-obj_type obj_name = <ls_status>-obj_name ] ).
+        CONTINUE.
+      ENDIF.
+
+      CASE <ls_status>-lstate.
+        WHEN zif_abapgit_definitions=>c_state-deleted.
+          lo_stage->rm( iv_path     = <ls_status>-path
+                        iv_filename = <ls_status>-filename ).
+        WHEN OTHERS.
+          DATA(lv_data) = ls_files-local[ file-filename = <ls_status>-filename
+                                          file-path     = <ls_status>-path ]-file-data.
+          lo_stage->add( iv_path     = <ls_status>-path
+                         iv_filename = <ls_status>-filename
+                         iv_data     = lv_data ).
+      ENDCASE.
+    ENDLOOP.
+
+    IF lo_stage->count( ) > 0.
+      io_repo->push(
+        is_comment = VALUE #(
+          committer = VALUE #( name = 'name' email = 'name@localhost' )
+          author    = VALUE #( name = 'name' email = 'name@localhost' )
+          comment   = iv_task )
+        io_stage   = lo_stage ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD release.
 
-    CONSTANTS lc_workbench TYPE e070-trfunction VALUE 'K'.
-    CONSTANTS lc_development TYPE e070-trfunction VALUE 'S'.
-
-    SELECT SINGLE strkorr, trfunction
-      FROM e070
-      INTO @DATA(ls_e070)
-      WHERE trkorr = @iv_trkorr.
-    IF sy-subrc <> 0
-        OR ( ls_e070-trfunction <> lc_workbench
-        AND ls_e070-trfunction <> lc_development ).
+    SELECT SINGLE strkorr, trfunction FROM e070 INTO @DATA(ls_e070) WHERE trkorr = @iv_trkorr.
+    IF sy-subrc <> 0 OR ( ls_e070-trfunction <> gc_workbench AND ls_e070-trfunction <> gc_development ).
       RETURN.
     ENDIF.
 
     IF ls_e070-strkorr IS NOT INITIAL.
-      release_task( iv_trkorr ).
+      DATA(lv_request) = ls_e070-strkorr.
     ELSE.
-      release_request( iv_trkorr ).
+      lv_request = iv_trkorr.
+    ENDIF.
+
+    DATA(lt_objects) = list_objects( lv_request ).
+    IF lines( lt_objects ) = 0.
+      RETURN.
+    ENDIF.
+
+    DATA(lo_repo) = find_abapgit_repo( lt_objects ).
+    IF lo_repo IS INITIAL OR lo_repo->get_url( ) NP '*github.com*'.
+      RETURN.
+    ENDIF.
+
+    IF ls_e070-strkorr IS NOT INITIAL.
+      release_task(
+        iv_task    = iv_trkorr
+        it_objects = lt_objects
+        iv_request = lv_request
+        io_repo    = lo_repo ).
+    ELSE.
+      release_request(
+        iv_request = iv_trkorr
+        io_repo    = lo_repo ).
     ENDIF.
 
   ENDMETHOD.
@@ -278,29 +330,48 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
   METHOD release_request.
 
-* todo, call github api to check if PR is merged
+* call github api to check if PR is merged
+
+    SELECT SINGLE pr FROM zagr_created_prs INTO @DATA(lv_pr)
+      WHERE trkorr = @iv_request.
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+    FIND REGEX 'https:\/\/github\.com\/([-\d\w]+)\/([-\d\w]+)(\.git)?'
+      IN io_repo->get_url( ) SUBMATCHES DATA(lv_owner) DATA(lv_repo).
+    ASSERT sy-subrc = 0.
+
+    DATA(li_github) = CAST zif_githubcom( NEW zcl_githubcom( create_http_client( ) ) ).
+    DATA(ls_pr) = li_github->pulls_get(
+      owner       = lv_owner
+      repo        = lv_repo
+      pull_number = lv_pr ).
+
+    IF ls_pr-state = 'open'.
+      zcx_abapgit_exception=>raise( |PR #{ lv_pr } must be merged before the request can be released| ).
+    ENDIF.
 
   ENDMETHOD.
 
 
   METHOD release_task.
 
-    DATA(lo_repo) = find_abapgit_repo( iv_task ).
-    IF lo_repo IS INITIAL OR lo_repo->get_url( ) NP '*github.com*'.
-      RETURN.
-    ENDIF.
-
-    DATA(lv_branch_name) = determine_branch_name( iv_task ).
+    DATA(lv_branch_name) = |{ iv_request }|.
 
     create_branch_if_missing(
-      io_repo        = lo_repo
+      io_repo        = io_repo
       iv_branch_name = lv_branch_name ).
 
-* push changes to branch
-* todo
+    push_changes(
+      io_repo        = io_repo
+      it_objects     = it_objects
+      iv_task        = iv_task
+      iv_branch_name = lv_branch_name ).
 
     create_pr_if_missing(
-      io_repo        = lo_repo
+      io_repo        = io_repo
+      iv_request     = iv_request
       iv_branch_name = lv_branch_name ).
 
   ENDMETHOD.
