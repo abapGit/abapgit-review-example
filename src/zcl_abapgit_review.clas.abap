@@ -21,6 +21,13 @@ CLASS zcl_abapgit_review DEFINITION
     TYPES:
       ty_tadir_tt TYPE STANDARD TABLE OF ty_tadir WITH EMPTY KEY .
 
+    METHODS push_changes
+      IMPORTING
+        !io_repo        TYPE REF TO zcl_abapgit_repo_online
+        !it_objects     TYPE ty_tadir_tt
+        !iv_branch_name TYPE string
+      RAISING
+        zcx_abapgit_exception .
     METHODS create_branch_if_missing
       IMPORTING
         !io_repo        TYPE REF TO zcl_abapgit_repo_online
@@ -51,7 +58,7 @@ CLASS zcl_abapgit_review DEFINITION
         VALUE(rv_branch_name) TYPE string .
     METHODS find_abapgit_repo
       IMPORTING
-        !iv_trkorr     TYPE trkorr
+        !it_tadir      TYPE ty_tadir_tt
       RETURNING
         VALUE(ro_repo) TYPE REF TO zcl_abapgit_repo_online
       RAISING
@@ -124,7 +131,7 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
   METHOD create_pr_if_missing.
 
-* todo, there must be commits on the branch for it to be possible to create the PR?
+* todo, there must be commits on the branch for it to be possible to create the PR
 
     DATA(lt_pulls) = zcl_abapgit_pr_enumerator=>new( io_repo )->get_pulls( ).
 
@@ -170,16 +177,15 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
   METHOD find_abapgit_repo.
 
-    DATA(lt_objects) = list_objects( find_request( iv_trkorr ) ).
-    IF lines( lt_objects ) = 0.
+    IF lines( it_tadir ) = 0.
       RETURN.
     ENDIF.
 
     SELECT DISTINCT devclass FROM tadir INTO TABLE @DATA(lt_packages)
-      FOR ALL ENTRIES IN @lt_objects
-      WHERE pgmid = @lt_objects-pgmid
-      AND object = @lt_objects-object
-      AND obj_name = @lt_objects-obj_name.
+      FOR ALL ENTRIES IN @it_tadir
+      WHERE pgmid = @it_tadir-pgmid
+      AND object = @it_tadir-object
+      AND obj_name = @it_tadir-obj_name.
 
     DATA(lt_repos) = zcl_abapgit_repo_srv=>get_instance( )->list( ).
     LOOP AT lt_packages INTO DATA(lv_package).
@@ -252,6 +258,51 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD push_changes.
+
+    DATA(ls_files) = zcl_abapgit_factory=>get_stage_logic( )->get( io_repo ).
+    DATA(lt_file_status) = zcl_abapgit_file_status=>status( io_repo ).
+
+    DATA(lo_stage) = NEW zcl_abapgit_stage( ).
+
+    LOOP AT lt_file_status ASSIGNING FIELD-SYMBOL(<ls_status>)
+        WHERE lstate <> zif_abapgit_definitions=>c_state-unchanged.
+
+* the object must be part of the task's request
+      READ TABLE it_objects WITH KEY object = <ls_status>-obj_type obj_name = <ls_status>-obj_name TRANSPORTING NO FIELDS.
+      IF sy-subrc <> 0.
+        CONTINUE.
+      ENDIF.
+
+      CASE <ls_status>-lstate.
+        WHEN zif_abapgit_definitions=>c_state-modified OR zif_abapgit_definitions=>c_state-added.
+          DATA(lv_data) = ls_files-local[ file-filename = <ls_status>-filename
+                                          file-path     = <ls_status>-path ]-file-data.
+          lo_stage->add( iv_path     = <ls_status>-path
+                         iv_filename = <ls_status>-filename
+                         iv_data     = lv_data ).
+        WHEN zif_abapgit_definitions=>c_state-deleted.
+          lo_stage->rm( iv_path     = <ls_status>-path
+                        iv_filename = <ls_status>-filename ).
+      ENDCASE.
+    ENDLOOP.
+
+    IF lo_stage->count( ) > 0.
+      DATA(lv_current) = io_repo->get_selected_branch( ).
+      ASSERT lv_current IS NOT INITIAL.
+      io_repo->select_branch( |refs/heads/{ iv_branch_name }| ).
+      io_repo->push(
+        is_comment = VALUE #(
+          committer = VALUE #( name = 'name' email = 'name@localhost' )
+          author    = VALUE #( name = 'name' email = 'name@localhost' )
+          comment   = 'automatic push')
+        io_stage   = lo_stage ).
+      io_repo->select_branch( lv_current ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD release.
 
     CONSTANTS lc_workbench TYPE e070-trfunction VALUE 'K'.
@@ -285,7 +336,12 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
   METHOD release_task.
 
-    DATA(lo_repo) = find_abapgit_repo( iv_task ).
+    DATA(lt_objects) = list_objects( find_request( iv_task ) ).
+    IF lines( lt_objects ) = 0.
+      RETURN.
+    ENDIF.
+
+    DATA(lo_repo) = find_abapgit_repo( lt_objects ).
     IF lo_repo IS INITIAL OR lo_repo->get_url( ) NP '*github.com*'.
       RETURN.
     ENDIF.
@@ -296,8 +352,10 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
       io_repo        = lo_repo
       iv_branch_name = lv_branch_name ).
 
-* push changes to branch
-* todo
+    push_changes(
+      io_repo        = lo_repo
+      it_objects     = lt_objects
+      iv_branch_name = lv_branch_name ).
 
     create_pr_if_missing(
       io_repo        = lo_repo
