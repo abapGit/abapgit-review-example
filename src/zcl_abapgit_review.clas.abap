@@ -258,11 +258,10 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
     DATA(lo_stage) = NEW zcl_abapgit_stage( ).
 
-    LOOP AT lt_file_status ASSIGNING FIELD-SYMBOL(<ls_status>) WHERE match <> abap_true.
-
+    LOOP AT lt_file_status ASSIGNING FIELD-SYMBOL(<ls_status>)
+        WHERE match <> abap_true AND obj_type IS NOT INITIAL.
 * the object must be part of the task's request
-      READ TABLE it_objects WITH KEY object = <ls_status>-obj_type obj_name = <ls_status>-obj_name TRANSPORTING NO FIELDS.
-      IF sy-subrc <> 0.
+      IF NOT line_exists( it_objects[ object = <ls_status>-obj_type obj_name = <ls_status>-obj_name ] ).
         CONTINUE.
       ENDIF.
 
