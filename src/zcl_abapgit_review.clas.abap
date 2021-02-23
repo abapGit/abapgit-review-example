@@ -47,6 +47,7 @@ CLASS zcl_abapgit_review DEFINITION
         !iv_url         TYPE string
         !iv_branch_name TYPE string
         !iv_request     TYPE trkorr
+        !iv_base        TYPE string
       RAISING
         cx_static_check .
     METHODS find_abapgit_repo
@@ -133,6 +134,9 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
 * todo, there must be commits on the branch for it to be possible to create the PR
 
+    DATA(lo_branches) = zcl_abapgit_git_transport=>branches( io_repo->get_url( ) ).
+    DATA(ls_head) = lo_branches->find_by_name( lo_branches->get_head_symref( ) ).
+
     SELECT SINGLE @abap_true FROM zagr_created_prs
       INTO @DATA(lv_created)
       WHERE trkorr = @iv_request.                         "#EC CI_SUBRC
@@ -140,6 +144,7 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
       create_pull_request(
         iv_url         = io_repo->get_url( )
         iv_request     = iv_request
+        iv_base        = ls_head-display_name
         iv_branch_name = iv_branch_name ).
     ENDIF.
 
@@ -161,7 +166,7 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
       body  = VALUE #(
         title                 = |{ sy-sysid } - { iv_request }|
         head                  = iv_branch_name
-        base                  = 'master' " todo
+        base                  = iv_base
         maintainer_can_modify = abap_true
         draft                 = abap_false
         issue                 = cl_abap_math=>max_int4
