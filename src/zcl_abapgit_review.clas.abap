@@ -349,7 +349,8 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
       pull_number = lv_pr ).
 
     IF ls_pr-state = 'open'.
-      zcx_abapgit_exception=>raise( 'the pull request must be merged before the request can be released' ).
+      zcx_abapgit_exception=>raise(
+        |PR #{ lv_pr } must be merged before the request can be released| ).
     ENDIF.
 
   ENDMETHOD.
