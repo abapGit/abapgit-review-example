@@ -140,7 +140,7 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
   METHOD create_pull_request.
 
 * todo, add more allowed characters,
-    FIND REGEX 'github.com/(\d\w)+/(\d\w)+' IN iv_url SUBMATCHES DATA(lv_owner) DATA(lv_repo).
+    FIND REGEX 'https:\/\/github\.com\/([\d\w]+)\/([-\d\w]+)(\.git)?' IN iv_url SUBMATCHES DATA(lv_owner) DATA(lv_repo).
     IF sy-subrc <> 0.
       RETURN.
     ENDIF.
@@ -149,7 +149,14 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
     DATA(ls_created) = li_github->pulls_create(
       owner = lv_owner
       repo  = lv_repo
-      body  = VALUE #( ) ). " todo
+      body  = VALUE #(
+        title                 = 'title'
+        head                  = iv_branch_name
+        base                  = 'master' " todo
+        maintainer_can_modify = abap_true
+        draft                 = abap_false
+        issue                 = cl_abap_math=>max_int4
+        body                  = 'body text' ) ).
 
   ENDMETHOD.
 
