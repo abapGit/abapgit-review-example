@@ -408,6 +408,22 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(workflow_run) TYPE zif_githubcom=>workflow_run
       RAISING cx_static_check.
+    METHODS parse_environment_approvals
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(environment_approvals) TYPE zif_githubcom=>environment_approvals
+      RAISING cx_static_check.
+    METHODS parse_deployment_reviewer_type
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(deployment_reviewer_type) TYPE zif_githubcom=>deployment_reviewer_type
+      RAISING cx_static_check.
+    METHODS parse_pending_deployment
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(pending_deployment) TYPE zif_githubcom=>pending_deployment
+      RAISING cx_static_check.
+    METHODS parse_deployment
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(deployment) TYPE zif_githubcom=>deployment
+      RAISING cx_static_check.
     METHODS parse_workflow_run_usage
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(workflow_run_usage) TYPE zif_githubcom=>workflow_run_usage
@@ -467,6 +483,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_protected_branch
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(protected_branch) TYPE zif_githubcom=>protected_branch
+      RAISING cx_static_check.
+    METHODS parse_deployment_simple
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(deployment_simple) TYPE zif_githubcom=>deployment_simple
       RAISING cx_static_check.
     METHODS parse_check_run
       IMPORTING iv_prefix TYPE string
@@ -704,13 +724,21 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(contributor) TYPE zif_githubcom=>contributor
       RAISING cx_static_check.
-    METHODS parse_deployment
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(deployment) TYPE zif_githubcom=>deployment
-      RAISING cx_static_check.
     METHODS parse_deployment_status
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(deployment_status) TYPE zif_githubcom=>deployment_status
+      RAISING cx_static_check.
+    METHODS parse_wait_timer
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(wait_timer) TYPE zif_githubcom=>wait_timer
+      RAISING cx_static_check.
+    METHODS parse_deployment_branch_policy
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(deployment_branch_policy) TYPE zif_githubcom=>deployment_branch_policy
+      RAISING cx_static_check.
+    METHODS parse_environment
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(environment) TYPE zif_githubcom=>environment
       RAISING cx_static_check.
     METHODS parse_short_blob
       IMPORTING iv_prefix TYPE string
@@ -1316,6 +1344,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING data TYPE zif_githubcom=>bodyactions_set_github_actio01
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
+    METHODS json_actions_review_pending_de
+      IMPORTING data TYPE zif_githubcom=>bodyactions_review_pending_dep
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
     METHODS json_actions_create_or_updat01
       IMPORTING data TYPE zif_githubcom=>bodyactions_create_or_update_r
       RETURNING VALUE(json) TYPE string
@@ -1470,6 +1502,14 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       RAISING cx_static_check.
     METHODS json_repos_create_dispatch_eve
       IMPORTING data TYPE zif_githubcom=>bodyrepos_create_dispatch_even
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
+    METHODS json_repos_create_or_update_en
+      IMPORTING data TYPE zif_githubcom=>bodyrepos_create_or_update_env
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
+    METHODS json_repos_delete_an_environme
+      IMPORTING data TYPE zif_githubcom=>bodyrepos_delete_an_environmen
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
     METHODS json_repos_create_fork
@@ -1766,6 +1806,14 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       RAISING cx_static_check.
     METHODS json_repos_create_using_templa
       IMPORTING data TYPE zif_githubcom=>bodyrepos_create_using_templat
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
+    METHODS json_actions_create_or_updat02
+      IMPORTING data TYPE zif_githubcom=>bodyactions_create_or_update_e
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
+    METHODS json_actions_delete_environmen
+      IMPORTING data TYPE zif_githubcom=>bodyactions_delete_environment
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
     METHODS json_enterprise_admin_provisio
@@ -2196,6 +2244,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_list_workflow) TYPE zif_githubcom=>response_actions_list_workflow
       RAISING cx_static_check.
+    METHODS parse_actions_get_reviews_for_
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_actions_get_reviews_f) TYPE zif_githubcom=>response_actions_get_reviews_f
+      RAISING cx_static_check.
     METHODS parse_actions_list_workflow_01
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_list_workfl01) TYPE zif_githubcom=>response_actions_list_workfl01
@@ -2203,6 +2255,14 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_actions_list_jobs_for_wo
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_list_jobs_for) TYPE zif_githubcom=>response_actions_list_jobs_for
+      RAISING cx_static_check.
+    METHODS parse_actions_get_pending_depl
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_actions_get_pending_d) TYPE zif_githubcom=>response_actions_get_pending_d
+      RAISING cx_static_check.
+    METHODS parse_actions_review_pending_d
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_actions_review_pendin) TYPE zif_githubcom=>response_actions_review_pendin
       RAISING cx_static_check.
     METHODS parse_actions_list_repo_secret
       IMPORTING iv_prefix TYPE string
@@ -2367,6 +2427,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_repos_list_deployment_st
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_repos_list_deployme01) TYPE zif_githubcom=>response_repos_list_deployme01
+      RAISING cx_static_check.
+    METHODS parse_repos_get_all_environmen
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_repos_get_all_environ) TYPE zif_githubcom=>response_repos_get_all_environ
       RAISING cx_static_check.
     METHODS parse_activity_list_repo_event
       IMPORTING iv_prefix TYPE string
@@ -2579,6 +2643,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_repos_list_public
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_repos_list_public) TYPE zif_githubcom=>response_repos_list_public
+      RAISING cx_static_check.
+    METHODS parse_actions_list_environment
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_actions_list_environm) TYPE zif_githubcom=>response_actions_list_environm
       RAISING cx_static_check.
     METHODS parse_search_code
       IMPORTING iv_prefix TYPE string
@@ -4479,6 +4547,49 @@ CLASS zcl_githubcom IMPLEMENTATION.
     workflow_run-head_repository_id = mo_json->value_string( iv_prefix && '/head_repository_id' ).
   ENDMETHOD.
 
+  METHOD parse_environment_approvals.
+* todo, array, environments
+    environment_approvals-state = mo_json->value_string( iv_prefix && '/state' ).
+    environment_approvals-user = parse_simple_user( iv_prefix ).
+    environment_approvals-comment = mo_json->value_string( iv_prefix && '/comment' ).
+  ENDMETHOD.
+
+  METHOD parse_deployment_reviewer_type.
+* todo, handle type string
+  ENDMETHOD.
+
+  METHOD parse_pending_deployment.
+    pending_deployment-environment-id = mo_json->value_string( iv_prefix && '/environment/id' ).
+    pending_deployment-environment-node_id = mo_json->value_string( iv_prefix && '/environment/node_id' ).
+    pending_deployment-environment-name = mo_json->value_string( iv_prefix && '/environment/name' ).
+    pending_deployment-environment-url = mo_json->value_string( iv_prefix && '/environment/url' ).
+    pending_deployment-environment-html_url = mo_json->value_string( iv_prefix && '/environment/html_url' ).
+    pending_deployment-wait_timer = mo_json->value_string( iv_prefix && '/wait_timer' ).
+    pending_deployment-wait_timer_started_at = mo_json->value_string( iv_prefix && '/wait_timer_started_at' ).
+    pending_deployment-current_user_can_approve = mo_json->value_boolean( iv_prefix && '/current_user_can_approve' ).
+* todo, array, reviewers
+  ENDMETHOD.
+
+  METHOD parse_deployment.
+    deployment-url = mo_json->value_string( iv_prefix && '/url' ).
+    deployment-id = mo_json->value_string( iv_prefix && '/id' ).
+    deployment-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
+    deployment-sha = mo_json->value_string( iv_prefix && '/sha' ).
+    deployment-ref = mo_json->value_string( iv_prefix && '/ref' ).
+    deployment-task = mo_json->value_string( iv_prefix && '/task' ).
+    deployment-original_environment = mo_json->value_string( iv_prefix && '/original_environment' ).
+    deployment-environment = mo_json->value_string( iv_prefix && '/environment' ).
+    deployment-description = mo_json->value_string( iv_prefix && '/description' ).
+    deployment-creator = mo_json->value_string( iv_prefix && '/creator' ).
+    deployment-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
+    deployment-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
+    deployment-statuses_url = mo_json->value_string( iv_prefix && '/statuses_url' ).
+    deployment-repository_url = mo_json->value_string( iv_prefix && '/repository_url' ).
+    deployment-transient_environment = mo_json->value_boolean( iv_prefix && '/transient_environment' ).
+    deployment-production_environment = mo_json->value_boolean( iv_prefix && '/production_environment' ).
+    deployment-performed_via_github_app = mo_json->value_string( iv_prefix && '/performed_via_github_app' ).
+  ENDMETHOD.
+
   METHOD parse_workflow_run_usage.
     workflow_run_usage-billable-ubuntu-total_ms = mo_json->value_string( iv_prefix && '/billable/UBUNTU/total_ms' ).
     workflow_run_usage-billable-ubuntu-jobs = mo_json->value_string( iv_prefix && '/billable/UBUNTU/jobs' ).
@@ -4645,6 +4756,23 @@ CLASS zcl_githubcom IMPLEMENTATION.
     protected_branch-restrictions = parse_branch_restriction_polic( iv_prefix ).
   ENDMETHOD.
 
+  METHOD parse_deployment_simple.
+    deployment_simple-url = mo_json->value_string( iv_prefix && '/url' ).
+    deployment_simple-id = mo_json->value_string( iv_prefix && '/id' ).
+    deployment_simple-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
+    deployment_simple-task = mo_json->value_string( iv_prefix && '/task' ).
+    deployment_simple-original_environment = mo_json->value_string( iv_prefix && '/original_environment' ).
+    deployment_simple-environment = mo_json->value_string( iv_prefix && '/environment' ).
+    deployment_simple-description = mo_json->value_string( iv_prefix && '/description' ).
+    deployment_simple-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
+    deployment_simple-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
+    deployment_simple-statuses_url = mo_json->value_string( iv_prefix && '/statuses_url' ).
+    deployment_simple-repository_url = mo_json->value_string( iv_prefix && '/repository_url' ).
+    deployment_simple-transient_environment = mo_json->value_boolean( iv_prefix && '/transient_environment' ).
+    deployment_simple-production_environment = mo_json->value_boolean( iv_prefix && '/production_environment' ).
+    deployment_simple-performed_via_github_app = mo_json->value_string( iv_prefix && '/performed_via_github_app' ).
+  ENDMETHOD.
+
   METHOD parse_check_run.
     check_run-id = mo_json->value_string( iv_prefix && '/id' ).
     check_run-head_sha = mo_json->value_string( iv_prefix && '/head_sha' ).
@@ -4666,6 +4794,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     check_run-check_suite-id = mo_json->value_string( iv_prefix && '/check_suite/id' ).
     check_run-app = mo_json->value_string( iv_prefix && '/app' ).
     check_run-pull_requests = mo_json->value_string( iv_prefix && '/pull_requests' ).
+    check_run-deployment = parse_deployment_simple( iv_prefix ).
   ENDMETHOD.
 
   METHOD parse_check_annotation.
@@ -5248,26 +5377,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     contributor-name = mo_json->value_string( iv_prefix && '/name' ).
   ENDMETHOD.
 
-  METHOD parse_deployment.
-    deployment-url = mo_json->value_string( iv_prefix && '/url' ).
-    deployment-id = mo_json->value_string( iv_prefix && '/id' ).
-    deployment-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
-    deployment-sha = mo_json->value_string( iv_prefix && '/sha' ).
-    deployment-ref = mo_json->value_string( iv_prefix && '/ref' ).
-    deployment-task = mo_json->value_string( iv_prefix && '/task' ).
-    deployment-original_environment = mo_json->value_string( iv_prefix && '/original_environment' ).
-    deployment-environment = mo_json->value_string( iv_prefix && '/environment' ).
-    deployment-description = mo_json->value_string( iv_prefix && '/description' ).
-    deployment-creator = mo_json->value_string( iv_prefix && '/creator' ).
-    deployment-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
-    deployment-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
-    deployment-statuses_url = mo_json->value_string( iv_prefix && '/statuses_url' ).
-    deployment-repository_url = mo_json->value_string( iv_prefix && '/repository_url' ).
-    deployment-transient_environment = mo_json->value_boolean( iv_prefix && '/transient_environment' ).
-    deployment-production_environment = mo_json->value_boolean( iv_prefix && '/production_environment' ).
-    deployment-performed_via_github_app = mo_json->value_string( iv_prefix && '/performed_via_github_app' ).
-  ENDMETHOD.
-
   METHOD parse_deployment_status.
     deployment_status-url = mo_json->value_string( iv_prefix && '/url' ).
     deployment_status-id = mo_json->value_string( iv_prefix && '/id' ).
@@ -5284,6 +5393,27 @@ CLASS zcl_githubcom IMPLEMENTATION.
     deployment_status-environment_url = mo_json->value_string( iv_prefix && '/environment_url' ).
     deployment_status-log_url = mo_json->value_string( iv_prefix && '/log_url' ).
     deployment_status-performed_via_github_app = mo_json->value_string( iv_prefix && '/performed_via_github_app' ).
+  ENDMETHOD.
+
+  METHOD parse_wait_timer.
+* todo, handle type integer
+  ENDMETHOD.
+
+  METHOD parse_deployment_branch_policy.
+    deployment_branch_policy-protected_branches = mo_json->value_boolean( iv_prefix && '/protected_branches' ).
+    deployment_branch_policy-custom_branch_policies = mo_json->value_boolean( iv_prefix && '/custom_branch_policies' ).
+  ENDMETHOD.
+
+  METHOD parse_environment.
+    environment-id = mo_json->value_string( iv_prefix && '/id' ).
+    environment-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
+    environment-name = mo_json->value_string( iv_prefix && '/name' ).
+    environment-url = mo_json->value_string( iv_prefix && '/url' ).
+    environment-html_url = mo_json->value_string( iv_prefix && '/html_url' ).
+    environment-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
+    environment-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
+* todo, array, protection_rules
+    environment-deployment_branch_policy = parse_deployment_branch_policy( iv_prefix ).
   ENDMETHOD.
 
   METHOD parse_short_blob.
@@ -7401,6 +7531,18 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, array, workflow_runs
   ENDMETHOD.
 
+  METHOD parse_actions_get_reviews_for_.
+    DATA lt_members TYPE string_table.
+    DATA lv_member LIKE LINE OF lt_members.
+    DATA environment_approvals TYPE zif_githubcom=>environment_approvals.
+    lt_members = mo_json->members( iv_prefix && '/' ).
+    LOOP AT lt_members INTO lv_member.
+      CLEAR environment_approvals.
+      environment_approvals = parse_environment_approvals( iv_prefix && '/' && lv_member ).
+      APPEND environment_approvals TO response_actions_get_reviews_f.
+    ENDLOOP.
+  ENDMETHOD.
+
   METHOD parse_actions_list_workflow_01.
     response_actions_list_workfl01-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
 * todo, array, artifacts
@@ -7409,6 +7551,30 @@ CLASS zcl_githubcom IMPLEMENTATION.
   METHOD parse_actions_list_jobs_for_wo.
     response_actions_list_jobs_for-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
 * todo, array, jobs
+  ENDMETHOD.
+
+  METHOD parse_actions_get_pending_depl.
+    DATA lt_members TYPE string_table.
+    DATA lv_member LIKE LINE OF lt_members.
+    DATA pending_deployment TYPE zif_githubcom=>pending_deployment.
+    lt_members = mo_json->members( iv_prefix && '/' ).
+    LOOP AT lt_members INTO lv_member.
+      CLEAR pending_deployment.
+      pending_deployment = parse_pending_deployment( iv_prefix && '/' && lv_member ).
+      APPEND pending_deployment TO response_actions_get_pending_d.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD parse_actions_review_pending_d.
+    DATA lt_members TYPE string_table.
+    DATA lv_member LIKE LINE OF lt_members.
+    DATA deployment TYPE zif_githubcom=>deployment.
+    lt_members = mo_json->members( iv_prefix && '/' ).
+    LOOP AT lt_members INTO lv_member.
+      CLEAR deployment.
+      deployment = parse_deployment( iv_prefix && '/' && lv_member ).
+      APPEND deployment TO response_actions_review_pendin.
+    ENDLOOP.
   ENDMETHOD.
 
   METHOD parse_actions_list_repo_secret.
@@ -7812,6 +7978,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
       deployment_status = parse_deployment_status( iv_prefix && '/' && lv_member ).
       APPEND deployment_status TO response_repos_list_deployme01.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD parse_repos_get_all_environmen.
+    response_repos_get_all_environ-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
+* todo, array, environments
   ENDMETHOD.
 
   METHOD parse_activity_list_repo_event.
@@ -8413,6 +8584,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
       minimal_repository = parse_minimal_repository( iv_prefix && '/' && lv_member ).
       APPEND minimal_repository TO response_repos_list_public.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD parse_actions_list_environment.
+    response_actions_list_environm-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
+* todo, array, secrets
   ENDMETHOD.
 
   METHOD parse_search_code.
@@ -9851,6 +10027,15 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '}'.
   ENDMETHOD.
 
+  METHOD json_actions_review_pending_de.
+    json = json && '{'.
+*  json = json && '"environment_ids":' not simple
+    json = json && |"state": "{ data-state }",|.
+    json = json && |"comment": "{ data-comment }",|.
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
   METHOD json_actions_create_or_updat01.
     json = json && '{'.
     json = json && |"encrypted_value": "{ data-encrypted_value }",|.
@@ -10276,6 +10461,24 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '{'.
     json = json && |"event_type": "{ data-event_type }",|.
 *  json = json && '"client_payload":' not simple
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
+  METHOD json_repos_create_or_update_en.
+    json = json && '{'.
+*  json = json && '"wait_timer":' not simple
+*  json = json && '"reviewers":' not simple
+*  json = json && '"deployment_branch_policy":' not simple
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
+  METHOD json_repos_delete_an_environme.
+    json = json && '{'.
+*  json = json && '"wait_timer":' not simple
+*  json = json && '"reviewers":' not simple
+*  json = json && '"deployment_branch_policy":' not simple
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -11030,6 +11233,22 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ELSEIF data-private = abap_false.
       json = json && |"private": false,|.
     ENDIF.
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
+  METHOD json_actions_create_or_updat02.
+    json = json && '{'.
+    json = json && |"encrypted_value": "{ data-encrypted_value }",|.
+    json = json && |"key_id": "{ data-key_id }",|.
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
+  METHOD json_actions_delete_environmen.
+    json = json && '{'.
+    json = json && |"encrypted_value": "{ data-encrypted_value }",|.
+    json = json && |"key_id": "{ data-key_id }",|.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -16212,6 +16431,23 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, handle more responses
   ENDMETHOD.
 
+  METHOD zif_githubcom~actions_get_reviews_for_run.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/actions/runs/{run_id}/approvals'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    lv_temp = run_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{run_id}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_actions_get_reviews_for_( '' ).
+  ENDMETHOD.
+
   METHOD zif_githubcom~actions_list_workflow_run_arti.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -16318,6 +16554,41 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     WRITE / mi_client->response->get_cdata( ).
 * todo, handle more responses
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_get_pending_deployment.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    lv_temp = run_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{run_id}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_actions_get_pending_depl( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_review_pending_deploym.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    lv_temp = run_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{run_id}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_actions_review_pending_de( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_actions_review_pending_d( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~actions_re_run_workflow.
@@ -18347,6 +18618,67 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_method( 'POST' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     mi_client->request->set_cdata( json_repos_create_dispatch_eve( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
+  ENDMETHOD.
+
+  METHOD zif_githubcom~repos_get_all_environments.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/environments'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_repos_get_all_environmen( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~repos_get_environment.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/environments/{environment_name}'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    REPLACE ALL OCCURRENCES OF '{environment_name}' IN lv_uri WITH environment_name.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_environment( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~repos_create_or_update_environ.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/environments/{environment_name}'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    REPLACE ALL OCCURRENCES OF '{environment_name}' IN lv_uri WITH environment_name.
+    mi_client->request->set_method( 'PUT' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_repos_create_or_update_en( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_environment( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~repos_delete_an_environment.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/environments/{environment_name}'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    REPLACE ALL OCCURRENCES OF '{environment_name}' IN lv_uri WITH environment_name.
+    mi_client->request->set_method( 'DELETE' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_repos_delete_an_environme( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     WRITE / mi_client->response->get_cdata( ).
@@ -21624,6 +21956,101 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
     return_data = parse_repos_list_public( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_list_environment_secre.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repositories/{repository_id}/environments/{environment_name}/secrets'.
+    lv_temp = repository_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{repository_id}' IN lv_uri WITH lv_temp.
+    REPLACE ALL OCCURRENCES OF '{environment_name}' IN lv_uri WITH environment_name.
+    lv_temp = per_page.
+    CONDENSE lv_temp.
+    IF per_page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'per_page' value = lv_temp ).
+    ENDIF.
+    lv_temp = page.
+    CONDENSE lv_temp.
+    IF page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_actions_list_environment( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_get_environment_public.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repositories/{repository_id}/environments/{environment_name}/secrets/public-key'.
+    lv_temp = repository_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{repository_id}' IN lv_uri WITH lv_temp.
+    REPLACE ALL OCCURRENCES OF '{environment_name}' IN lv_uri WITH environment_name.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_actions_public_key( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_get_environment_secret.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repositories/{repository_id}/environments/{environment_name}/secrets/{secret_name}'.
+    lv_temp = repository_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{repository_id}' IN lv_uri WITH lv_temp.
+    REPLACE ALL OCCURRENCES OF '{environment_name}' IN lv_uri WITH environment_name.
+    REPLACE ALL OCCURRENCES OF '{secret_name}' IN lv_uri WITH secret_name.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_actions_secret( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_create_or_update_envir.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repositories/{repository_id}/environments/{environment_name}/secrets/{secret_name}'.
+    lv_temp = repository_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{repository_id}' IN lv_uri WITH lv_temp.
+    REPLACE ALL OCCURRENCES OF '{environment_name}' IN lv_uri WITH environment_name.
+    REPLACE ALL OCCURRENCES OF '{secret_name}' IN lv_uri WITH secret_name.
+    mi_client->request->set_method( 'PUT' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_actions_create_or_updat02( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_delete_environment_sec.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repositories/{repository_id}/environments/{environment_name}/secrets/{secret_name}'.
+    lv_temp = repository_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{repository_id}' IN lv_uri WITH lv_temp.
+    REPLACE ALL OCCURRENCES OF '{environment_name}' IN lv_uri WITH environment_name.
+    REPLACE ALL OCCURRENCES OF '{secret_name}' IN lv_uri WITH secret_name.
+    mi_client->request->set_method( 'DELETE' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_actions_delete_environmen( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
   ENDMETHOD.
 
   METHOD zif_githubcom~enterprise_admin_list_provisio.
