@@ -1914,6 +1914,58 @@ INTERFACE zif_githubcom PUBLIC.
            head_repository_id TYPE i,
          END OF workflow_run.
 
+* Component schema: environment-approvals, object
+  TYPES: BEGIN OF environment_approvals,
+           environments TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           state TYPE string,
+           user TYPE simple_user,
+           comment TYPE string,
+         END OF environment_approvals.
+
+* Component schema: deployment-reviewer-type, string
+  TYPES deployment_reviewer_type TYPE string.
+
+* Component schema: pending-deployment, object
+  TYPES: BEGIN OF subpending_deployment_environm,
+           id TYPE i,
+           node_id TYPE string,
+           name TYPE string,
+           url TYPE string,
+           html_url TYPE string,
+         END OF subpending_deployment_environm.
+  TYPES: BEGIN OF pending_deployment,
+           environment TYPE subpending_deployment_environm,
+           wait_timer TYPE i,
+           wait_timer_started_at TYPE string,
+           current_user_can_approve TYPE abap_bool,
+           reviewers TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF pending_deployment.
+
+* Component schema: deployment, object
+  TYPES: BEGIN OF subdeployment_payload,
+           dummy_workaround TYPE i,
+         END OF subdeployment_payload.
+  TYPES: BEGIN OF deployment,
+           url TYPE string,
+           id TYPE i,
+           node_id TYPE string,
+           sha TYPE string,
+           ref TYPE string,
+           task TYPE string,
+           payload TYPE subdeployment_payload,
+           original_environment TYPE string,
+           environment TYPE string,
+           description TYPE string,
+           creator TYPE string,
+           created_at TYPE string,
+           updated_at TYPE string,
+           statuses_url TYPE string,
+           repository_url TYPE string,
+           transient_environment TYPE abap_bool,
+           production_environment TYPE abap_bool,
+           performed_via_github_app TYPE string,
+         END OF deployment.
+
 * Component schema: workflow-run-usage, object
   TYPES: BEGIN OF subsubworkflow_run_usage_bil02,
            total_ms TYPE i,
@@ -2170,6 +2222,24 @@ INTERFACE zif_githubcom PUBLIC.
            restrictions TYPE branch_restriction_policy,
          END OF protected_branch.
 
+* Component schema: deployment-simple, object
+  TYPES: BEGIN OF deployment_simple,
+           url TYPE string,
+           id TYPE i,
+           node_id TYPE string,
+           task TYPE string,
+           original_environment TYPE string,
+           environment TYPE string,
+           description TYPE string,
+           created_at TYPE string,
+           updated_at TYPE string,
+           statuses_url TYPE string,
+           repository_url TYPE string,
+           transient_environment TYPE abap_bool,
+           production_environment TYPE abap_bool,
+           performed_via_github_app TYPE string,
+         END OF deployment_simple.
+
 * Component schema: check-run, object
   TYPES: BEGIN OF subcheck_run_check_suite,
            id TYPE i,
@@ -2198,6 +2268,7 @@ INTERFACE zif_githubcom PUBLIC.
            check_suite TYPE subcheck_run_check_suite,
            app TYPE string,
            pull_requests TYPE string,
+           deployment TYPE deployment_simple,
          END OF check_run.
 
 * Component schema: check-annotation, object
@@ -2849,31 +2920,6 @@ INTERFACE zif_githubcom PUBLIC.
            name TYPE string,
          END OF contributor.
 
-* Component schema: deployment, object
-  TYPES: BEGIN OF subdeployment_payload,
-           dummy_workaround TYPE i,
-         END OF subdeployment_payload.
-  TYPES: BEGIN OF deployment,
-           url TYPE string,
-           id TYPE i,
-           node_id TYPE string,
-           sha TYPE string,
-           ref TYPE string,
-           task TYPE string,
-           payload TYPE subdeployment_payload,
-           original_environment TYPE string,
-           environment TYPE string,
-           description TYPE string,
-           creator TYPE string,
-           created_at TYPE string,
-           updated_at TYPE string,
-           statuses_url TYPE string,
-           repository_url TYPE string,
-           transient_environment TYPE abap_bool,
-           production_environment TYPE abap_bool,
-           performed_via_github_app TYPE string,
-         END OF deployment.
-
 * Component schema: deployment-status, object
   TYPES: BEGIN OF deployment_status,
            url TYPE string,
@@ -2892,6 +2938,28 @@ INTERFACE zif_githubcom PUBLIC.
            log_url TYPE string,
            performed_via_github_app TYPE string,
          END OF deployment_status.
+
+* Component schema: wait-timer, integer
+  TYPES wait_timer TYPE i.
+
+* Component schema: deployment_branch_policy, object
+  TYPES: BEGIN OF deployment_branch_policy,
+           protected_branches TYPE abap_bool,
+           custom_branch_policies TYPE abap_bool,
+         END OF deployment_branch_policy.
+
+* Component schema: environment, object
+  TYPES: BEGIN OF environment,
+           id TYPE i,
+           node_id TYPE string,
+           name TYPE string,
+           url TYPE string,
+           html_url TYPE string,
+           created_at TYPE string,
+           updated_at TYPE string,
+           protection_rules TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           deployment_branch_policy TYPE deployment_branch_policy,
+         END OF environment.
 
 * Component schema: short-blob, object
   TYPES: BEGIN OF short_blob,
@@ -4940,6 +5008,13 @@ INTERFACE zif_githubcom PUBLIC.
            allowed_actions TYPE allowed_actions,
          END OF bodyactions_set_github_actio01.
 
+* Component schema: bodyactions_review_pending_dep, object
+  TYPES: BEGIN OF bodyactions_review_pending_dep,
+           environment_ids TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           state TYPE string,
+           comment TYPE string,
+         END OF bodyactions_review_pending_dep.
+
 * Component schema: bodyactions_create_or_update_r, object
   TYPES: BEGIN OF bodyactions_create_or_update_r,
            encrypted_value TYPE string,
@@ -5294,6 +5369,20 @@ INTERFACE zif_githubcom PUBLIC.
            event_type TYPE string,
            client_payload TYPE subbodyrepos_create_dispatch_e,
          END OF bodyrepos_create_dispatch_even.
+
+* Component schema: bodyrepos_create_or_update_env, object
+  TYPES: BEGIN OF bodyrepos_create_or_update_env,
+           wait_timer TYPE wait_timer,
+           reviewers TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           deployment_branch_policy TYPE deployment_branch_policy,
+         END OF bodyrepos_create_or_update_env.
+
+* Component schema: bodyrepos_delete_an_environmen, object
+  TYPES: BEGIN OF bodyrepos_delete_an_environmen,
+           wait_timer TYPE wait_timer,
+           reviewers TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           deployment_branch_policy TYPE deployment_branch_policy,
+         END OF bodyrepos_delete_an_environmen.
 
 * Component schema: bodyrepos_create_fork, object
   TYPES: BEGIN OF bodyrepos_create_fork,
@@ -5841,6 +5930,18 @@ INTERFACE zif_githubcom PUBLIC.
            include_all_branches TYPE abap_bool,
            private TYPE abap_bool,
          END OF bodyrepos_create_using_templat.
+
+* Component schema: bodyactions_create_or_update_e, object
+  TYPES: BEGIN OF bodyactions_create_or_update_e,
+           encrypted_value TYPE string,
+           key_id TYPE string,
+         END OF bodyactions_create_or_update_e.
+
+* Component schema: bodyactions_delete_environment, object
+  TYPES: BEGIN OF bodyactions_delete_environment,
+           encrypted_value TYPE string,
+           key_id TYPE string,
+         END OF bodyactions_delete_environment.
 
 * Component schema: bodyenterprise_admin_provision, object
   TYPES: BEGIN OF bodyenterprise_admin_provision,
@@ -6419,6 +6520,9 @@ INTERFACE zif_githubcom PUBLIC.
            workflow_runs TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF response_actions_list_workflow.
 
+* Component schema: response_actions_get_reviews_for_run, array
+  TYPES response_actions_get_reviews_f TYPE STANDARD TABLE OF environment_approvals WITH DEFAULT KEY.
+
 * Component schema: response_actions_list_workflow_run_arti, object
   TYPES: BEGIN OF response_actions_list_workfl01,
            total_count TYPE i,
@@ -6430,6 +6534,12 @@ INTERFACE zif_githubcom PUBLIC.
            total_count TYPE i,
            jobs TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF response_actions_list_jobs_for.
+
+* Component schema: response_actions_get_pending_deployment, array
+  TYPES response_actions_get_pending_d TYPE STANDARD TABLE OF pending_deployment WITH DEFAULT KEY.
+
+* Component schema: response_actions_review_pending_deploym, array
+  TYPES response_actions_review_pendin TYPE STANDARD TABLE OF deployment WITH DEFAULT KEY.
 
 * Component schema: response_actions_list_repo_secrets, object
   TYPES: BEGIN OF response_actions_list_repo_sec,
@@ -6576,6 +6686,12 @@ INTERFACE zif_githubcom PUBLIC.
 
 * Component schema: response_repos_list_deployment_statuses, array
   TYPES response_repos_list_deployme01 TYPE STANDARD TABLE OF deployment_status WITH DEFAULT KEY.
+
+* Component schema: response_repos_get_all_environments, object
+  TYPES: BEGIN OF response_repos_get_all_environ,
+           total_count TYPE i,
+           environments TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF response_repos_get_all_environ.
 
 * Component schema: response_activity_list_repo_events, array
   TYPES response_activity_list_repo_ev TYPE STANDARD TABLE OF event WITH DEFAULT KEY.
@@ -6750,6 +6866,12 @@ INTERFACE zif_githubcom PUBLIC.
 
 * Component schema: response_repos_list_public, array
   TYPES response_repos_list_public TYPE STANDARD TABLE OF minimal_repository WITH DEFAULT KEY.
+
+* Component schema: response_actions_list_environment_secre, object
+  TYPES: BEGIN OF response_actions_list_environm,
+           total_count TYPE i,
+           secrets TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF response_actions_list_environm.
 
 * Component schema: response_search_code, object
   TYPES: BEGIN OF response_search_code,
@@ -11183,6 +11305,22 @@ INTERFACE zif_githubcom PUBLIC.
       run_id TYPE i
     RAISING cx_static_check.
 
+* GET - "Get the review history for a workflow run"
+* Operation id: actions/get-reviews-for-run
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: run_id, required, path
+* Response: 200
+*     application/json, #/components/schemas/response_actions_get_reviews_for_run
+  METHODS actions_get_reviews_for_run
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      run_id TYPE i
+    RETURNING
+      VALUE(return_data) TYPE response_actions_get_reviews_f
+    RAISING cx_static_check.
+
 * GET - "List workflow run artifacts"
 * Operation id: actions/list-workflow-run-artifacts
 * Parameter: owner, required, path
@@ -11262,6 +11400,40 @@ INTERFACE zif_githubcom PUBLIC.
       owner TYPE string
       repo TYPE string
       run_id TYPE i
+    RAISING cx_static_check.
+
+* GET - "Get pending deployments for a workflow run"
+* Operation id: actions/get-pending-deployments-for-run
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: run_id, required, path
+* Response: 200
+*     application/json, #/components/schemas/response_actions_get_pending_deployment
+  METHODS actions_get_pending_deployment
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      run_id TYPE i
+    RETURNING
+      VALUE(return_data) TYPE response_actions_get_pending_d
+    RAISING cx_static_check.
+
+* POST - "Review pending deployments for a workflow run"
+* Operation id: actions/review-pending-deployments-for-run
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: run_id, required, path
+* Response: 200
+*     application/json, #/components/schemas/response_actions_review_pending_deploym
+* Body ref: #/components/schemas/bodyactions_review_pending_dep
+  METHODS actions_review_pending_deploym
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      run_id TYPE i
+      body TYPE bodyactions_review_pending_dep
+    RETURNING
+      VALUE(return_data) TYPE response_actions_review_pendin
     RAISING cx_static_check.
 
 * POST - "Re-run a workflow"
@@ -13270,6 +13442,71 @@ INTERFACE zif_githubcom PUBLIC.
       owner TYPE string
       repo TYPE string
       body TYPE bodyrepos_create_dispatch_even
+    RAISING cx_static_check.
+
+* GET - "Get all environments"
+* Operation id: repos/get-all-environments
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Response: 200
+*     application/json, #/components/schemas/response_repos_get_all_environments
+  METHODS repos_get_all_environments
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+    RETURNING
+      VALUE(return_data) TYPE response_repos_get_all_environ
+    RAISING cx_static_check.
+
+* GET - "Get an environment"
+* Operation id: repos/get-environment
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: environment_name, required, path
+* Response: 200
+*     application/json, #/components/schemas/environment
+  METHODS repos_get_environment
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      environment_name TYPE string
+    RETURNING
+      VALUE(return_data) TYPE environment
+    RAISING cx_static_check.
+
+* PUT - "Create or update an environment"
+* Operation id: repos/create-or-update-environment
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: environment_name, required, path
+* Response: 200
+*     application/json, #/components/schemas/environment
+* Response: 422
+*     application/json, #/components/schemas/basic-error
+* Body ref: #/components/schemas/bodyrepos_create_or_update_env
+  METHODS repos_create_or_update_environ
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      environment_name TYPE string
+      body TYPE bodyrepos_create_or_update_env
+    RETURNING
+      VALUE(return_data) TYPE environment
+    RAISING cx_static_check.
+
+* DELETE - "Delete an environment"
+* Operation id: repos/delete-an-environment
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: environment_name, required, path
+* Response: 204
+* Body ref: #/components/schemas/bodyrepos_delete_an_environmen
+  METHODS repos_delete_an_environment
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      environment_name TYPE string
+      body TYPE bodyrepos_delete_an_environmen
     RAISING cx_static_check.
 
 * GET - "List repository events"
@@ -16398,6 +16635,85 @@ INTERFACE zif_githubcom PUBLIC.
       since TYPE i OPTIONAL
     RETURNING
       VALUE(return_data) TYPE response_repos_list_public
+    RAISING cx_static_check.
+
+* GET - "List environment secrets"
+* Operation id: actions/list-environment-secrets
+* Parameter: repository_id, required, path
+* Parameter: environment_name, required, path
+* Parameter: per_page, optional, query
+* Parameter: page, optional, query
+* Response: 200
+*     application/json, #/components/schemas/response_actions_list_environment_secre
+  METHODS actions_list_environment_secre
+    IMPORTING
+      repository_id TYPE i
+      environment_name TYPE string
+      per_page TYPE i DEFAULT 30
+      page TYPE i DEFAULT 1
+    RETURNING
+      VALUE(return_data) TYPE response_actions_list_environm
+    RAISING cx_static_check.
+
+* GET - "Get an environment public key"
+* Operation id: actions/get-environment-public-key
+* Parameter: repository_id, required, path
+* Parameter: environment_name, required, path
+* Response: 200
+*     application/json, #/components/schemas/actions-public-key
+  METHODS actions_get_environment_public
+    IMPORTING
+      repository_id TYPE i
+      environment_name TYPE string
+    RETURNING
+      VALUE(return_data) TYPE actions_public_key
+    RAISING cx_static_check.
+
+* GET - "Get an environment secret"
+* Operation id: actions/get-environment-secret
+* Parameter: repository_id, required, path
+* Parameter: environment_name, required, path
+* Parameter: secret_name, required, path
+* Response: 200
+*     application/json, #/components/schemas/actions-secret
+  METHODS actions_get_environment_secret
+    IMPORTING
+      repository_id TYPE i
+      environment_name TYPE string
+      secret_name TYPE string
+    RETURNING
+      VALUE(return_data) TYPE actions_secret
+    RAISING cx_static_check.
+
+* PUT - "Create or update an environment secret"
+* Operation id: actions/create-or-update-environment-secret
+* Parameter: repository_id, required, path
+* Parameter: environment_name, required, path
+* Parameter: secret_name, required, path
+* Response: 201
+* Response: 204
+* Body ref: #/components/schemas/bodyactions_create_or_update_e
+  METHODS actions_create_or_update_envir
+    IMPORTING
+      repository_id TYPE i
+      environment_name TYPE string
+      secret_name TYPE string
+      body TYPE bodyactions_create_or_update_e
+    RAISING cx_static_check.
+
+* DELETE - "Delete an environment secret"
+* Operation id: actions/delete-environment-secret
+* Parameter: repository_id, required, path
+* Parameter: environment_name, required, path
+* Parameter: secret_name, required, path
+* Response: 204
+* Body ref: #/components/schemas/bodyactions_delete_environment
+  METHODS actions_delete_environment_sec
+    IMPORTING
+      repository_id TYPE i
+      environment_name TYPE string
+      secret_name TYPE string
+      body TYPE bodyactions_delete_environment
     RAISING cx_static_check.
 
 * GET - "List provisioned SCIM groups for an enterprise"
