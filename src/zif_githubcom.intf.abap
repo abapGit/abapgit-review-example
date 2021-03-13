@@ -7695,6 +7695,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: after, optional, query
 * Parameter: before, optional, query
 * Parameter: order, optional, query
+* Parameter: page, optional, query
 * Parameter: per_page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/response_audit_log_get_audit_log
@@ -7706,6 +7707,7 @@ INTERFACE zif_githubcom PUBLIC.
       after TYPE string OPTIONAL
       before TYPE string OPTIONAL
       order TYPE string OPTIONAL
+      page TYPE i DEFAULT 1
       per_page TYPE i DEFAULT 30
     RETURNING
       VALUE(return_data) TYPE response_audit_log_get_audit_l
@@ -8171,6 +8173,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Operation id: licenses/get-all-commonly-used
 * Parameter: featured, optional, query
 * Parameter: per_page, optional, query
+* Parameter: page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/response_licenses_get_all_commonly_used
 * Response: 304
@@ -8178,6 +8181,7 @@ INTERFACE zif_githubcom PUBLIC.
     IMPORTING
       featured TYPE abap_bool OPTIONAL
       per_page TYPE i DEFAULT 30
+      page TYPE i DEFAULT 1
     RETURNING
       VALUE(return_data) TYPE response_licenses_get_all_comm
     RAISING cx_static_check.
@@ -8692,12 +8696,16 @@ INTERFACE zif_githubcom PUBLIC.
 * Operation id: actions/list-repo-access-to-self-hosted-runner-group-in-org
 * Parameter: org, required, path
 * Parameter: runner_group_id, required, path
+* Parameter: page, optional, query
+* Parameter: per_page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/response_actions_list_repo_access_to_se
   METHODS actions_list_repo_access_to_se
     IMPORTING
       org TYPE string
       runner_group_id TYPE i
+      page TYPE i DEFAULT 1
+      per_page TYPE i DEFAULT 30
     RETURNING
       VALUE(return_data) TYPE response_actions_list_repo_acc
     RAISING cx_static_check.
@@ -8948,12 +8956,16 @@ INTERFACE zif_githubcom PUBLIC.
 * Operation id: actions/list-selected-repos-for-org-secret
 * Parameter: org, required, path
 * Parameter: secret_name, required, path
+* Parameter: page, optional, query
+* Parameter: per_page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/response_actions_list_selected_repos_fo
   METHODS actions_list_selected_repos_fo
     IMPORTING
       org TYPE string
       secret_name TYPE string
+      page TYPE i DEFAULT 1
+      per_page TYPE i DEFAULT 30
     RETURNING
       VALUE(return_data) TYPE response_actions_list_select01
     RAISING cx_static_check.
@@ -9008,6 +9020,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: before, optional, query
 * Parameter: order, optional, query
 * Parameter: per_page, optional, query
+* Parameter: page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/response_orgs_get_audit_log
   METHODS orgs_get_audit_log
@@ -9019,6 +9032,7 @@ INTERFACE zif_githubcom PUBLIC.
       before TYPE string OPTIONAL
       order TYPE string OPTIONAL
       per_page TYPE i DEFAULT 30
+      page TYPE i DEFAULT 1
     RETURNING
       VALUE(return_data) TYPE response_orgs_get_audit_log
     RAISING cx_static_check.
@@ -9507,6 +9521,7 @@ INTERFACE zif_githubcom PUBLIC.
 
 * GET - "List organization migrations"
 * Operation id: migrations/list-for-org
+* Parameter: exclude, optional, query
 * Parameter: org, required, path
 * Parameter: per_page, optional, query
 * Parameter: page, optional, query
@@ -9514,6 +9529,7 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, #/components/schemas/response_migrations_list_for_org
   METHODS migrations_list_for_org
     IMPORTING
+      exclude TYPE string OPTIONAL
       org TYPE string
       per_page TYPE i DEFAULT 30
       page TYPE i DEFAULT 1
@@ -9539,6 +9555,7 @@ INTERFACE zif_githubcom PUBLIC.
 
 * GET - "Get an organization migration status"
 * Operation id: migrations/get-status-for-org
+* Parameter: exclude, optional, query
 * Parameter: org, required, path
 * Parameter: migration_id, required, path
 * Response: 200
@@ -9546,6 +9563,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 404
   METHODS migrations_get_status_for_org
     IMPORTING
+      exclude TYPE string OPTIONAL
       org TYPE string
       migration_id TYPE i
     RETURNING
@@ -9689,6 +9707,7 @@ INTERFACE zif_githubcom PUBLIC.
 
 * POST - "Restore a package for an organization"
 * Operation id: packages/restore-package-for-org
+* Parameter: token, optional, query
 * Parameter: package_type, required, path
 * Parameter: package_name, required, path
 * Parameter: org, required, path
@@ -9698,16 +9717,20 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 404
   METHODS packages_restore_package_for_o
     IMPORTING
+      token TYPE string OPTIONAL
       package_type TYPE string
       package_name TYPE string
       org TYPE string
     RAISING cx_static_check.
 
 * GET - "Get all package versions for a package owned by an organization"
-* Operation id: packages/get-all-package-versions-for-a-package-owned-by-an-org
+* Operation id: packages/get-all-package-versions-for-package-owned-by-org
+* Parameter: state, optional, query
 * Parameter: package_type, required, path
 * Parameter: package_name, required, path
 * Parameter: org, required, path
+* Parameter: page, optional, query
+* Parameter: per_page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/response_packages_get_all_package_versi
 * Response: 401
@@ -9715,9 +9738,12 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 404
   METHODS packages_get_all_package_versi
     IMPORTING
+      state TYPE string DEFAULT 'active'
       package_type TYPE string
       package_name TYPE string
       org TYPE string
+      page TYPE i DEFAULT 1
+      per_page TYPE i DEFAULT 30
     RETURNING
       VALUE(return_data) TYPE response_packages_get_all_pack
     RAISING cx_static_check.
@@ -9941,16 +9967,16 @@ INTERFACE zif_githubcom PUBLIC.
 
 * GET - "List IdP groups for an organization"
 * Operation id: teams/list-idp-groups-for-org
+* Parameter: page, optional, query
 * Parameter: org, required, path
 * Parameter: per_page, optional, query
-* Parameter: page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/group-mapping
   METHODS teams_list_idp_groups_for_org
     IMPORTING
+      page TYPE string OPTIONAL
       org TYPE string
       per_page TYPE i DEFAULT 30
-      page TYPE i DEFAULT 1
     RETURNING
       VALUE(return_data) TYPE group_mapping
     RAISING cx_static_check.
@@ -10034,6 +10060,7 @@ INTERFACE zif_githubcom PUBLIC.
 
 * GET - "List discussions"
 * Operation id: teams/list-discussions-in-org
+* Parameter: pinned, optional, query
 * Parameter: org, required, path
 * Parameter: team_slug, required, path
 * Parameter: direction, optional, query
@@ -10043,6 +10070,7 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, #/components/schemas/response_teams_list_discussions_in_org
   METHODS teams_list_discussions_in_org
     IMPORTING
+      pinned TYPE string OPTIONAL
       org TYPE string
       team_slug TYPE string
       direction TYPE string DEFAULT 'desc'
@@ -12943,6 +12971,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: path, optional, query
 * Parameter: author, optional, query
 * Parameter: until, optional, query
+* Parameter: top, optional, query
+* Parameter: last_sha, optional, query
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Parameter: since, optional, query
@@ -12960,6 +12990,8 @@ INTERFACE zif_githubcom PUBLIC.
       path TYPE string OPTIONAL
       author TYPE string OPTIONAL
       until TYPE string OPTIONAL
+      top TYPE string OPTIONAL
+      last_sha TYPE string OPTIONAL
       owner TYPE string
       repo TYPE string
       since TYPE string OPTIONAL
@@ -13053,6 +13085,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: ref, required, path
 * Parameter: owner, required, path
 * Parameter: repo, required, path
+* Parameter: page, optional, query
+* Parameter: per_page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/commit
 * Response: 404
@@ -13063,6 +13097,8 @@ INTERFACE zif_githubcom PUBLIC.
       ref TYPE string
       owner TYPE string
       repo TYPE string
+      page TYPE i DEFAULT 1
+      per_page TYPE i DEFAULT 30
     RETURNING
       VALUE(return_data) TYPE commit
     RAISING cx_static_check.
@@ -13071,6 +13107,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Operation id: checks/list-for-ref
 * Parameter: ref, required, path
 * Parameter: filter, optional, query
+* Parameter: app_id, optional, query
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Parameter: check_name, optional, query
@@ -13083,6 +13120,7 @@ INTERFACE zif_githubcom PUBLIC.
     IMPORTING
       ref TYPE string
       filter TYPE string DEFAULT 'latest'
+      app_id TYPE i OPTIONAL
       owner TYPE string
       repo TYPE string
       check_name TYPE string OPTIONAL
@@ -13122,6 +13160,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: ref, required, path
 * Parameter: owner, required, path
 * Parameter: repo, required, path
+* Parameter: per_page, optional, query
+* Parameter: page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/combined-commit-status
 * Response: 404
@@ -13130,6 +13170,8 @@ INTERFACE zif_githubcom PUBLIC.
       ref TYPE string
       owner TYPE string
       repo TYPE string
+      per_page TYPE i DEFAULT 30
+      page TYPE i DEFAULT 1
     RETURNING
       VALUE(return_data) TYPE combined_commit_status
     RAISING cx_static_check.
@@ -13530,6 +13572,8 @@ INTERFACE zif_githubcom PUBLIC.
 * GET - "List forks"
 * Operation id: repos/list-forks
 * Parameter: sort, optional, query
+* Parameter: org, optional, query
+* Parameter: organization, optional, query
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Parameter: per_page, optional, query
@@ -13540,6 +13584,8 @@ INTERFACE zif_githubcom PUBLIC.
   METHODS repos_list_forks
     IMPORTING
       sort TYPE string DEFAULT 'newest'
+      org TYPE string OPTIONAL
+      organization TYPE string OPTIONAL
       owner TYPE string
       repo TYPE string
       per_page TYPE i DEFAULT 30
@@ -13550,6 +13596,8 @@ INTERFACE zif_githubcom PUBLIC.
 
 * POST - "Create a fork"
 * Operation id: repos/create-fork
+* Parameter: org, optional, query
+* Parameter: organization, optional, query
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Response: 202
@@ -13561,6 +13609,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Body ref: #/components/schemas/bodyrepos_create_fork
   METHODS repos_create_fork
     IMPORTING
+      org TYPE string OPTIONAL
+      organization TYPE string OPTIONAL
       owner TYPE string
       repo TYPE string
       body TYPE bodyrepos_create_fork
@@ -15372,10 +15422,10 @@ INTERFACE zif_githubcom PUBLIC.
 
 * GET - "List review comments in a repository"
 * Operation id: pulls/list-review-comments-for-repo
+* Parameter: sort, optional, query
 * Parameter: direction, optional, query
 * Parameter: owner, required, path
 * Parameter: repo, required, path
-* Parameter: sort, optional, query
 * Parameter: since, optional, query
 * Parameter: per_page, optional, query
 * Parameter: page, optional, query
@@ -15383,10 +15433,10 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, #/components/schemas/response_pulls_list_review_comments_for
   METHODS pulls_list_review_comments_for
     IMPORTING
+      sort TYPE string OPTIONAL
       direction TYPE string OPTIONAL
       owner TYPE string
       repo TYPE string
-      sort TYPE string DEFAULT 'created'
       since TYPE string OPTIONAL
       per_page TYPE i DEFAULT 30
       page TYPE i DEFAULT 1
@@ -15956,6 +16006,26 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE content_file
     RAISING cx_static_check.
 
+* GET - "Get a repository README"
+* Operation id: repos/get-readme-from-alt-path
+* Parameter: dir, required, path
+* Parameter: ref, optional, query
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Response: 200
+*     application/json, #/components/schemas/content-file
+* Response: 404
+* Response: 422
+  METHODS repos_get_readme_from_alt_path
+    IMPORTING
+      dir TYPE string
+      ref TYPE string OPTIONAL
+      owner TYPE string
+      repo TYPE string
+    RETURNING
+      VALUE(return_data) TYPE content_file
+    RAISING cx_static_check.
+
 * GET - "List releases"
 * Operation id: repos/list-releases
 * Parameter: owner, required, path
@@ -16451,6 +16521,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Operation id: repos/get-all-topics
 * Parameter: owner, required, path
 * Parameter: repo, required, path
+* Parameter: page, optional, query
+* Parameter: per_page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/topic
 * Response: 404
@@ -16459,6 +16531,8 @@ INTERFACE zif_githubcom PUBLIC.
     IMPORTING
       owner TYPE string
       repo TYPE string
+      page TYPE i DEFAULT 1
+      per_page TYPE i DEFAULT 30
     RETURNING
       VALUE(return_data) TYPE topic
     RAISING cx_static_check.
@@ -16718,6 +16792,8 @@ INTERFACE zif_githubcom PUBLIC.
 
 * GET - "List provisioned SCIM groups for an enterprise"
 * Operation id: enterprise-admin/list-provisioned-groups-enterprise
+* Parameter: filter, optional, query
+* Parameter: excludedAttributes, optional, query
 * Parameter: enterprise, required, path
 * Parameter: startIndex, optional, query
 * Parameter: count, optional, query
@@ -16725,6 +16801,8 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, #/components/schemas/scim-group-list-enterprise
   METHODS enterprise_admin_list_provisio
     IMPORTING
+      filter TYPE string OPTIONAL
+      excludedattributes TYPE string OPTIONAL
       enterprise TYPE string
       startindex TYPE i OPTIONAL
       count TYPE i OPTIONAL
@@ -16748,12 +16826,14 @@ INTERFACE zif_githubcom PUBLIC.
 
 * GET - "Get SCIM provisioning information for an enterprise group"
 * Operation id: enterprise-admin/get-provisioning-information-for-enterprise-group
+* Parameter: excludedAttributes, optional, query
 * Parameter: enterprise, required, path
 * Parameter: scim_group_id, required, path
 * Response: 200
 *     application/json, #/components/schemas/scim-enterprise-group
   METHODS enterprise_admin_get_provision
     IMPORTING
+      excludedattributes TYPE string OPTIONAL
       enterprise TYPE string
       scim_group_id TYPE string
     RETURNING
@@ -16807,6 +16887,7 @@ INTERFACE zif_githubcom PUBLIC.
 
 * GET - "List SCIM provisioned identities for an enterprise"
 * Operation id: enterprise-admin/list-provisioned-identities-enterprise
+* Parameter: filter, optional, query
 * Parameter: enterprise, required, path
 * Parameter: startIndex, optional, query
 * Parameter: count, optional, query
@@ -16814,6 +16895,7 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, #/components/schemas/scim-user-list-enterprise
   METHODS enterprise_admin_list_provis01
     IMPORTING
+      filter TYPE string OPTIONAL
       enterprise TYPE string
       startindex TYPE i OPTIONAL
       count TYPE i OPTIONAL
@@ -17859,6 +17941,7 @@ INTERFACE zif_githubcom PUBLIC.
 
 * POST - "Restore a package for the authenticated user"
 * Operation id: packages/restore-package-for-authenticated-user
+* Parameter: token, optional, query
 * Parameter: package_type, required, path
 * Parameter: package_name, required, path
 * Response: 204
@@ -17867,14 +17950,18 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 404
   METHODS packages_restore_package_for_a
     IMPORTING
+      token TYPE string OPTIONAL
       package_type TYPE string
       package_name TYPE string
     RAISING cx_static_check.
 
 * GET - "Get all package versions for a package owned by the authenticated user"
-* Operation id: packages/get-all-package-versions-for-a-package-owned-by-the-authenticated-user
+* Operation id: packages/get-all-package-versions-for-package-owned-by-authenticated-user
+* Parameter: state, optional, query
 * Parameter: package_type, required, path
 * Parameter: package_name, required, path
+* Parameter: page, optional, query
+* Parameter: per_page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/response_packages_get_all_package_ver01
 * Response: 401
@@ -17882,8 +17969,11 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 404
   METHODS packages_get_all_package_ver01
     IMPORTING
+      state TYPE string DEFAULT 'active'
       package_type TYPE string
       package_name TYPE string
+      page TYPE i DEFAULT 1
+      per_page TYPE i DEFAULT 30
     RETURNING
       VALUE(return_data) TYPE response_packages_get_all_pa01
     RAISING cx_static_check.
