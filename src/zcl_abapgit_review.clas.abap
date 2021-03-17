@@ -194,7 +194,7 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
       FOR ALL ENTRIES IN @it_tadir
       WHERE pgmid = @it_tadir-pgmid
       AND object = @it_tadir-object
-      AND obj_name = @it_tadir-obj_name.
+      AND obj_name = @it_tadir-obj_name. "#EC CI_SUBRC
 
     DATA(lt_repos) = zcl_abapgit_repo_srv=>get_instance( )->list( ).
     LOOP AT lt_packages INTO DATA(lv_package).
@@ -232,7 +232,7 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
     SELECT pgmid, object, obj_name FROM e071
       INTO TABLE @DATA(lt_e071)
       FOR ALL ENTRIES IN @lt_e070
-      WHERE trkorr = @lt_e070-trkorr.
+      WHERE trkorr = @lt_e070-trkorr. "#EC CI_SUBRC
     SORT lt_e071 BY pgmid object obj_name.
     DELETE ADJACENT DUPLICATES FROM lt_e071 COMPARING pgmid object obj_name.
 
