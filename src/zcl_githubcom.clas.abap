@@ -1032,6 +1032,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(key_simple) TYPE zif_githubcom=>key_simple
       RAISING cx_static_check.
+    METHODS json_apps_create_from_manifest
+      IMPORTING data TYPE zif_githubcom=>bodyapps_create_from_manifest
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
     METHODS json_apps_update_webhook_confi
       IMPORTING data TYPE zif_githubcom=>bodyapps_update_webhook_config
       RETURNING VALUE(json) TYPE string
@@ -1384,54 +1388,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING data TYPE zif_githubcom=>bodyrepos_remove_status_check_
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
-    METHODS json_repos_add_status_check_co
-      IMPORTING data TYPE zif_githubcom=>bodyrepos_add_status_check_con
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_repos_set_status_check_co
-      IMPORTING data TYPE zif_githubcom=>bodyrepos_set_status_check_con
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_repos_remove_status_che01
-      IMPORTING data TYPE zif_githubcom=>bodyrepos_remove_status_chec01
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_repos_add_app_access_rest
-      IMPORTING data TYPE zif_githubcom=>bodyrepos_add_app_access_restr
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_repos_set_app_access_rest
-      IMPORTING data TYPE zif_githubcom=>bodyrepos_set_app_access_restr
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_repos_remove_app_access_r
-      IMPORTING data TYPE zif_githubcom=>bodyrepos_remove_app_access_re
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_repos_add_team_access_res
-      IMPORTING data TYPE zif_githubcom=>bodyrepos_add_team_access_rest
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_repos_set_team_access_res
-      IMPORTING data TYPE zif_githubcom=>bodyrepos_set_team_access_rest
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_repos_remove_team_access_
-      IMPORTING data TYPE zif_githubcom=>bodyrepos_remove_team_access_r
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_repos_add_user_access_res
-      IMPORTING data TYPE zif_githubcom=>bodyrepos_add_user_access_rest
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_repos_set_user_access_res
-      IMPORTING data TYPE zif_githubcom=>bodyrepos_set_user_access_rest
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_repos_remove_user_access_
-      IMPORTING data TYPE zif_githubcom=>bodyrepos_remove_user_access_r
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
     METHODS json_repos_rename_branch
       IMPORTING data TYPE zif_githubcom=>bodyrepos_rename_branch
       RETURNING VALUE(json) TYPE string
@@ -1618,18 +1574,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       RAISING cx_static_check.
     METHODS json_issues_create_comment
       IMPORTING data TYPE zif_githubcom=>bodyissues_create_comment
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_issues_add_labels
-      IMPORTING data TYPE zif_githubcom=>bodyissues_add_labels
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_issues_set_labels
-      IMPORTING data TYPE zif_githubcom=>bodyissues_set_labels
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_issues_remove_all_labels
-      IMPORTING data TYPE zif_githubcom=>bodyissues_remove_all_labels
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
     METHODS json_issues_lock
@@ -2048,6 +1992,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_list_org_secr) TYPE zif_githubcom=>response_actions_list_org_secr
       RAISING cx_static_check.
+    METHODS parse_actions_create_or_update
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_actions_create_or_upd) TYPE zif_githubcom=>response_actions_create_or_upd
+      RAISING cx_static_check.
     METHODS parse_actions_list_selected_01
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_list_select01) TYPE zif_githubcom=>response_actions_list_select01
@@ -2160,10 +2108,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_teams_list_members_in) TYPE zif_githubcom=>response_teams_list_members_in
       RAISING cx_static_check.
-    METHODS parse_teams_add_or_update_memb
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(response_teams_add_or_update_m) TYPE zif_githubcom=>response_teams_add_or_update_m
-      RAISING cx_static_check.
     METHODS parse_teams_list_projects_in_o
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_teams_list_projects_i) TYPE zif_githubcom=>response_teams_list_projects_i
@@ -2252,6 +2196,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_list_workfl01) TYPE zif_githubcom=>response_actions_list_workfl01
       RAISING cx_static_check.
+    METHODS parse_actions_cancel_workflow_
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_actions_cancel_workfl) TYPE zif_githubcom=>response_actions_cancel_workfl
+      RAISING cx_static_check.
     METHODS parse_actions_list_jobs_for_wo
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_list_jobs_for) TYPE zif_githubcom=>response_actions_list_jobs_for
@@ -2264,9 +2212,17 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_review_pendin) TYPE zif_githubcom=>response_actions_review_pendin
       RAISING cx_static_check.
+    METHODS parse_actions_re_run_workflow
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_actions_re_run_workfl) TYPE zif_githubcom=>response_actions_re_run_workfl
+      RAISING cx_static_check.
     METHODS parse_actions_list_repo_secret
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_list_repo_sec) TYPE zif_githubcom=>response_actions_list_repo_sec
+      RAISING cx_static_check.
+    METHODS parse_actions_create_or_upda01
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_actions_create_or_u01) TYPE zif_githubcom=>response_actions_create_or_u01
       RAISING cx_static_check.
     METHODS parse_actions_list_repo_workfl
       IMPORTING iv_prefix TYPE string
@@ -2356,6 +2312,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_checks_list_for_suite) TYPE zif_githubcom=>response_checks_list_for_suite
       RAISING cx_static_check.
+    METHODS parse_checks_rerequest_suite
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_checks_rerequest_suit) TYPE zif_githubcom=>response_checks_rerequest_suit
+      RAISING cx_static_check.
     METHODS parse_code_scanning_list_alert
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_code_scanning_list_al) TYPE zif_githubcom=>response_code_scanning_list_al
@@ -2419,10 +2379,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_repos_create_deployment
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_repos_create_deployme) TYPE zif_githubcom=>response_repos_create_deployme
-      RAISING cx_static_check.
-    METHODS parse_repos_create_deploymen01
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(response_repos_create_deploy01) TYPE zif_githubcom=>response_repos_create_deploy01
       RAISING cx_static_check.
     METHODS parse_repos_list_deployment_st
       IMPORTING iv_prefix TYPE string
@@ -2516,14 +2472,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_issues_list_labels_fo) TYPE zif_githubcom=>response_issues_list_labels_fo
       RAISING cx_static_check.
-    METHODS parse_repos_merge
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(response_repos_merge) TYPE zif_githubcom=>response_repos_merge
-      RAISING cx_static_check.
-    METHODS parse_repos_merge01
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(response_repos_merge01) TYPE zif_githubcom=>response_repos_merge01
-      RAISING cx_static_check.
     METHODS parse_issues_list_milestones
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_issues_list_milestone) TYPE zif_githubcom=>response_issues_list_milestone
@@ -2535,6 +2483,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_activity_list_repo_notif
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_activity_list_repo_no) TYPE zif_githubcom=>response_activity_list_repo_no
+      RAISING cx_static_check.
+    METHODS parse_activity_mark_repo_notif
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_activity_mark_repo_no) TYPE zif_githubcom=>response_activity_mark_repo_no
       RAISING cx_static_check.
     METHODS parse_repos_list_pages_builds
       IMPORTING iv_prefix TYPE string
@@ -2599,10 +2551,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_secret_scanning_list_ale
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_secret_scanning_list_) TYPE zif_githubcom=>response_secret_scanning_list_
-      RAISING cx_static_check.
-    METHODS parse_activity_list_stargazers
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(response_activity_list_stargaz) TYPE zif_githubcom=>response_activity_list_stargaz
       RAISING cx_static_check.
     METHODS parse_repos_get_code_frequency
       IMPORTING iv_prefix TYPE string
@@ -2832,10 +2780,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_repos_list_for_user) TYPE zif_githubcom=>response_repos_list_for_user
       RAISING cx_static_check.
-    METHODS parse_activity_list_repos_st01
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(response_activity_list_repos01) TYPE zif_githubcom=>response_activity_list_repos01
-      RAISING cx_static_check.
     METHODS parse_activity_list_repos_watc
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_activity_list_repos_w) TYPE zif_githubcom=>response_activity_list_repos_w
@@ -2902,6 +2846,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
   METHOD parse_basic_error.
     basic_error-message = mo_json->value_string( iv_prefix && '/message' ).
     basic_error-documentation_url = mo_json->value_string( iv_prefix && '/documentation_url' ).
+    basic_error-url = mo_json->value_string( iv_prefix && '/url' ).
+    basic_error-status = mo_json->value_string( iv_prefix && '/status' ).
   ENDMETHOD.
 
   METHOD parse_validation_error_simple.
@@ -3024,6 +2970,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     repository-name = mo_json->value_string( iv_prefix && '/name' ).
     repository-full_name = mo_json->value_string( iv_prefix && '/full_name' ).
     repository-license = mo_json->value_string( iv_prefix && '/license' ).
+    repository-organization = mo_json->value_string( iv_prefix && '/organization' ).
     repository-forks = mo_json->value_string( iv_prefix && '/forks' ).
     repository-permissions-admin = mo_json->value_boolean( iv_prefix && '/permissions/admin' ).
     repository-permissions-pull = mo_json->value_boolean( iv_prefix && '/permissions/pull' ).
@@ -3591,6 +3538,27 @@ CLASS zcl_githubcom IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD parse_gist_simple.
+* todo, array, forks
+* todo, array, history
+    gist_simple-fork_of-url = mo_json->value_string( iv_prefix && '/fork_of/url' ).
+    gist_simple-fork_of-forks_url = mo_json->value_string( iv_prefix && '/fork_of/forks_url' ).
+    gist_simple-fork_of-commits_url = mo_json->value_string( iv_prefix && '/fork_of/commits_url' ).
+    gist_simple-fork_of-id = mo_json->value_string( iv_prefix && '/fork_of/id' ).
+    gist_simple-fork_of-node_id = mo_json->value_string( iv_prefix && '/fork_of/node_id' ).
+    gist_simple-fork_of-git_pull_url = mo_json->value_string( iv_prefix && '/fork_of/git_pull_url' ).
+    gist_simple-fork_of-git_push_url = mo_json->value_string( iv_prefix && '/fork_of/git_push_url' ).
+    gist_simple-fork_of-html_url = mo_json->value_string( iv_prefix && '/fork_of/html_url' ).
+    gist_simple-fork_of-public = mo_json->value_boolean( iv_prefix && '/fork_of/public' ).
+    gist_simple-fork_of-created_at = mo_json->value_string( iv_prefix && '/fork_of/created_at' ).
+    gist_simple-fork_of-updated_at = mo_json->value_string( iv_prefix && '/fork_of/updated_at' ).
+    gist_simple-fork_of-description = mo_json->value_string( iv_prefix && '/fork_of/description' ).
+    gist_simple-fork_of-comments = mo_json->value_string( iv_prefix && '/fork_of/comments' ).
+    gist_simple-fork_of-user = mo_json->value_string( iv_prefix && '/fork_of/user' ).
+    gist_simple-fork_of-comments_url = mo_json->value_string( iv_prefix && '/fork_of/comments_url' ).
+    gist_simple-fork_of-owner = mo_json->value_string( iv_prefix && '/fork_of/owner' ).
+    gist_simple-fork_of-truncated = mo_json->value_boolean( iv_prefix && '/fork_of/truncated' ).
+* todo, array, forks
+* todo, array, history
     gist_simple-url = mo_json->value_string( iv_prefix && '/url' ).
     gist_simple-forks_url = mo_json->value_string( iv_prefix && '/forks_url' ).
     gist_simple-commits_url = mo_json->value_string( iv_prefix && '/commits_url' ).
@@ -3713,6 +3681,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     marketplace_purchase-id = mo_json->value_string( iv_prefix && '/id' ).
     marketplace_purchase-login = mo_json->value_string( iv_prefix && '/login' ).
     marketplace_purchase-organization_billing_email = mo_json->value_string( iv_prefix && '/organization_billing_email' ).
+    marketplace_purchase-email = mo_json->value_string( iv_prefix && '/email' ).
     marketplace_purchase-marketplace_pending_change-is_installed = mo_json->value_boolean( iv_prefix && '/marketplace_pending_change/is_installed' ).
     marketplace_purchase-marketplace_pending_change-effective_date = mo_json->value_string( iv_prefix && '/marketplace_pending_change/effective_date' ).
     marketplace_purchase-marketplace_pending_change-unit_count = mo_json->value_string( iv_prefix && '/marketplace_pending_change/unit_count' ).
@@ -3736,9 +3705,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, array, web
 * todo, array, api
 * todo, array, git
+* todo, array, packages
 * todo, array, pages
 * todo, array, importer
 * todo, array, actions
+* todo, array, dependabot
   ENDMETHOD.
 
   METHOD parse_minimal_repository.
@@ -3903,6 +3874,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     organization_full-members_can_create_private_rep = mo_json->value_boolean( iv_prefix && '/members_can_create_private_repositories' ).
     organization_full-members_can_create_internal_re = mo_json->value_boolean( iv_prefix && '/members_can_create_internal_repositories' ).
     organization_full-members_can_create_pages = mo_json->value_boolean( iv_prefix && '/members_can_create_pages' ).
+    organization_full-members_can_create_public_page = mo_json->value_boolean( iv_prefix && '/members_can_create_public_pages' ).
+    organization_full-members_can_create_private_pag = mo_json->value_boolean( iv_prefix && '/members_can_create_private_pages' ).
     organization_full-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
   ENDMETHOD.
 
@@ -3970,7 +3943,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     organization_invitation-failed_reason = mo_json->value_string( iv_prefix && '/failed_reason' ).
     organization_invitation-inviter = parse_simple_user( iv_prefix ).
     organization_invitation-team_count = mo_json->value_string( iv_prefix && '/team_count' ).
-    organization_invitation-invitation_team_url = mo_json->value_string( iv_prefix && '/invitation_team_url' ).
     organization_invitation-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
     organization_invitation-invitation_teams_url = mo_json->value_string( iv_prefix && '/invitation_teams_url' ).
   ENDMETHOD.
@@ -4522,6 +4494,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     workflow_run-id = mo_json->value_string( iv_prefix && '/id' ).
     workflow_run-name = mo_json->value_string( iv_prefix && '/name' ).
     workflow_run-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
+    workflow_run-check_suite_id = mo_json->value_string( iv_prefix && '/check_suite_id' ).
+    workflow_run-check_suite_node_id = mo_json->value_string( iv_prefix && '/check_suite_node_id' ).
     workflow_run-head_branch = mo_json->value_string( iv_prefix && '/head_branch' ).
     workflow_run-head_sha = mo_json->value_string( iv_prefix && '/head_sha' ).
     workflow_run-run_number = mo_json->value_string( iv_prefix && '/run_number' ).
@@ -4541,7 +4515,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     workflow_run-cancel_url = mo_json->value_string( iv_prefix && '/cancel_url' ).
     workflow_run-rerun_url = mo_json->value_string( iv_prefix && '/rerun_url' ).
     workflow_run-workflow_url = mo_json->value_string( iv_prefix && '/workflow_url' ).
-    workflow_run-head_commit = parse_simple_commit( iv_prefix ).
+    workflow_run-head_commit = mo_json->value_string( iv_prefix && '/head_commit' ).
     workflow_run-repository = parse_minimal_repository( iv_prefix ).
     workflow_run-head_repository = parse_minimal_repository( iv_prefix ).
     workflow_run-head_repository_id = mo_json->value_string( iv_prefix && '/head_repository_id' ).
@@ -4577,6 +4551,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     deployment-sha = mo_json->value_string( iv_prefix && '/sha' ).
     deployment-ref = mo_json->value_string( iv_prefix && '/ref' ).
     deployment-task = mo_json->value_string( iv_prefix && '/task' ).
+    deployment-payload = mo_json->value_string( iv_prefix && '/payload' ).
     deployment-original_environment = mo_json->value_string( iv_prefix && '/original_environment' ).
     deployment-environment = mo_json->value_string( iv_prefix && '/environment' ).
     deployment-description = mo_json->value_string( iv_prefix && '/description' ).
@@ -4665,9 +4640,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     branch_protection-required_linear_history-enabled = mo_json->value_boolean( iv_prefix && '/required_linear_history/enabled' ).
     branch_protection-allow_force_pushes-enabled = mo_json->value_boolean( iv_prefix && '/allow_force_pushes/enabled' ).
     branch_protection-allow_deletions-enabled = mo_json->value_boolean( iv_prefix && '/allow_deletions/enabled' ).
-    branch_protection-enabled = mo_json->value_boolean( iv_prefix && '/enabled' ).
+    branch_protection-required_conversation_resoluti-enabled = mo_json->value_boolean( iv_prefix && '/required_conversation_resolution/enabled' ).
     branch_protection-name = mo_json->value_string( iv_prefix && '/name' ).
     branch_protection-protection_url = mo_json->value_string( iv_prefix && '/protection_url' ).
+    branch_protection-required_signatures-url = mo_json->value_string( iv_prefix && '/required_signatures/url' ).
+    branch_protection-required_signatures-enabled = mo_json->value_boolean( iv_prefix && '/required_signatures/enabled' ).
   ENDMETHOD.
 
   METHOD parse_short_branch.
@@ -4754,6 +4731,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     protected_branch-allow_force_pushes-enabled = mo_json->value_boolean( iv_prefix && '/allow_force_pushes/enabled' ).
     protected_branch-allow_deletions-enabled = mo_json->value_boolean( iv_prefix && '/allow_deletions/enabled' ).
     protected_branch-restrictions = parse_branch_restriction_polic( iv_prefix ).
+    protected_branch-required_conversation_resoluti-enabled = mo_json->value_boolean( iv_prefix && '/required_conversation_resolution/enabled' ).
   ENDMETHOD.
 
   METHOD parse_deployment_simple.
@@ -4832,7 +4810,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
 
   METHOD parse_check_suite_preference.
 * todo, array, auto_trigger_checks
-    check_suite_preference-repository = parse_repository( iv_prefix ).
+    check_suite_preference-repository = parse_minimal_repository( iv_prefix ).
   ENDMETHOD.
 
   METHOD parse_code_scanning_analysis_t.
@@ -4958,6 +4936,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     code_scanning_alert-created_at = parse_alert_created_at( iv_prefix ).
     code_scanning_alert-url = parse_alert_url( iv_prefix ).
     code_scanning_alert-html_url = parse_alert_html_url( iv_prefix ).
+    code_scanning_alert-instances = mo_json->value_string( iv_prefix && '/instances' ).
     code_scanning_alert-instances_url = parse_alert_instances_url( iv_prefix ).
     code_scanning_alert-state = parse_code_scanning_alert_stat( iv_prefix ).
     code_scanning_alert-dismissed_by = parse_simple_user( iv_prefix ).
@@ -5515,7 +5494,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
 
   METHOD parse_import.
     import-vcs = mo_json->value_string( iv_prefix && '/vcs' ).
-    import-use_lfs = mo_json->value_string( iv_prefix && '/use_lfs' ).
+    import-use_lfs = mo_json->value_boolean( iv_prefix && '/use_lfs' ).
     import-vcs_url = mo_json->value_string( iv_prefix && '/vcs_url' ).
     import-svc_root = mo_json->value_string( iv_prefix && '/svc_root' ).
     import-tfvc_project = mo_json->value_string( iv_prefix && '/tfvc_project' ).
@@ -5608,6 +5587,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     issue_event-rename = parse_issue_event_rename( iv_prefix ).
     issue_event-author_association = parse_author_association( iv_prefix ).
     issue_event-lock_reason = mo_json->value_string( iv_prefix && '/lock_reason' ).
+    issue_event-performed_via_github_app = mo_json->value_string( iv_prefix && '/performed_via_github_app' ).
   ENDMETHOD.
 
   METHOD parse_issue_event_for_issue.
@@ -6126,6 +6106,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, array, assets
     release-body_html = mo_json->value_string( iv_prefix && '/body_html' ).
     release-body_text = mo_json->value_string( iv_prefix && '/body_text' ).
+    release-discussion_url = mo_json->value_string( iv_prefix && '/discussion_url' ).
   ENDMETHOD.
 
   METHOD parse_secret_scanning_alert_st.
@@ -6312,7 +6293,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     code_search_result_item-git_url = mo_json->value_string( iv_prefix && '/git_url' ).
     code_search_result_item-html_url = mo_json->value_string( iv_prefix && '/html_url' ).
     code_search_result_item-repository = parse_minimal_repository( iv_prefix ).
-    code_search_result_item-score = mo_json->value_string( iv_prefix && '/score' ).
+* todo, number, score
     code_search_result_item-file_size = mo_json->value_string( iv_prefix && '/file_size' ).
     code_search_result_item-language = mo_json->value_string( iv_prefix && '/language' ).
     code_search_result_item-last_modified_at = mo_json->value_string( iv_prefix && '/last_modified_at' ).
@@ -6339,7 +6320,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     commit_search_result_item-committer = mo_json->value_string( iv_prefix && '/committer' ).
 * todo, array, parents
     commit_search_result_item-repository = parse_minimal_repository( iv_prefix ).
-    commit_search_result_item-score = mo_json->value_string( iv_prefix && '/score' ).
+* todo, number, score
     commit_search_result_item-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
     commit_search_result_item-text_matches = parse_search_result_text_match( iv_prefix ).
   ENDMETHOD.
@@ -6374,7 +6355,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     issue_search_result_item-pull_request-patch_url = mo_json->value_string( iv_prefix && '/pull_request/patch_url' ).
     issue_search_result_item-pull_request-url = mo_json->value_string( iv_prefix && '/pull_request/url' ).
     issue_search_result_item-body = mo_json->value_string( iv_prefix && '/body' ).
-    issue_search_result_item-score = mo_json->value_string( iv_prefix && '/score' ).
+* todo, number, score
     issue_search_result_item-author_association = parse_author_association( iv_prefix ).
     issue_search_result_item-draft = mo_json->value_boolean( iv_prefix && '/draft' ).
     issue_search_result_item-repository = parse_repository( iv_prefix ).
@@ -6392,7 +6373,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     label_search_result_item-color = mo_json->value_string( iv_prefix && '/color' ).
     label_search_result_item-default = mo_json->value_boolean( iv_prefix && '/default' ).
     label_search_result_item-description = mo_json->value_string( iv_prefix && '/description' ).
-    label_search_result_item-score = mo_json->value_string( iv_prefix && '/score' ).
+* todo, number, score
     label_search_result_item-text_matches = parse_search_result_text_match( iv_prefix ).
   ENDMETHOD.
 
@@ -6419,7 +6400,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     repo_search_result_item-open_issues_count = mo_json->value_string( iv_prefix && '/open_issues_count' ).
     repo_search_result_item-master_branch = mo_json->value_string( iv_prefix && '/master_branch' ).
     repo_search_result_item-default_branch = mo_json->value_string( iv_prefix && '/default_branch' ).
-    repo_search_result_item-score = mo_json->value_string( iv_prefix && '/score' ).
+* todo, number, score
     repo_search_result_item-forks_url = mo_json->value_string( iv_prefix && '/forks_url' ).
     repo_search_result_item-keys_url = mo_json->value_string( iv_prefix && '/keys_url' ).
     repo_search_result_item-collaborators_url = mo_json->value_string( iv_prefix && '/collaborators_url' ).
@@ -6495,7 +6476,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     topic_search_result_item-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
     topic_search_result_item-featured = mo_json->value_boolean( iv_prefix && '/featured' ).
     topic_search_result_item-curated = mo_json->value_boolean( iv_prefix && '/curated' ).
-    topic_search_result_item-score = mo_json->value_string( iv_prefix && '/score' ).
+* todo, number, score
     topic_search_result_item-repository_count = mo_json->value_string( iv_prefix && '/repository_count' ).
     topic_search_result_item-logo_url = mo_json->value_string( iv_prefix && '/logo_url' ).
     topic_search_result_item-text_matches = parse_search_result_text_match( iv_prefix ).
@@ -6517,7 +6498,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     user_search_result_item-repos_url = mo_json->value_string( iv_prefix && '/repos_url' ).
     user_search_result_item-received_events_url = mo_json->value_string( iv_prefix && '/received_events_url' ).
     user_search_result_item-type = mo_json->value_string( iv_prefix && '/type' ).
-    user_search_result_item-score = mo_json->value_string( iv_prefix && '/score' ).
+* todo, number, score
     user_search_result_item-following_url = mo_json->value_string( iv_prefix && '/following_url' ).
     user_search_result_item-gists_url = mo_json->value_string( iv_prefix && '/gists_url' ).
     user_search_result_item-starred_url = mo_json->value_string( iv_prefix && '/starred_url' ).
@@ -6657,7 +6638,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD parse_key.
-    key-key_id = mo_json->value_string( iv_prefix && '/key_id' ).
     key-key = mo_json->value_string( iv_prefix && '/key' ).
     key-id = mo_json->value_string( iv_prefix && '/id' ).
     key-url = mo_json->value_string( iv_prefix && '/url' ).
@@ -7065,6 +7045,9 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, array, secrets
   ENDMETHOD.
 
+  METHOD parse_actions_create_or_update.
+  ENDMETHOD.
+
   METHOD parse_actions_list_selected_01.
     response_actions_list_select01-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
 * todo, array, repositories
@@ -7232,8 +7215,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD parse_orgs_convert_member_to_o.
-    response_orgs_convert_member_t-message = mo_json->value_string( iv_prefix && '/message' ).
-    response_orgs_convert_member_t-documentation_url = mo_json->value_string( iv_prefix && '/documentation_url' ).
   ENDMETHOD.
 
   METHOD parse_orgs_remove_outside_coll.
@@ -7371,11 +7352,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
       simple_user = parse_simple_user( iv_prefix && '/' && lv_member ).
       APPEND simple_user TO response_teams_list_members_in.
     ENDLOOP.
-  ENDMETHOD.
-
-  METHOD parse_teams_add_or_update_memb.
-    response_teams_add_or_update_m-message = mo_json->value_string( iv_prefix && '/message' ).
-* todo, array, errors
   ENDMETHOD.
 
   METHOD parse_teams_list_projects_in_o.
@@ -7548,6 +7524,9 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, array, artifacts
   ENDMETHOD.
 
+  METHOD parse_actions_cancel_workflow_.
+  ENDMETHOD.
+
   METHOD parse_actions_list_jobs_for_wo.
     response_actions_list_jobs_for-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
 * todo, array, jobs
@@ -7577,9 +7556,15 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
+  METHOD parse_actions_re_run_workflow.
+  ENDMETHOD.
+
   METHOD parse_actions_list_repo_secret.
     response_actions_list_repo_sec-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
 * todo, array, secrets
+  ENDMETHOD.
+
+  METHOD parse_actions_create_or_upda01.
   ENDMETHOD.
 
   METHOD parse_actions_list_repo_workfl.
@@ -7793,6 +7778,9 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, array, check_runs
   ENDMETHOD.
 
+  METHOD parse_checks_rerequest_suite.
+  ENDMETHOD.
+
   METHOD parse_code_scanning_list_alert.
     DATA lt_members TYPE string_table.
     DATA lv_member LIKE LINE OF lt_members.
@@ -7961,11 +7949,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
 
   METHOD parse_repos_create_deployment.
     response_repos_create_deployme-message = mo_json->value_string( iv_prefix && '/message' ).
-  ENDMETHOD.
-
-  METHOD parse_repos_create_deploymen01.
-    response_repos_create_deploy01-message = mo_json->value_string( iv_prefix && '/message' ).
-    response_repos_create_deploy01-documentation_url = mo_json->value_string( iv_prefix && '/documentation_url' ).
   ENDMETHOD.
 
   METHOD parse_repos_list_deployment_st.
@@ -8237,16 +8220,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD parse_repos_merge.
-    response_repos_merge-message = mo_json->value_string( iv_prefix && '/message' ).
-    response_repos_merge-documentation_url = mo_json->value_string( iv_prefix && '/documentation_url' ).
-  ENDMETHOD.
-
-  METHOD parse_repos_merge01.
-    response_repos_merge01-message = mo_json->value_string( iv_prefix && '/message' ).
-    response_repos_merge01-documentation_url = mo_json->value_string( iv_prefix && '/documentation_url' ).
-  ENDMETHOD.
-
   METHOD parse_issues_list_milestones.
     DATA lt_members TYPE string_table.
     DATA lv_member LIKE LINE OF lt_members.
@@ -8281,6 +8254,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
       thread = parse_thread( iv_prefix && '/' && lv_member ).
       APPEND thread TO response_activity_list_repo_no.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD parse_activity_mark_repo_notif.
+    response_activity_mark_repo_no-message = mo_json->value_string( iv_prefix && '/message' ).
+    response_activity_mark_repo_no-url = mo_json->value_string( iv_prefix && '/url' ).
   ENDMETHOD.
 
   METHOD parse_repos_list_pages_builds.
@@ -8451,18 +8429,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
       CLEAR secret_scanning_alert.
       secret_scanning_alert = parse_secret_scanning_alert( iv_prefix && '/' && lv_member ).
       APPEND secret_scanning_alert TO response_secret_scanning_list_.
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD parse_activity_list_stargazers.
-    DATA lt_members TYPE string_table.
-    DATA lv_member LIKE LINE OF lt_members.
-    DATA simple_user TYPE zif_githubcom=>simple_user.
-    lt_members = mo_json->members( iv_prefix && '/' ).
-    LOOP AT lt_members INTO lv_member.
-      CLEAR simple_user.
-      simple_user = parse_simple_user( iv_prefix && '/' && lv_member ).
-      APPEND simple_user TO response_activity_list_stargaz.
     ENDLOOP.
   ENDMETHOD.
 
@@ -9088,18 +9054,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD parse_activity_list_repos_st01.
-    DATA lt_members TYPE string_table.
-    DATA lv_member LIKE LINE OF lt_members.
-    DATA repository TYPE zif_githubcom=>repository.
-    lt_members = mo_json->members( iv_prefix && '/' ).
-    LOOP AT lt_members INTO lv_member.
-      CLEAR repository.
-      repository = parse_repository( iv_prefix && '/' && lv_member ).
-      APPEND repository TO response_activity_list_repos01.
-    ENDLOOP.
-  ENDMETHOD.
-
   METHOD parse_activity_list_repos_watc.
     DATA lt_members TYPE string_table.
     DATA lv_member LIKE LINE OF lt_members.
@@ -9110,6 +9064,12 @@ CLASS zcl_githubcom IMPLEMENTATION.
       minimal_repository = parse_minimal_repository( iv_prefix && '/' && lv_member ).
       APPEND minimal_repository TO response_activity_list_repos_w.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD json_apps_create_from_manifest.
+    json = json && '{'.
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
   ENDMETHOD.
 
   METHOD json_apps_update_webhook_confi.
@@ -10182,90 +10142,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '}'.
   ENDMETHOD.
 
-  METHOD json_repos_add_status_check_co.
-    json = json && '{'.
-*  json = json && '"contexts":' not simple
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
-  METHOD json_repos_set_status_check_co.
-    json = json && '{'.
-*  json = json && '"contexts":' not simple
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
-  METHOD json_repos_remove_status_che01.
-    json = json && '{'.
-*  json = json && '"contexts":' not simple
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
-  METHOD json_repos_add_app_access_rest.
-    json = json && '{'.
-*  json = json && '"apps":' not simple
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
-  METHOD json_repos_set_app_access_rest.
-    json = json && '{'.
-*  json = json && '"apps":' not simple
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
-  METHOD json_repos_remove_app_access_r.
-    json = json && '{'.
-*  json = json && '"apps":' not simple
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
-  METHOD json_repos_add_team_access_res.
-    json = json && '{'.
-*  json = json && '"teams":' not simple
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
-  METHOD json_repos_set_team_access_res.
-    json = json && '{'.
-*  json = json && '"teams":' not simple
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
-  METHOD json_repos_remove_team_access_.
-    json = json && '{'.
-*  json = json && '"teams":' not simple
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
-  METHOD json_repos_add_user_access_res.
-    json = json && '{'.
-*  json = json && '"users":' not simple
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
-  METHOD json_repos_set_user_access_res.
-    json = json && '{'.
-*  json = json && '"users":' not simple
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
-  METHOD json_repos_remove_user_access_.
-    json = json && '{'.
-*  json = json && '"users":' not simple
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
   METHOD json_repos_rename_branch.
     json = json && '{'.
     json = json && |"new_name": "{ data-new_name }",|.
@@ -10651,7 +10527,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '{'.
     json = json && |"email": "{ data-email }",|.
     json = json && |"name": "{ data-name }",|.
-    json = json && |"remote_id": "{ data-remote_id }",|.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -10740,27 +10615,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
   METHOD json_issues_create_comment.
     json = json && '{'.
     json = json && |"body": "{ data-body }",|.
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
-  METHOD json_issues_add_labels.
-    json = json && '{'.
-*  json = json && '"labels":' not simple
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
-  METHOD json_issues_set_labels.
-    json = json && '{'.
-*  json = json && '"labels":' not simple
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
-  METHOD json_issues_remove_all_labels.
-    json = json && '{'.
-*  json = json && '"labels":' not simple
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -11091,6 +10945,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ELSEIF data-prerelease = abap_false.
       json = json && |"prerelease": false,|.
     ENDIF.
+    json = json && |"discussion_category_name": "{ data-discussion_category_name }",|.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -11129,6 +10984,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ELSEIF data-prerelease = abap_false.
       json = json && |"prerelease": false,|.
     ENDIF.
+    json = json && |"discussion_category_name": "{ data-discussion_category_name }",|.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -11149,6 +11005,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ELSEIF data-prerelease = abap_false.
       json = json && |"prerelease": false,|.
     ENDIF.
+    json = json && |"discussion_category_name": "{ data-discussion_category_name }",|.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -11551,6 +11408,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{code}' IN lv_uri WITH code.
     mi_client->request->set_method( 'POST' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_apps_create_from_manifest( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     WRITE / mi_client->response->get_cdata( ).
@@ -13275,7 +13133,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_organization_full( '' ).
   ENDMETHOD.
 
-  METHOD zif_githubcom~actions_get_github_actions_per.
+  METHOD zif_githubcom~actions_actions_policies_get_g.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
     DATA lv_uri TYPE string VALUE '/orgs/{org}/actions/permissions'.
@@ -13802,8 +13660,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_cdata( json_actions_create_or_update_( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
-    WRITE / mi_client->response->get_cdata( ).
-* todo, handle more responses
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_actions_create_or_update( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~actions_delete_org_secret.
@@ -14243,8 +14101,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
     WRITE / lv_code.
-    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_interaction_limit_respon( '' ).
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
   ENDMETHOD.
 
   METHOD zif_githubcom~interactions_set_restrictions_.
@@ -15673,8 +15531,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
     WRITE / lv_code.
-    WRITE / mi_client->response->get_cdata( ).
-* todo, handle more responses
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_team_repository( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~teams_add_or_update_repo_permi.
@@ -16244,8 +16102,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
     WRITE / lv_code.
-    WRITE / mi_client->response->get_cdata( ).
-* todo, handle more responses
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_job( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~actions_download_job_logs_for_.
@@ -16265,7 +16123,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, handle more responses
   ENDMETHOD.
 
-  METHOD zif_githubcom~actions_get_github_actions_p01.
+  METHOD zif_githubcom~actions_get_github_actions_per.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
     DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/actions/permissions'.
@@ -16666,8 +16524,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
     WRITE / lv_code.
-    WRITE / mi_client->response->get_cdata( ).
-* todo, handle more responses
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_actions_re_run_workflow( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~actions_get_workflow_run_usage.
@@ -16752,8 +16610,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_cdata( json_actions_create_or_updat01( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
-    WRITE / mi_client->response->get_cdata( ).
-* todo, handle more responses
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_actions_create_or_upda01( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~actions_delete_repo_secret.
@@ -17123,8 +16981,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
     WRITE / lv_code.
-    WRITE / mi_client->response->get_cdata( ).
-* todo, handle more responses
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_protected_branch_pull_re( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~repos_update_pull_request_revi.
@@ -17275,7 +17133,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{branch}' IN lv_uri WITH branch.
     mi_client->request->set_method( 'POST' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_repos_add_status_check_co( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
@@ -17291,7 +17148,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{branch}' IN lv_uri WITH branch.
     mi_client->request->set_method( 'PUT' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_repos_set_status_check_co( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
@@ -17307,7 +17163,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{branch}' IN lv_uri WITH branch.
     mi_client->request->set_method( 'DELETE' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_repos_remove_status_che01( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
@@ -17368,7 +17223,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{branch}' IN lv_uri WITH branch.
     mi_client->request->set_method( 'POST' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_repos_add_app_access_rest( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
@@ -17384,7 +17238,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{branch}' IN lv_uri WITH branch.
     mi_client->request->set_method( 'PUT' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_repos_set_app_access_rest( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
@@ -17400,7 +17253,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{branch}' IN lv_uri WITH branch.
     mi_client->request->set_method( 'DELETE' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_repos_remove_app_access_r( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
@@ -17431,7 +17283,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{branch}' IN lv_uri WITH branch.
     mi_client->request->set_method( 'POST' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_repos_add_team_access_res( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
@@ -17447,7 +17298,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{branch}' IN lv_uri WITH branch.
     mi_client->request->set_method( 'PUT' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_repos_set_team_access_res( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
@@ -17463,7 +17313,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{branch}' IN lv_uri WITH branch.
     mi_client->request->set_method( 'DELETE' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_repos_remove_team_access_( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
@@ -17494,7 +17343,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{branch}' IN lv_uri WITH branch.
     mi_client->request->set_method( 'POST' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_repos_add_user_access_res( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
@@ -17510,7 +17358,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{branch}' IN lv_uri WITH branch.
     mi_client->request->set_method( 'PUT' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_repos_set_user_access_res( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
@@ -17526,7 +17373,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{branch}' IN lv_uri WITH branch.
     mi_client->request->set_method( 'DELETE' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_repos_remove_user_access_( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
@@ -17722,8 +17568,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
     WRITE / lv_code.
-    WRITE / mi_client->response->get_cdata( ).
-* todo, handle more responses
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_checks_rerequest_suite( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~code_scanning_list_alerts_for_.
@@ -18176,12 +18022,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     IF until IS SUPPLIED.
       mi_client->request->set_form_field( name = 'until' value = until ).
     ENDIF.
-    IF top IS SUPPLIED.
-      mi_client->request->set_form_field( name = 'top' value = top ).
-    ENDIF.
-    IF last_sha IS SUPPLIED.
-      mi_client->request->set_form_field( name = 'last_sha' value = last_sha ).
-    ENDIF.
     IF since IS SUPPLIED.
       mi_client->request->set_form_field( name = 'since' value = since ).
     ENDIF.
@@ -18462,11 +18302,20 @@ CLASS zcl_githubcom IMPLEMENTATION.
   METHOD zif_githubcom~repos_compare_commits.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
-    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/compare/{base}...{head}'.
-    REPLACE ALL OCCURRENCES OF '{base}' IN lv_uri WITH base.
-    REPLACE ALL OCCURRENCES OF '{head}' IN lv_uri WITH head.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/compare/{basehead}'.
+    REPLACE ALL OCCURRENCES OF '{basehead}' IN lv_uri WITH basehead.
     REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
     REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    lv_temp = page.
+    CONDENSE lv_temp.
+    IF page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
+    ENDIF.
+    lv_temp = per_page.
+    CONDENSE lv_temp.
+    IF per_page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'per_page' value = lv_temp ).
+    ENDIF.
     mi_client->request->set_method( 'GET' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
@@ -18811,12 +18660,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     IF sort IS SUPPLIED.
       mi_client->request->set_form_field( name = 'sort' value = sort ).
     ENDIF.
-    IF org IS SUPPLIED.
-      mi_client->request->set_form_field( name = 'org' value = org ).
-    ENDIF.
-    IF organization IS SUPPLIED.
-      mi_client->request->set_form_field( name = 'organization' value = organization ).
-    ENDIF.
     lv_temp = per_page.
     CONDENSE lv_temp.
     IF per_page IS SUPPLIED.
@@ -18841,12 +18684,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/forks'.
     REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
     REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
-    IF org IS SUPPLIED.
-      mi_client->request->set_form_field( name = 'org' value = org ).
-    ENDIF.
-    IF organization IS SUPPLIED.
-      mi_client->request->set_form_field( name = 'organization' value = organization ).
-    ENDIF.
     mi_client->request->set_method( 'POST' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     mi_client->request->set_cdata( json_repos_create_fork( body ) ).
@@ -19376,8 +19213,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
     WRITE / lv_code.
-    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_interaction_limit_respon( '' ).
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
   ENDMETHOD.
 
   METHOD zif_githubcom~interactions_set_restriction01.
@@ -19914,7 +19751,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{issue_number}' IN lv_uri WITH lv_temp.
     mi_client->request->set_method( 'POST' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_issues_add_labels( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
@@ -19932,7 +19768,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{issue_number}' IN lv_uri WITH lv_temp.
     mi_client->request->set_method( 'PUT' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_issues_set_labels( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
@@ -19950,7 +19785,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{issue_number}' IN lv_uri WITH lv_temp.
     mi_client->request->set_method( 'DELETE' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_issues_remove_all_labels( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     WRITE / mi_client->response->get_cdata( ).
@@ -21127,8 +20961,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_cdata( json_pulls_remove_requested_re( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
-    WRITE / mi_client->response->get_cdata( ).
-* todo, handle more responses
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_pull_request_simple( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~pulls_list_reviews.
@@ -21345,7 +21179,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_content_file( '' ).
   ENDMETHOD.
 
-  METHOD zif_githubcom~repos_get_readme_from_alt_path.
+  METHOD zif_githubcom~repos_get_readme_in_directory.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
     DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/readme/{dir}'.
@@ -21665,8 +21499,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
     WRITE / lv_code.
-    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_activity_list_stargazers( '' ).
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
   ENDMETHOD.
 
   METHOD zif_githubcom~repos_get_code_frequency_stats.
@@ -23043,8 +22877,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
     WRITE / lv_code.
-    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_interaction_limit_respon( '' ).
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
   ENDMETHOD.
 
   METHOD zif_githubcom~interactions_set_restriction02.
@@ -24309,8 +24143,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
     WRITE / lv_code.
-    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_activity_list_repos_st01( '' ).
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
   ENDMETHOD.
 
   METHOD zif_githubcom~activity_list_repos_watched_by.
