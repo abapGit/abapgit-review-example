@@ -57,6 +57,8 @@ INTERFACE zif_githubcom PUBLIC.
   TYPES: BEGIN OF basic_error,
            message TYPE string,
            documentation_url TYPE string,
+           url TYPE string,
+           status TYPE string,
          END OF basic_error.
 
 * Component schema: validation-error-simple, object
@@ -299,6 +301,7 @@ INTERFACE zif_githubcom PUBLIC.
            name TYPE string,
            full_name TYPE string,
            license TYPE string,
+           organization TYPE string,
            forks TYPE i,
            permissions TYPE subrepository_permissions,
            owner TYPE string,
@@ -823,7 +826,35 @@ INTERFACE zif_githubcom PUBLIC.
   TYPES: BEGIN OF subgist_simple_files,
            dummy_workaround TYPE i,
          END OF subgist_simple_files.
+  TYPES: BEGIN OF subsubgist_simple_fork_of_file,
+           dummy_workaround TYPE i,
+         END OF subsubgist_simple_fork_of_file.
+  TYPES: BEGIN OF subgist_simple_fork_of,
+           url TYPE string,
+           forks_url TYPE string,
+           commits_url TYPE string,
+           id TYPE string,
+           node_id TYPE string,
+           git_pull_url TYPE string,
+           git_push_url TYPE string,
+           html_url TYPE string,
+           files TYPE subsubgist_simple_fork_of_file,
+           public TYPE abap_bool,
+           created_at TYPE string,
+           updated_at TYPE string,
+           description TYPE string,
+           comments TYPE i,
+           user TYPE string,
+           comments_url TYPE string,
+           owner TYPE string,
+           truncated TYPE abap_bool,
+           forks TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           history TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF subgist_simple_fork_of.
   TYPES: BEGIN OF gist_simple,
+           forks TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           history TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           fork_of TYPE subgist_simple_fork_of,
            url TYPE string,
            forks_url TYPE string,
            commits_url TYPE string,
@@ -977,6 +1008,7 @@ INTERFACE zif_githubcom PUBLIC.
            id TYPE i,
            login TYPE string,
            organization_billing_email TYPE string,
+           email TYPE string,
            marketplace_pending_change TYPE submarketplace_purchase_market,
            marketplace_purchase TYPE submarketplace_purchase_mark01,
          END OF marketplace_purchase.
@@ -993,9 +1025,11 @@ INTERFACE zif_githubcom PUBLIC.
            web TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            api TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            git TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           packages TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            pages TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            importer TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            actions TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           dependabot TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF api_overview.
 
 * Component schema: minimal-repository, object
@@ -1184,6 +1218,8 @@ INTERFACE zif_githubcom PUBLIC.
            members_can_create_private_rep TYPE abap_bool,
            members_can_create_internal_re TYPE abap_bool,
            members_can_create_pages TYPE abap_bool,
+           members_can_create_public_page TYPE abap_bool,
+           members_can_create_private_pag TYPE abap_bool,
            updated_at TYPE string,
          END OF organization_full.
 
@@ -1256,7 +1292,6 @@ INTERFACE zif_githubcom PUBLIC.
            failed_reason TYPE string,
            inviter TYPE simple_user,
            team_count TYPE i,
-           invitation_team_url TYPE string,
            node_id TYPE string,
            invitation_teams_url TYPE string,
          END OF organization_invitation.
@@ -1889,6 +1924,8 @@ INTERFACE zif_githubcom PUBLIC.
            id TYPE i,
            name TYPE string,
            node_id TYPE string,
+           check_suite_id TYPE i,
+           check_suite_node_id TYPE string,
            head_branch TYPE string,
            head_sha TYPE string,
            run_number TYPE i,
@@ -1908,7 +1945,7 @@ INTERFACE zif_githubcom PUBLIC.
            cancel_url TYPE string,
            rerun_url TYPE string,
            workflow_url TYPE string,
-           head_commit TYPE simple_commit,
+           head_commit TYPE string,
            repository TYPE minimal_repository,
            head_repository TYPE minimal_repository,
            head_repository_id TYPE i,
@@ -1942,9 +1979,6 @@ INTERFACE zif_githubcom PUBLIC.
          END OF pending_deployment.
 
 * Component schema: deployment, object
-  TYPES: BEGIN OF subdeployment_payload,
-           dummy_workaround TYPE i,
-         END OF subdeployment_payload.
   TYPES: BEGIN OF deployment,
            url TYPE string,
            id TYPE i,
@@ -1952,7 +1986,7 @@ INTERFACE zif_githubcom PUBLIC.
            sha TYPE string,
            ref TYPE string,
            task TYPE string,
-           payload TYPE subdeployment_payload,
+           payload TYPE string,
            original_environment TYPE string,
            environment TYPE string,
            description TYPE string,
@@ -2064,6 +2098,13 @@ INTERFACE zif_githubcom PUBLIC.
          END OF branch_restriction_policy.
 
 * Component schema: branch-protection, object
+  TYPES: BEGIN OF subbranch_protection_require03,
+           url TYPE string,
+           enabled TYPE abap_bool,
+         END OF subbranch_protection_require03.
+  TYPES: BEGIN OF subbranch_protection_require02,
+           enabled TYPE abap_bool,
+         END OF subbranch_protection_require02.
   TYPES: BEGIN OF subbranch_protection_allow_del,
            enabled TYPE abap_bool,
          END OF subbranch_protection_allow_del.
@@ -2088,9 +2129,10 @@ INTERFACE zif_githubcom PUBLIC.
            required_linear_history TYPE subbranch_protection_require01,
            allow_force_pushes TYPE subbranch_protection_allow_for,
            allow_deletions TYPE subbranch_protection_allow_del,
-           enabled TYPE abap_bool,
+           required_conversation_resoluti TYPE subbranch_protection_require02,
            name TYPE string,
            protection_url TYPE string,
+           required_signatures TYPE subbranch_protection_require03,
          END OF branch_protection.
 
 * Component schema: short-branch, object
@@ -2179,6 +2221,9 @@ INTERFACE zif_githubcom PUBLIC.
          END OF status_check_policy.
 
 * Component schema: protected-branch, object
+  TYPES: BEGIN OF subprotected_branch_required_c,
+           enabled TYPE abap_bool,
+         END OF subprotected_branch_required_c.
   TYPES: BEGIN OF subprotected_branch_allow_dele,
            enabled TYPE abap_bool,
          END OF subprotected_branch_allow_dele.
@@ -2220,6 +2265,7 @@ INTERFACE zif_githubcom PUBLIC.
            allow_force_pushes TYPE subprotected_branch_allow_forc,
            allow_deletions TYPE subprotected_branch_allow_dele,
            restrictions TYPE branch_restriction_policy,
+           required_conversation_resoluti TYPE subprotected_branch_required_c,
          END OF protected_branch.
 
 * Component schema: deployment-simple, object
@@ -2312,7 +2358,7 @@ INTERFACE zif_githubcom PUBLIC.
          END OF subcheck_suite_preference_pref.
   TYPES: BEGIN OF check_suite_preference,
            preferences TYPE subcheck_suite_preference_pref,
-           repository TYPE repository,
+           repository TYPE minimal_repository,
          END OF check_suite_preference.
 
 * Component schema: code-scanning-analysis-tool-name, string
@@ -2433,6 +2479,7 @@ INTERFACE zif_githubcom PUBLIC.
            created_at TYPE alert_created_at,
            url TYPE alert_url,
            html_url TYPE alert_html_url,
+           instances TYPE string,
            instances_url TYPE alert_instances_url,
            state TYPE code_scanning_alert_state,
            dismissed_by TYPE simple_user,
@@ -3093,7 +3140,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: import, object
   TYPES: BEGIN OF import,
            vcs TYPE string,
-           use_lfs TYPE string,
+           use_lfs TYPE abap_bool,
            vcs_url TYPE string,
            svc_root TYPE string,
            tfvc_project TYPE string,
@@ -3194,6 +3241,7 @@ INTERFACE zif_githubcom PUBLIC.
            rename TYPE issue_event_rename,
            author_association TYPE author_association,
            lock_reason TYPE string,
+           performed_via_github_app TYPE string,
          END OF issue_event.
 
 * Component schema: issue-event-for-issue, object
@@ -3795,6 +3843,7 @@ INTERFACE zif_githubcom PUBLIC.
            assets TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            body_html TYPE string,
            body_text TYPE string,
+           discussion_url TYPE string,
          END OF release.
 
 * Component schema: secret-scanning-alert-state, string
@@ -4015,7 +4064,7 @@ INTERFACE zif_githubcom PUBLIC.
            git_url TYPE string,
            html_url TYPE string,
            repository TYPE minimal_repository,
-           score TYPE i,
+           score TYPE f,
            file_size TYPE i,
            language TYPE string,
            last_modified_at TYPE string,
@@ -4052,7 +4101,7 @@ INTERFACE zif_githubcom PUBLIC.
            committer TYPE string,
            parents TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            repository TYPE minimal_repository,
-           score TYPE i,
+           score TYPE f,
            node_id TYPE string,
            text_matches TYPE search_result_text_matches,
          END OF commit_search_result_item.
@@ -4091,7 +4140,7 @@ INTERFACE zif_githubcom PUBLIC.
            text_matches TYPE search_result_text_matches,
            pull_request TYPE subissue_search_result_item_pu,
            body TYPE string,
-           score TYPE i,
+           score TYPE f,
            author_association TYPE author_association,
            draft TYPE abap_bool,
            repository TYPE repository,
@@ -4110,7 +4159,7 @@ INTERFACE zif_githubcom PUBLIC.
            color TYPE string,
            default TYPE abap_bool,
            description TYPE string,
-           score TYPE i,
+           score TYPE f,
            text_matches TYPE search_result_text_matches,
          END OF label_search_result_item.
 
@@ -4143,7 +4192,7 @@ INTERFACE zif_githubcom PUBLIC.
            open_issues_count TYPE i,
            master_branch TYPE string,
            default_branch TYPE string,
-           score TYPE i,
+           score TYPE f,
            forks_url TYPE string,
            keys_url TYPE string,
            collaborators_url TYPE string,
@@ -4218,7 +4267,7 @@ INTERFACE zif_githubcom PUBLIC.
            updated_at TYPE string,
            featured TYPE abap_bool,
            curated TYPE abap_bool,
-           score TYPE i,
+           score TYPE f,
            repository_count TYPE i,
            logo_url TYPE string,
            text_matches TYPE search_result_text_matches,
@@ -4241,7 +4290,7 @@ INTERFACE zif_githubcom PUBLIC.
            repos_url TYPE string,
            received_events_url TYPE string,
            type TYPE string,
-           score TYPE i,
+           score TYPE f,
            following_url TYPE string,
            gists_url TYPE string,
            starred_url TYPE string,
@@ -4392,7 +4441,6 @@ INTERFACE zif_githubcom PUBLIC.
 
 * Component schema: key, object
   TYPES: BEGIN OF key,
-           key_id TYPE string,
            key TYPE string,
            id TYPE i,
            url TYPE string,
@@ -4441,6 +4489,11 @@ INTERFACE zif_githubcom PUBLIC.
            id TYPE i,
            key TYPE string,
          END OF key_simple.
+
+* Component schema: bodyapps_create_from_manifest, object
+  TYPES: BEGIN OF bodyapps_create_from_manifest,
+           dummy_workaround TYPE i,
+         END OF bodyapps_create_from_manifest.
 
 * Component schema: bodyapps_update_webhook_config, object
   TYPES: BEGIN OF bodyapps_update_webhook_config,
@@ -5132,66 +5185,6 @@ INTERFACE zif_githubcom PUBLIC.
            contexts TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF bodyrepos_remove_status_check_.
 
-* Component schema: bodyrepos_add_status_check_con, object
-  TYPES: BEGIN OF bodyrepos_add_status_check_con,
-           contexts TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyrepos_add_status_check_con.
-
-* Component schema: bodyrepos_set_status_check_con, object
-  TYPES: BEGIN OF bodyrepos_set_status_check_con,
-           contexts TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyrepos_set_status_check_con.
-
-* Component schema: bodyrepos_remove_status_chec01, object
-  TYPES: BEGIN OF bodyrepos_remove_status_chec01,
-           contexts TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyrepos_remove_status_chec01.
-
-* Component schema: bodyrepos_add_app_access_restr, object
-  TYPES: BEGIN OF bodyrepos_add_app_access_restr,
-           apps TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyrepos_add_app_access_restr.
-
-* Component schema: bodyrepos_set_app_access_restr, object
-  TYPES: BEGIN OF bodyrepos_set_app_access_restr,
-           apps TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyrepos_set_app_access_restr.
-
-* Component schema: bodyrepos_remove_app_access_re, object
-  TYPES: BEGIN OF bodyrepos_remove_app_access_re,
-           apps TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyrepos_remove_app_access_re.
-
-* Component schema: bodyrepos_add_team_access_rest, object
-  TYPES: BEGIN OF bodyrepos_add_team_access_rest,
-           teams TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyrepos_add_team_access_rest.
-
-* Component schema: bodyrepos_set_team_access_rest, object
-  TYPES: BEGIN OF bodyrepos_set_team_access_rest,
-           teams TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyrepos_set_team_access_rest.
-
-* Component schema: bodyrepos_remove_team_access_r, object
-  TYPES: BEGIN OF bodyrepos_remove_team_access_r,
-           teams TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyrepos_remove_team_access_r.
-
-* Component schema: bodyrepos_add_user_access_rest, object
-  TYPES: BEGIN OF bodyrepos_add_user_access_rest,
-           users TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyrepos_add_user_access_rest.
-
-* Component schema: bodyrepos_set_user_access_rest, object
-  TYPES: BEGIN OF bodyrepos_set_user_access_rest,
-           users TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyrepos_set_user_access_rest.
-
-* Component schema: bodyrepos_remove_user_access_r, object
-  TYPES: BEGIN OF bodyrepos_remove_user_access_r,
-           users TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyrepos_remove_user_access_r.
-
 * Component schema: bodyrepos_rename_branch, object
   TYPES: BEGIN OF bodyrepos_rename_branch,
            new_name TYPE string,
@@ -5541,7 +5534,6 @@ INTERFACE zif_githubcom PUBLIC.
   TYPES: BEGIN OF bodymigrations_map_commit_auth,
            email TYPE string,
            name TYPE string,
-           remote_id TYPE string,
          END OF bodymigrations_map_commit_auth.
 
 * Component schema: bodymigrations_set_lfs_prefere, object
@@ -5609,21 +5601,6 @@ INTERFACE zif_githubcom PUBLIC.
   TYPES: BEGIN OF bodyissues_create_comment,
            body TYPE string,
          END OF bodyissues_create_comment.
-
-* Component schema: bodyissues_add_labels, object
-  TYPES: BEGIN OF bodyissues_add_labels,
-           labels TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyissues_add_labels.
-
-* Component schema: bodyissues_set_labels, object
-  TYPES: BEGIN OF bodyissues_set_labels,
-           labels TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyissues_set_labels.
-
-* Component schema: bodyissues_remove_all_labels, object
-  TYPES: BEGIN OF bodyissues_remove_all_labels,
-           labels TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF bodyissues_remove_all_labels.
 
 * Component schema: bodyissues_lock, object
   TYPES: BEGIN OF bodyissues_lock,
@@ -5849,6 +5826,7 @@ INTERFACE zif_githubcom PUBLIC.
            body TYPE string,
            draft TYPE abap_bool,
            prerelease TYPE abap_bool,
+           discussion_category_name TYPE string,
          END OF bodyrepos_create_release.
 
 * Component schema: bodyrepos_update_release_asset, object
@@ -5873,6 +5851,7 @@ INTERFACE zif_githubcom PUBLIC.
            body TYPE string,
            draft TYPE abap_bool,
            prerelease TYPE abap_bool,
+           discussion_category_name TYPE string,
          END OF bodyrepos_update_release.
 
 * Component schema: bodyrepos_delete_release, object
@@ -5883,6 +5862,7 @@ INTERFACE zif_githubcom PUBLIC.
            body TYPE string,
            draft TYPE abap_bool,
            prerelease TYPE abap_bool,
+           discussion_category_name TYPE string,
          END OF bodyrepos_delete_release.
 
 * Component schema: bodysecret_scanning_update_ale, object
@@ -6313,6 +6293,11 @@ INTERFACE zif_githubcom PUBLIC.
            secrets TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF response_actions_list_org_secr.
 
+* Component schema: response_actions_create_or_update_org_s, object
+  TYPES: BEGIN OF response_actions_create_or_upd,
+           dummy_workaround TYPE i,
+         END OF response_actions_create_or_upd.
+
 * Component schema: response_actions_list_selected_repos_fo, object
   TYPES: BEGIN OF response_actions_list_select01,
            total_count TYPE i,
@@ -6366,8 +6351,7 @@ INTERFACE zif_githubcom PUBLIC.
 
 * Component schema: response_orgs_convert_member_to_outside, object
   TYPES: BEGIN OF response_orgs_convert_member_t,
-           message TYPE string,
-           documentation_url TYPE string,
+           dummy_workaround TYPE i,
          END OF response_orgs_convert_member_t.
 
 * Component schema: response_orgs_remove_outside_collaborat, object
@@ -6408,12 +6392,6 @@ INTERFACE zif_githubcom PUBLIC.
 
 * Component schema: response_teams_list_members_in_org, array
   TYPES response_teams_list_members_in TYPE STANDARD TABLE OF simple_user WITH DEFAULT KEY.
-
-* Component schema: response_teams_add_or_update_membership, object
-  TYPES: BEGIN OF response_teams_add_or_update_m,
-           message TYPE string,
-           errors TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF response_teams_add_or_update_m.
 
 * Component schema: response_teams_list_projects_in_org, array
   TYPES response_teams_list_projects_i TYPE STANDARD TABLE OF team_project WITH DEFAULT KEY.
@@ -6529,6 +6507,11 @@ INTERFACE zif_githubcom PUBLIC.
            artifacts TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF response_actions_list_workfl01.
 
+* Component schema: response_actions_cancel_workflow_run, object
+  TYPES: BEGIN OF response_actions_cancel_workfl,
+           dummy_workaround TYPE i,
+         END OF response_actions_cancel_workfl.
+
 * Component schema: response_actions_list_jobs_for_workflow, object
   TYPES: BEGIN OF response_actions_list_jobs_for,
            total_count TYPE i,
@@ -6541,11 +6524,21 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: response_actions_review_pending_deploym, array
   TYPES response_actions_review_pendin TYPE STANDARD TABLE OF deployment WITH DEFAULT KEY.
 
+* Component schema: response_actions_re_run_workflow, object
+  TYPES: BEGIN OF response_actions_re_run_workfl,
+           dummy_workaround TYPE i,
+         END OF response_actions_re_run_workfl.
+
 * Component schema: response_actions_list_repo_secrets, object
   TYPES: BEGIN OF response_actions_list_repo_sec,
            total_count TYPE i,
            secrets TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF response_actions_list_repo_sec.
+
+* Component schema: response_actions_create_or_update_repo_, object
+  TYPES: BEGIN OF response_actions_create_or_u01,
+           dummy_workaround TYPE i,
+         END OF response_actions_create_or_u01.
 
 * Component schema: response_actions_list_repo_workflows, object
   TYPES: BEGIN OF response_actions_list_repo_wor,
@@ -6622,6 +6615,11 @@ INTERFACE zif_githubcom PUBLIC.
            check_runs TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF response_checks_list_for_suite.
 
+* Component schema: response_checks_rerequest_suite, object
+  TYPES: BEGIN OF response_checks_rerequest_suit,
+           dummy_workaround TYPE i,
+         END OF response_checks_rerequest_suit.
+
 * Component schema: response_code_scanning_list_alerts_for_, array
   TYPES response_code_scanning_list_al TYPE STANDARD TABLE OF code_scanning_alert_items WITH DEFAULT KEY.
 
@@ -6677,12 +6675,6 @@ INTERFACE zif_githubcom PUBLIC.
   TYPES: BEGIN OF response_repos_create_deployme,
            message TYPE string,
          END OF response_repos_create_deployme.
-
-* Component schema: response_repos_create_deployment, object
-  TYPES: BEGIN OF response_repos_create_deploy01,
-           message TYPE string,
-           documentation_url TYPE string,
-         END OF response_repos_create_deploy01.
 
 * Component schema: response_repos_list_deployment_statuses, array
   TYPES response_repos_list_deployme01 TYPE STANDARD TABLE OF deployment_status WITH DEFAULT KEY.
@@ -6756,18 +6748,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: response_issues_list_labels_for_repo, array
   TYPES response_issues_list_labels_fo TYPE STANDARD TABLE OF label WITH DEFAULT KEY.
 
-* Component schema: response_repos_merge, object
-  TYPES: BEGIN OF response_repos_merge,
-           message TYPE string,
-           documentation_url TYPE string,
-         END OF response_repos_merge.
-
-* Component schema: response_repos_merge, object
-  TYPES: BEGIN OF response_repos_merge01,
-           message TYPE string,
-           documentation_url TYPE string,
-         END OF response_repos_merge01.
-
 * Component schema: response_issues_list_milestones, array
   TYPES response_issues_list_milestone TYPE STANDARD TABLE OF milestone WITH DEFAULT KEY.
 
@@ -6776,6 +6756,12 @@ INTERFACE zif_githubcom PUBLIC.
 
 * Component schema: response_activity_list_repo_notificatio, array
   TYPES response_activity_list_repo_no TYPE STANDARD TABLE OF thread WITH DEFAULT KEY.
+
+* Component schema: response_activity_mark_repo_notificatio, object
+  TYPES: BEGIN OF response_activity_mark_repo_no,
+           message TYPE string,
+           url TYPE string,
+         END OF response_activity_mark_repo_no.
 
 * Component schema: response_repos_list_pages_builds, array
   TYPES response_repos_list_pages_buil TYPE STANDARD TABLE OF page_build WITH DEFAULT KEY.
@@ -6833,9 +6819,6 @@ INTERFACE zif_githubcom PUBLIC.
 
 * Component schema: response_secret_scanning_list_alerts_fo, array
   TYPES response_secret_scanning_list_ TYPE STANDARD TABLE OF secret_scanning_alert WITH DEFAULT KEY.
-
-* Component schema: response_activity_list_stargazers_for_r, array
-  TYPES response_activity_list_stargaz TYPE STANDARD TABLE OF simple_user WITH DEFAULT KEY.
 
 * Component schema: response_repos_get_code_frequency_stats, array
   TYPES response_repos_get_code_freque TYPE STANDARD TABLE OF code_frequency_stat WITH DEFAULT KEY.
@@ -7046,9 +7029,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: response_repos_list_for_user, array
   TYPES response_repos_list_for_user TYPE STANDARD TABLE OF minimal_repository WITH DEFAULT KEY.
 
-* Component schema: response_activity_list_repos_starred_01, array
-  TYPES response_activity_list_repos01 TYPE STANDARD TABLE OF repository WITH DEFAULT KEY.
-
 * Component schema: response_activity_list_repos_watched_by, array
   TYPES response_activity_list_repos_w TYPE STANDARD TABLE OF minimal_repository WITH DEFAULT KEY.
 
@@ -7077,9 +7057,11 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, string
 * Response: 404
 * Response: 422
+* Body ref: #/components/schemas/bodyapps_create_from_manifest
   METHODS apps_create_from_manifest
     IMPORTING
       code TYPE string
+      body TYPE bodyapps_create_from_manifest
     RAISING cx_static_check.
 
 * GET - "Get a webhook configuration for an app"
@@ -8525,11 +8507,11 @@ INTERFACE zif_githubcom PUBLIC.
     RAISING cx_static_check.
 
 * GET - "Get GitHub Actions permissions for an organization"
-* Operation id: actions/get-github-actions-permissions-organization
+* Operation id: actions/actions-policies/get-github-actions-permissions-organization
 * Parameter: org, required, path
 * Response: 200
 *     application/json, #/components/schemas/actions-organization-permissions
-  METHODS actions_get_github_actions_per
+  METHODS actions_actions_policies_get_g
     IMPORTING
       org TYPE string
     RETURNING
@@ -8930,6 +8912,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: org, required, path
 * Parameter: secret_name, required, path
 * Response: 201
+*     application/json, #/components/schemas/response_actions_create_or_update_org_s
 * Response: 204
 * Body ref: #/components/schemas/bodyactions_create_or_update_o
   METHODS actions_create_or_update_org_s
@@ -8937,6 +8920,8 @@ INTERFACE zif_githubcom PUBLIC.
       org TYPE string
       secret_name TYPE string
       body TYPE bodyactions_create_or_update_o
+    RETURNING
+      VALUE(return_data) TYPE response_actions_create_or_upd
     RAISING cx_static_check.
 
 * DELETE - "Delete an organization secret"
@@ -9297,12 +9282,10 @@ INTERFACE zif_githubcom PUBLIC.
 * Operation id: interactions/get-restrictions-for-org
 * Parameter: org, required, path
 * Response: 200
-*     application/json, #/components/schemas/interaction-limit-response
+*     application/json, string
   METHODS interactions_get_restrictions_
     IMPORTING
       org TYPE string
-    RETURNING
-      VALUE(return_data) TYPE interaction_limit_response
     RAISING cx_static_check.
 
 * PUT - "Set interaction restrictions for an organization"
@@ -9650,9 +9633,9 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: org, required, path
 * Parameter: username, required, path
 * Response: 202
+*     application/json, #/components/schemas/response_orgs_convert_member_to_outside
 * Response: 204
 * Response: 403
-*     application/json, #/components/schemas/response_orgs_convert_member_to_outside
 * Response: 404
   METHODS orgs_convert_member_to_outside
     IMPORTING
@@ -10270,6 +10253,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: team_slug, required, path
 * Parameter: discussion_number, required, path
 * Parameter: comment_number, required, path
+* Response: 200
+*     application/json, #/components/schemas/reaction
 * Response: 201
 *     application/json, #/components/schemas/reaction
 * Body ref: #/components/schemas/bodyreactions_create_for_team_
@@ -10328,6 +10313,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: org, required, path
 * Parameter: team_slug, required, path
 * Parameter: discussion_number, required, path
+* Response: 200
+*     application/json, #/components/schemas/reaction
 * Response: 201
 *     application/json, #/components/schemas/reaction
 * Body ref: #/components/schemas/bodyreactions_create_for_tea01
@@ -10420,7 +10407,6 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, #/components/schemas/team-membership
 * Response: 403
 * Response: 422
-*     application/json, #/components/schemas/response_teams_add_or_update_membership
 * Body ref: #/components/schemas/bodyteams_add_or_update_member
   METHODS teams_add_or_update_membership
     IMPORTING
@@ -10540,7 +10526,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Response: 200
-*     application/vnd.github.v3.repository+json, #/components/schemas/team-repository
+*     application/json, #/components/schemas/team-repository
 * Response: 204
 * Response: 404
   METHODS teams_check_permissions_for_re
@@ -10549,6 +10535,8 @@ INTERFACE zif_githubcom PUBLIC.
       team_slug TYPE string
       owner TYPE string
       repo TYPE string
+    RETURNING
+      VALUE(return_data) TYPE team_repository
     RAISING cx_static_check.
 
 * PUT - "Add or update team repository permissions"
@@ -11113,13 +11101,15 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Parameter: job_id, required, path
-* Response: 202
+* Response: 200
 *     application/json, #/components/schemas/job
   METHODS actions_get_job_for_workflow_r
     IMPORTING
       owner TYPE string
       repo TYPE string
       job_id TYPE i
+    RETURNING
+      VALUE(return_data) TYPE job
     RAISING cx_static_check.
 
 * GET - "Download job logs for a workflow run"
@@ -11141,7 +11131,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Response: 200
 *     application/json, #/components/schemas/actions-repository-permissions
-  METHODS actions_get_github_actions_p01
+  METHODS actions_get_github_actions_per
     IMPORTING
       owner TYPE string
       repo TYPE string
@@ -11375,6 +11365,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Parameter: run_id, required, path
 * Response: 202
+*     application/json, #/components/schemas/response_actions_cancel_workflow_run
   METHODS actions_cancel_workflow_run
     IMPORTING
       owner TYPE string
@@ -11470,11 +11461,14 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Parameter: run_id, required, path
 * Response: 201
+*     application/json, #/components/schemas/response_actions_re_run_workflow
   METHODS actions_re_run_workflow
     IMPORTING
       owner TYPE string
       repo TYPE string
       run_id TYPE i
+    RETURNING
+      VALUE(return_data) TYPE response_actions_re_run_workfl
     RAISING cx_static_check.
 
 * GET - "Get workflow run usage"
@@ -11547,6 +11541,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Parameter: secret_name, required, path
 * Response: 201
+*     application/json, #/components/schemas/response_actions_create_or_update_repo_
 * Response: 204
 * Body ref: #/components/schemas/bodyactions_create_or_update_r
   METHODS actions_create_or_update_repo_
@@ -11555,6 +11550,8 @@ INTERFACE zif_githubcom PUBLIC.
       repo TYPE string
       secret_name TYPE string
       body TYPE bodyactions_create_or_update_r
+    RETURNING
+      VALUE(return_data) TYPE response_actions_create_or_u01
     RAISING cx_static_check.
 
 * DELETE - "Delete a repository secret"
@@ -11775,6 +11772,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: branch, required, path
 * Response: 200
 *     application/json, #/components/schemas/branch-with-protection
+* Response: 301
 * Response: 404
 * Response: 415
   METHODS repos_get_branch
@@ -11893,12 +11891,14 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Parameter: branch, required, path
 * Response: 200
-*     application/vnd.github.luke-cage-preview+json, #/components/schemas/protected-branch-pull-request-review
+*     application/json, #/components/schemas/protected-branch-pull-request-review
   METHODS repos_get_pull_request_review_
     IMPORTING
       owner TYPE string
       repo TYPE string
       branch TYPE string
+    RETURNING
+      VALUE(return_data) TYPE protected_branch_pull_request_
     RAISING cx_static_check.
 
 * PATCH - "Update pull request review protection"
@@ -12063,13 +12063,12 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 403
 * Response: 404
 * Response: 422
-* Body ref: #/components/schemas/bodyrepos_add_status_check_con
+* Body schema: string
   METHODS repos_add_status_check_context
     IMPORTING
       owner TYPE string
       repo TYPE string
       branch TYPE string
-      body TYPE bodyrepos_add_status_check_con
     RETURNING
       VALUE(return_data) TYPE response_repos_add_status_chec
     RAISING cx_static_check.
@@ -12083,13 +12082,12 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, #/components/schemas/response_repos_set_status_check_context
 * Response: 404
 * Response: 422
-* Body ref: #/components/schemas/bodyrepos_set_status_check_con
+* Body schema: string
   METHODS repos_set_status_check_context
     IMPORTING
       owner TYPE string
       repo TYPE string
       branch TYPE string
-      body TYPE bodyrepos_set_status_check_con
     RETURNING
       VALUE(return_data) TYPE response_repos_set_status_chec
     RAISING cx_static_check.
@@ -12103,13 +12101,12 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, #/components/schemas/response_repos_remove_status_check_cont
 * Response: 404
 * Response: 422
-* Body ref: #/components/schemas/bodyrepos_remove_status_chec01
+* Body schema: string
   METHODS repos_remove_status_check_cont
     IMPORTING
       owner TYPE string
       repo TYPE string
       branch TYPE string
-      body TYPE bodyrepos_remove_status_chec01
     RETURNING
       VALUE(return_data) TYPE response_repos_remove_status_c
     RAISING cx_static_check.
@@ -12169,13 +12166,12 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 200
 *     application/json, #/components/schemas/response_repos_add_app_access_restricti
 * Response: 422
-* Body ref: #/components/schemas/bodyrepos_add_app_access_restr
+* Body schema: string
   METHODS repos_add_app_access_restricti
     IMPORTING
       owner TYPE string
       repo TYPE string
       branch TYPE string
-      body TYPE bodyrepos_add_app_access_restr
     RETURNING
       VALUE(return_data) TYPE response_repos_add_app_access_
     RAISING cx_static_check.
@@ -12188,13 +12184,12 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 200
 *     application/json, #/components/schemas/response_repos_set_app_access_restricti
 * Response: 422
-* Body ref: #/components/schemas/bodyrepos_set_app_access_restr
+* Body schema: string
   METHODS repos_set_app_access_restricti
     IMPORTING
       owner TYPE string
       repo TYPE string
       branch TYPE string
-      body TYPE bodyrepos_set_app_access_restr
     RETURNING
       VALUE(return_data) TYPE response_repos_set_app_access_
     RAISING cx_static_check.
@@ -12207,13 +12202,12 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 200
 *     application/json, #/components/schemas/response_repos_remove_app_access_restri
 * Response: 422
-* Body ref: #/components/schemas/bodyrepos_remove_app_access_re
+* Body schema: string
   METHODS repos_remove_app_access_restri
     IMPORTING
       owner TYPE string
       repo TYPE string
       branch TYPE string
-      body TYPE bodyrepos_remove_app_access_re
     RETURNING
       VALUE(return_data) TYPE response_repos_remove_app_acce
     RAISING cx_static_check.
@@ -12243,13 +12237,12 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 200
 *     application/json, #/components/schemas/response_repos_add_team_access_restrict
 * Response: 422
-* Body ref: #/components/schemas/bodyrepos_add_team_access_rest
+* Body schema: string
   METHODS repos_add_team_access_restrict
     IMPORTING
       owner TYPE string
       repo TYPE string
       branch TYPE string
-      body TYPE bodyrepos_add_team_access_rest
     RETURNING
       VALUE(return_data) TYPE response_repos_add_team_access
     RAISING cx_static_check.
@@ -12262,13 +12255,12 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 200
 *     application/json, #/components/schemas/response_repos_set_team_access_restrict
 * Response: 422
-* Body ref: #/components/schemas/bodyrepos_set_team_access_rest
+* Body schema: string
   METHODS repos_set_team_access_restrict
     IMPORTING
       owner TYPE string
       repo TYPE string
       branch TYPE string
-      body TYPE bodyrepos_set_team_access_rest
     RETURNING
       VALUE(return_data) TYPE response_repos_set_team_access
     RAISING cx_static_check.
@@ -12281,13 +12273,12 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 200
 *     application/json, #/components/schemas/response_repos_remove_team_access_restr
 * Response: 422
-* Body ref: #/components/schemas/bodyrepos_remove_team_access_r
+* Body schema: string
   METHODS repos_remove_team_access_restr
     IMPORTING
       owner TYPE string
       repo TYPE string
       branch TYPE string
-      body TYPE bodyrepos_remove_team_access_r
     RETURNING
       VALUE(return_data) TYPE response_repos_remove_team_acc
     RAISING cx_static_check.
@@ -12317,13 +12308,12 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 200
 *     application/json, #/components/schemas/response_repos_add_user_access_restrict
 * Response: 422
-* Body ref: #/components/schemas/bodyrepos_add_user_access_rest
+* Body schema: string
   METHODS repos_add_user_access_restrict
     IMPORTING
       owner TYPE string
       repo TYPE string
       branch TYPE string
-      body TYPE bodyrepos_add_user_access_rest
     RETURNING
       VALUE(return_data) TYPE response_repos_add_user_access
     RAISING cx_static_check.
@@ -12336,13 +12326,12 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 200
 *     application/json, #/components/schemas/response_repos_set_user_access_restrict
 * Response: 422
-* Body ref: #/components/schemas/bodyrepos_set_user_access_rest
+* Body schema: string
   METHODS repos_set_user_access_restrict
     IMPORTING
       owner TYPE string
       repo TYPE string
       branch TYPE string
-      body TYPE bodyrepos_set_user_access_rest
     RETURNING
       VALUE(return_data) TYPE response_repos_set_user_access
     RAISING cx_static_check.
@@ -12355,13 +12344,12 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 200
 *     application/json, #/components/schemas/response_repos_remove_user_access_restr
 * Response: 422
-* Body ref: #/components/schemas/bodyrepos_remove_user_access_r
+* Body schema: string
   METHODS repos_remove_user_access_restr
     IMPORTING
       owner TYPE string
       repo TYPE string
       branch TYPE string
-      body TYPE bodyrepos_remove_user_access_r
     RETURNING
       VALUE(return_data) TYPE response_repos_remove_user_acc
     RAISING cx_static_check.
@@ -12461,6 +12449,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Operation id: checks/create-suite
 * Parameter: owner, required, path
 * Parameter: repo, required, path
+* Response: 200
+*     application/json, #/components/schemas/check-suite
 * Response: 201
 *     application/json, #/components/schemas/check-suite
 * Body ref: #/components/schemas/bodychecks_create_suite
@@ -12537,11 +12527,14 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Parameter: check_suite_id, required, path
 * Response: 201
+*     application/json, #/components/schemas/response_checks_rerequest_suite
   METHODS checks_rerequest_suite
     IMPORTING
       owner TYPE string
       repo TYPE string
       check_suite_id TYPE i
+    RETURNING
+      VALUE(return_data) TYPE response_checks_rerequest_suit
     RAISING cx_static_check.
 
 * GET - "List code scanning alerts for a repository"
@@ -12673,6 +12666,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Response: 200
+*     application/json+sarif, string
 *     application/json, #/components/schemas/code-scanning-analysis
 * Response: 403
 * Response: 404
@@ -12712,6 +12706,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Operation id: code-scanning/upload-sarif
 * Parameter: owner, required, path
 * Parameter: repo, required, path
+* Response: 200
+*     application/json, string
 * Response: 202
 *     application/json, #/components/schemas/code-scanning-sarifs-receipt
 * Response: 400
@@ -12971,8 +12967,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: path, optional, query
 * Parameter: author, optional, query
 * Parameter: until, optional, query
-* Parameter: top, optional, query
-* Parameter: last_sha, optional, query
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Parameter: since, optional, query
@@ -12990,8 +12984,6 @@ INTERFACE zif_githubcom PUBLIC.
       path TYPE string OPTIONAL
       author TYPE string OPTIONAL
       until TYPE string OPTIONAL
-      top TYPE string OPTIONAL
-      last_sha TYPE string OPTIONAL
       owner TYPE string
       repo TYPE string
       since TYPE string OPTIONAL
@@ -13227,20 +13219,22 @@ INTERFACE zif_githubcom PUBLIC.
 
 * GET - "Compare two commits"
 * Operation id: repos/compare-commits
-* Parameter: base, required, path
-* Parameter: head, required, path
+* Parameter: basehead, required, path
 * Parameter: owner, required, path
 * Parameter: repo, required, path
+* Parameter: page, optional, query
+* Parameter: per_page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/commit-comparison
 * Response: 404
 * Response: 500
   METHODS repos_compare_commits
     IMPORTING
-      base TYPE string
-      head TYPE string
+      basehead TYPE string
       owner TYPE string
       repo TYPE string
+      page TYPE i DEFAULT 1
+      per_page TYPE i DEFAULT 30
     RETURNING
       VALUE(return_data) TYPE commit_comparison
     RAISING cx_static_check.
@@ -13368,7 +13362,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 202
 *     application/json, #/components/schemas/response_repos_create_deployment
 * Response: 409
-*     application/json, #/components/schemas/response_repos_create_deployment
 * Response: 422
 * Body ref: #/components/schemas/bodyrepos_create_deployment
   METHODS repos_create_deployment
@@ -13572,8 +13565,6 @@ INTERFACE zif_githubcom PUBLIC.
 * GET - "List forks"
 * Operation id: repos/list-forks
 * Parameter: sort, optional, query
-* Parameter: org, optional, query
-* Parameter: organization, optional, query
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Parameter: per_page, optional, query
@@ -13584,8 +13575,6 @@ INTERFACE zif_githubcom PUBLIC.
   METHODS repos_list_forks
     IMPORTING
       sort TYPE string DEFAULT 'newest'
-      org TYPE string OPTIONAL
-      organization TYPE string OPTIONAL
       owner TYPE string
       repo TYPE string
       per_page TYPE i DEFAULT 30
@@ -13596,12 +13585,10 @@ INTERFACE zif_githubcom PUBLIC.
 
 * POST - "Create a fork"
 * Operation id: repos/create-fork
-* Parameter: org, optional, query
-* Parameter: organization, optional, query
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Response: 202
-*     application/json, #/components/schemas/repository
+*     application/json, #/components/schemas/full-repository
 * Response: 400
 * Response: 403
 * Response: 404
@@ -13609,8 +13596,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Body ref: #/components/schemas/bodyrepos_create_fork
   METHODS repos_create_fork
     IMPORTING
-      org TYPE string OPTIONAL
-      organization TYPE string OPTIONAL
       owner TYPE string
       repo TYPE string
       body TYPE bodyrepos_create_fork
@@ -14156,13 +14141,11 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Response: 200
-*     application/json, #/components/schemas/interaction-limit-response
+*     application/json, string
   METHODS interactions_get_restriction01
     IMPORTING
       owner TYPE string
       repo TYPE string
-    RETURNING
-      VALUE(return_data) TYPE interaction_limit_response
     RAISING cx_static_check.
 
 * PUT - "Set interaction restrictions for a repository"
@@ -14658,13 +14641,12 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, #/components/schemas/response_issues_add_labels
 * Response: 410
 * Response: 422
-* Body ref: #/components/schemas/bodyissues_add_labels
+* Body schema: string
   METHODS issues_add_labels
     IMPORTING
       owner TYPE string
       repo TYPE string
       issue_number TYPE i
-      body TYPE bodyissues_add_labels
     RETURNING
       VALUE(return_data) TYPE response_issues_add_labels
     RAISING cx_static_check.
@@ -14678,13 +14660,12 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, #/components/schemas/response_issues_set_labels
 * Response: 410
 * Response: 422
-* Body ref: #/components/schemas/bodyissues_set_labels
+* Body schema: string
   METHODS issues_set_labels
     IMPORTING
       owner TYPE string
       repo TYPE string
       issue_number TYPE i
-      body TYPE bodyissues_set_labels
     RETURNING
       VALUE(return_data) TYPE response_issues_set_labels
     RAISING cx_static_check.
@@ -14696,13 +14677,12 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: issue_number, required, path
 * Response: 204
 * Response: 410
-* Body ref: #/components/schemas/bodyissues_remove_all_labels
+* Body schema: string
   METHODS issues_remove_all_labels
     IMPORTING
       owner TYPE string
       repo TYPE string
       issue_number TYPE i
-      body TYPE bodyissues_remove_all_labels
     RAISING cx_static_check.
 
 * DELETE - "Remove a label from an issue"
@@ -14791,6 +14771,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Parameter: issue_number, required, path
+* Response: 200
+*     application/json, #/components/schemas/reaction
 * Response: 201
 *     application/json, #/components/schemas/reaction
 * Response: 415
@@ -15030,11 +15012,10 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Response: 201
 *     application/json, #/components/schemas/commit
+* Response: 204
 * Response: 403
 * Response: 404
-*     application/json, #/components/schemas/response_repos_merge
 * Response: 409
-*     application/json, #/components/schemas/response_repos_merge
 * Response: 422
 * Body ref: #/components/schemas/bodyrepos_merge
   METHODS repos_merge
@@ -15191,6 +15172,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Response: 202
+*     application/json, #/components/schemas/response_activity_mark_repo_notificatio
+* Response: 205
 * Body ref: #/components/schemas/bodyactivity_mark_repo_notific
   METHODS activity_mark_repo_notificatio
     IMPORTING
@@ -15789,6 +15772,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Parameter: pull_number, required, path
 * Response: 200
+*     application/json, #/components/schemas/pull-request-simple
 * Response: 422
 * Body ref: #/components/schemas/bodypulls_remove_requested_rev
   METHODS pulls_remove_requested_reviewe
@@ -15797,6 +15781,8 @@ INTERFACE zif_githubcom PUBLIC.
       repo TYPE string
       pull_number TYPE i
       body TYPE bodypulls_remove_requested_rev
+    RETURNING
+      VALUE(return_data) TYPE pull_request_simple
     RAISING cx_static_check.
 
 * GET - "List reviews for a pull request"
@@ -16006,8 +15992,8 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE content_file
     RAISING cx_static_check.
 
-* GET - "Get a repository README"
-* Operation id: repos/get-readme-from-alt-path
+* GET - "Get a repository README for a directory"
+* Operation id: repos/get-readme-in-directory
 * Parameter: dir, required, path
 * Parameter: ref, optional, query
 * Parameter: owner, required, path
@@ -16016,7 +16002,7 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, #/components/schemas/content-file
 * Response: 404
 * Response: 422
-  METHODS repos_get_readme_from_alt_path
+  METHODS repos_get_readme_in_directory
     IMPORTING
       dir TYPE string
       ref TYPE string OPTIONAL
@@ -16051,6 +16037,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Response: 201
 *     application/json, #/components/schemas/release
+* Response: 404
+*     application/json, #/components/schemas/basic-error
 * Response: 422
 * Body ref: #/components/schemas/bodyrepos_create_release
   METHODS repos_create_release
@@ -16169,6 +16157,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: release_id, required, path
 * Response: 200
 *     application/json, #/components/schemas/release
+* Response: 404
+*     application/json, #/components/schemas/basic-error
 * Body ref: #/components/schemas/bodyrepos_update_release
   METHODS repos_update_release
     IMPORTING
@@ -16303,8 +16293,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: per_page, optional, query
 * Parameter: page, optional, query
 * Response: 200
-*     application/json, #/components/schemas/response_activity_list_stargazers_for_r
-*     application/vnd.github.v3.star+json, array
+*     application/json, string
 * Response: 422
   METHODS activity_list_stargazers_for_r
     IMPORTING
@@ -16312,8 +16301,6 @@ INTERFACE zif_githubcom PUBLIC.
       repo TYPE string
       per_page TYPE i DEFAULT 30
       page TYPE i DEFAULT 1
-    RETURNING
-      VALUE(return_data) TYPE response_activity_list_stargaz
     RAISING cx_static_check.
 
 * GET - "Get the weekly commit activity"
@@ -16322,6 +16309,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Response: 200
 *     application/json, #/components/schemas/response_repos_get_code_frequency_stats
+* Response: 202
+* Response: 204
   METHODS repos_get_code_frequency_stats
     IMPORTING
       owner TYPE string
@@ -16336,6 +16325,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Response: 200
 *     application/json, #/components/schemas/response_repos_get_commit_activity_stat
+* Response: 202
+* Response: 204
   METHODS repos_get_commit_activity_stat
     IMPORTING
       owner TYPE string
@@ -16350,6 +16341,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Response: 200
 *     application/json, #/components/schemas/response_repos_get_contributors_stats
+* Response: 202
+* Response: 204
   METHODS repos_get_contributors_stats
     IMPORTING
       owner TYPE string
@@ -16379,6 +16372,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Response: 200
 *     application/json, #/components/schemas/response_repos_get_punch_card_stats
+* Response: 204
   METHODS repos_get_punch_card_stats
     IMPORTING
       owner TYPE string
@@ -16625,7 +16619,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Response: 202
-*     application/json, #/components/schemas/repository
+*     application/json, #/components/schemas/minimal-repository
 * Body ref: #/components/schemas/bodyrepos_transfer
   METHODS repos_transfer
     IMPORTING
@@ -17585,10 +17579,9 @@ INTERFACE zif_githubcom PUBLIC.
 * GET - "Get interaction restrictions for your public repositories"
 * Operation id: interactions/get-restrictions-for-authenticated-user
 * Response: 200
-*     application/json, #/components/schemas/interaction-limit-response
+*     application/json, string
+* Response: 204
   METHODS interactions_get_restriction02
-    RETURNING
-      VALUE(return_data) TYPE interaction_limit_response
     RAISING cx_static_check.
 
 * PUT - "Set interaction restrictions for your public repositories"
@@ -18277,6 +18270,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: username, required, path
 * Response: 200
 *     application/json, string
+* Response: 202
 * Response: 404
   METHODS users_get_by_username
     IMPORTING
@@ -18645,8 +18639,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: per_page, optional, query
 * Parameter: page, optional, query
 * Response: 200
-*     application/json, #/components/schemas/response_activity_list_repos_starred_01
-*     application/vnd.github.v3.star+json, array
+*     application/json, string
   METHODS activity_list_repos_starred_01
     IMPORTING
       username TYPE string
@@ -18654,8 +18647,6 @@ INTERFACE zif_githubcom PUBLIC.
       direction TYPE string DEFAULT 'desc'
       per_page TYPE i DEFAULT 30
       page TYPE i DEFAULT 1
-    RETURNING
-      VALUE(return_data) TYPE response_activity_list_repos01
     RAISING cx_static_check.
 
 * GET - "List repositories watched by a user"
