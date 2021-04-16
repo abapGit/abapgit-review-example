@@ -3297,6 +3297,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     runner_application-architecture = mo_json->value_string( iv_prefix && '/architecture' ).
     runner_application-download_url = mo_json->value_string( iv_prefix && '/download_url' ).
     runner_application-filename = mo_json->value_string( iv_prefix && '/filename' ).
+    runner_application-temp_download_token = mo_json->value_string( iv_prefix && '/temp_download_token' ).
+    runner_application-sha256_checksum = mo_json->value_string( iv_prefix && '/sha256_checksum' ).
   ENDMETHOD.
 
   METHOD parse_authentication_token.
