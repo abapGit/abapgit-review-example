@@ -264,6 +264,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(actions_public_key) TYPE zif_githubcom=>actions_public_key
       RAISING cx_static_check.
+    METHODS parse_empty_object
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(empty_object) TYPE zif_githubcom=>empty_object
+      RAISING cx_static_check.
     METHODS parse_credential_authorization
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(credential_authorization) TYPE zif_githubcom=>credential_authorization
@@ -610,6 +614,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       RAISING cx_static_check.
     METHODS parse_code_scanning_analysis04
       IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(code_scanning_analysis_categor) TYPE zif_githubcom=>code_scanning_analysis_categor
+      RAISING cx_static_check.
+    METHODS parse_code_scanning_analysis05
+      IMPORTING iv_prefix TYPE string
       RETURNING VALUE(code_scanning_analysis_created) TYPE zif_githubcom=>code_scanning_analysis_created
       RAISING cx_static_check.
     METHODS parse_code_scanning_analysis_u
@@ -628,7 +636,7 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(scim_error) TYPE zif_githubcom=>scim_error
       RAISING cx_static_check.
-    METHODS parse_code_scanning_analysis05
+    METHODS parse_code_scanning_analysis06
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(code_scanning_analysis_sarif_f) TYPE zif_githubcom=>code_scanning_analysis_sarif_f
       RAISING cx_static_check.
@@ -828,6 +836,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(pages_source_hash) TYPE zif_githubcom=>pages_source_hash
       RAISING cx_static_check.
+    METHODS parse_pages_https_certificate
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(pages_https_certificate) TYPE zif_githubcom=>pages_https_certificate
+      RAISING cx_static_check.
     METHODS parse_page
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(page) TYPE zif_githubcom=>page
@@ -839,6 +851,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_page_build_status
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(page_build_status) TYPE zif_githubcom=>page_build_status
+      RAISING cx_static_check.
+    METHODS parse_pages_health_check
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(pages_health_check) TYPE zif_githubcom=>pages_health_check
       RAISING cx_static_check.
     METHODS parse_pull_request
       IMPORTING iv_prefix TYPE string
@@ -1992,10 +2008,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_list_org_secr) TYPE zif_githubcom=>response_actions_list_org_secr
       RAISING cx_static_check.
-    METHODS parse_actions_create_or_update
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(response_actions_create_or_upd) TYPE zif_githubcom=>response_actions_create_or_upd
-      RAISING cx_static_check.
     METHODS parse_actions_list_selected_01
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_list_select01) TYPE zif_githubcom=>response_actions_list_select01
@@ -2220,9 +2232,9 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_list_repo_sec) TYPE zif_githubcom=>response_actions_list_repo_sec
       RAISING cx_static_check.
-    METHODS parse_actions_create_or_upda01
+    METHODS parse_actions_create_or_update
       IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(response_actions_create_or_u01) TYPE zif_githubcom=>response_actions_create_or_u01
+      RETURNING VALUE(response_actions_create_or_upd) TYPE zif_githubcom=>response_actions_create_or_upd
       RAISING cx_static_check.
     METHODS parse_actions_list_repo_workfl
       IMPORTING iv_prefix TYPE string
@@ -3921,6 +3933,9 @@ CLASS zcl_githubcom IMPLEMENTATION.
     actions_public_key-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
   ENDMETHOD.
 
+  METHOD parse_empty_object.
+  ENDMETHOD.
+
   METHOD parse_credential_authorization.
     credential_authorization-login = mo_json->value_string( iv_prefix && '/login' ).
     credential_authorization-credential_id = mo_json->value_string( iv_prefix && '/credential_id' ).
@@ -4335,7 +4350,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     full_repository-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
     full_repository-name = mo_json->value_string( iv_prefix && '/name' ).
     full_repository-full_name = mo_json->value_string( iv_prefix && '/full_name' ).
-    full_repository-owner = mo_json->value_string( iv_prefix && '/owner' ).
+    full_repository-owner = parse_simple_user( iv_prefix ).
     full_repository-private = mo_json->value_boolean( iv_prefix && '/private' ).
     full_repository-html_url = mo_json->value_string( iv_prefix && '/html_url' ).
     full_repository-description = mo_json->value_string( iv_prefix && '/description' ).
@@ -4969,6 +4984,10 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, handle type string
   ENDMETHOD.
 
+  METHOD parse_code_scanning_analysis05.
+* todo, handle type string
+  ENDMETHOD.
+
   METHOD parse_code_scanning_analysis_u.
 * todo, handle type string
   ENDMETHOD.
@@ -4978,8 +4997,9 @@ CLASS zcl_githubcom IMPLEMENTATION.
     code_scanning_analysis-commit_sha = parse_code_scanning_analysis_c( iv_prefix ).
     code_scanning_analysis-analysis_key = parse_code_scanning_analysis_a( iv_prefix ).
     code_scanning_analysis-environment = parse_code_scanning_analysis_e( iv_prefix ).
+    code_scanning_analysis-category = parse_code_scanning_analysis04( iv_prefix ).
     code_scanning_analysis-error = mo_json->value_string( iv_prefix && '/error' ).
-    code_scanning_analysis-created_at = parse_code_scanning_analysis04( iv_prefix ).
+    code_scanning_analysis-created_at = parse_code_scanning_analysis05( iv_prefix ).
     code_scanning_analysis-results_count = mo_json->value_string( iv_prefix && '/results_count' ).
     code_scanning_analysis-rules_count = mo_json->value_string( iv_prefix && '/rules_count' ).
     code_scanning_analysis-id = mo_json->value_string( iv_prefix && '/id' ).
@@ -4987,6 +5007,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     code_scanning_analysis-sarif_id = parse_code_scanning_analysis_s( iv_prefix ).
     code_scanning_analysis-tool = parse_code_scanning_analysis03( iv_prefix ).
     code_scanning_analysis-deletable = mo_json->value_boolean( iv_prefix && '/deletable' ).
+    code_scanning_analysis-warning = mo_json->value_string( iv_prefix && '/warning' ).
   ENDMETHOD.
 
   METHOD parse_code_scanning_analysis_d.
@@ -5003,7 +5024,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, array, schemas
   ENDMETHOD.
 
-  METHOD parse_code_scanning_analysis05.
+  METHOD parse_code_scanning_analysis06.
 * todo, handle type string
   ENDMETHOD.
 
@@ -5652,6 +5673,13 @@ CLASS zcl_githubcom IMPLEMENTATION.
     pages_source_hash-path = mo_json->value_string( iv_prefix && '/path' ).
   ENDMETHOD.
 
+  METHOD parse_pages_https_certificate.
+    pages_https_certificate-state = mo_json->value_string( iv_prefix && '/state' ).
+    pages_https_certificate-description = mo_json->value_string( iv_prefix && '/description' ).
+* todo, array, domains
+    pages_https_certificate-expires_at = mo_json->value_string( iv_prefix && '/expires_at' ).
+  ENDMETHOD.
+
   METHOD parse_page.
     page-url = mo_json->value_string( iv_prefix && '/url' ).
     page-status = mo_json->value_string( iv_prefix && '/status' ).
@@ -5660,6 +5688,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     page-html_url = mo_json->value_string( iv_prefix && '/html_url' ).
     page-source = parse_pages_source_hash( iv_prefix ).
     page-public = mo_json->value_boolean( iv_prefix && '/public' ).
+    page-https_certificate = parse_pages_https_certificate( iv_prefix ).
+    page-https_enforced = mo_json->value_boolean( iv_prefix && '/https_enforced' ).
   ENDMETHOD.
 
   METHOD parse_page_build.
@@ -5676,6 +5706,65 @@ CLASS zcl_githubcom IMPLEMENTATION.
   METHOD parse_page_build_status.
     page_build_status-url = mo_json->value_string( iv_prefix && '/url' ).
     page_build_status-status = mo_json->value_string( iv_prefix && '/status' ).
+  ENDMETHOD.
+
+  METHOD parse_pages_health_check.
+    pages_health_check-domain-host = mo_json->value_string( iv_prefix && '/domain/host' ).
+    pages_health_check-domain-uri = mo_json->value_string( iv_prefix && '/domain/uri' ).
+    pages_health_check-domain-nameservers = mo_json->value_string( iv_prefix && '/domain/nameservers' ).
+    pages_health_check-domain-dns_resolves = mo_json->value_boolean( iv_prefix && '/domain/dns_resolves' ).
+    pages_health_check-domain-is_proxied = mo_json->value_boolean( iv_prefix && '/domain/is_proxied' ).
+    pages_health_check-domain-is_cloudflare_ip = mo_json->value_boolean( iv_prefix && '/domain/is_cloudflare_ip' ).
+    pages_health_check-domain-is_fastly_ip = mo_json->value_boolean( iv_prefix && '/domain/is_fastly_ip' ).
+    pages_health_check-domain-is_old_ip_address = mo_json->value_boolean( iv_prefix && '/domain/is_old_ip_address' ).
+    pages_health_check-domain-is_a_record = mo_json->value_boolean( iv_prefix && '/domain/is_a_record' ).
+    pages_health_check-domain-has_cname_record = mo_json->value_boolean( iv_prefix && '/domain/has_cname_record' ).
+    pages_health_check-domain-has_mx_records_present = mo_json->value_boolean( iv_prefix && '/domain/has_mx_records_present' ).
+    pages_health_check-domain-is_valid_domain = mo_json->value_boolean( iv_prefix && '/domain/is_valid_domain' ).
+    pages_health_check-domain-is_apex_domain = mo_json->value_boolean( iv_prefix && '/domain/is_apex_domain' ).
+    pages_health_check-domain-should_be_a_record = mo_json->value_boolean( iv_prefix && '/domain/should_be_a_record' ).
+    pages_health_check-domain-is_cname_to_github_user_domain = mo_json->value_boolean( iv_prefix && '/domain/is_cname_to_github_user_domain' ).
+    pages_health_check-domain-is_cname_to_pages_dot_github_d = mo_json->value_boolean( iv_prefix && '/domain/is_cname_to_pages_dot_github_dot_com' ).
+    pages_health_check-domain-is_cname_to_fastly = mo_json->value_boolean( iv_prefix && '/domain/is_cname_to_fastly' ).
+    pages_health_check-domain-is_pointed_to_github_pages_ip = mo_json->value_boolean( iv_prefix && '/domain/is_pointed_to_github_pages_ip' ).
+    pages_health_check-domain-is_non_github_pages_ip_present = mo_json->value_boolean( iv_prefix && '/domain/is_non_github_pages_ip_present' ).
+    pages_health_check-domain-is_pages_domain = mo_json->value_boolean( iv_prefix && '/domain/is_pages_domain' ).
+    pages_health_check-domain-is_served_by_pages = mo_json->value_boolean( iv_prefix && '/domain/is_served_by_pages' ).
+    pages_health_check-domain-is_valid = mo_json->value_boolean( iv_prefix && '/domain/is_valid' ).
+    pages_health_check-domain-reason = mo_json->value_string( iv_prefix && '/domain/reason' ).
+    pages_health_check-domain-responds_to_https = mo_json->value_boolean( iv_prefix && '/domain/responds_to_https' ).
+    pages_health_check-domain-enforces_https = mo_json->value_boolean( iv_prefix && '/domain/enforces_https' ).
+    pages_health_check-domain-https_error = mo_json->value_string( iv_prefix && '/domain/https_error' ).
+    pages_health_check-domain-is_https_eligible = mo_json->value_boolean( iv_prefix && '/domain/is_https_eligible' ).
+    pages_health_check-domain-caa_error = mo_json->value_string( iv_prefix && '/domain/caa_error' ).
+    pages_health_check-alt_domain-host = mo_json->value_string( iv_prefix && '/alt_domain/host' ).
+    pages_health_check-alt_domain-uri = mo_json->value_string( iv_prefix && '/alt_domain/uri' ).
+    pages_health_check-alt_domain-nameservers = mo_json->value_string( iv_prefix && '/alt_domain/nameservers' ).
+    pages_health_check-alt_domain-dns_resolves = mo_json->value_boolean( iv_prefix && '/alt_domain/dns_resolves' ).
+    pages_health_check-alt_domain-is_proxied = mo_json->value_boolean( iv_prefix && '/alt_domain/is_proxied' ).
+    pages_health_check-alt_domain-is_cloudflare_ip = mo_json->value_boolean( iv_prefix && '/alt_domain/is_cloudflare_ip' ).
+    pages_health_check-alt_domain-is_fastly_ip = mo_json->value_boolean( iv_prefix && '/alt_domain/is_fastly_ip' ).
+    pages_health_check-alt_domain-is_old_ip_address = mo_json->value_boolean( iv_prefix && '/alt_domain/is_old_ip_address' ).
+    pages_health_check-alt_domain-is_a_record = mo_json->value_boolean( iv_prefix && '/alt_domain/is_a_record' ).
+    pages_health_check-alt_domain-has_cname_record = mo_json->value_boolean( iv_prefix && '/alt_domain/has_cname_record' ).
+    pages_health_check-alt_domain-has_mx_records_present = mo_json->value_boolean( iv_prefix && '/alt_domain/has_mx_records_present' ).
+    pages_health_check-alt_domain-is_valid_domain = mo_json->value_boolean( iv_prefix && '/alt_domain/is_valid_domain' ).
+    pages_health_check-alt_domain-is_apex_domain = mo_json->value_boolean( iv_prefix && '/alt_domain/is_apex_domain' ).
+    pages_health_check-alt_domain-should_be_a_record = mo_json->value_boolean( iv_prefix && '/alt_domain/should_be_a_record' ).
+    pages_health_check-alt_domain-is_cname_to_github_user_domain = mo_json->value_boolean( iv_prefix && '/alt_domain/is_cname_to_github_user_domain' ).
+    pages_health_check-alt_domain-is_cname_to_pages_dot_github_d = mo_json->value_boolean( iv_prefix && '/alt_domain/is_cname_to_pages_dot_github_dot_com' ).
+    pages_health_check-alt_domain-is_cname_to_fastly = mo_json->value_boolean( iv_prefix && '/alt_domain/is_cname_to_fastly' ).
+    pages_health_check-alt_domain-is_pointed_to_github_pages_ip = mo_json->value_boolean( iv_prefix && '/alt_domain/is_pointed_to_github_pages_ip' ).
+    pages_health_check-alt_domain-is_non_github_pages_ip_present = mo_json->value_boolean( iv_prefix && '/alt_domain/is_non_github_pages_ip_present' ).
+    pages_health_check-alt_domain-is_pages_domain = mo_json->value_boolean( iv_prefix && '/alt_domain/is_pages_domain' ).
+    pages_health_check-alt_domain-is_served_by_pages = mo_json->value_boolean( iv_prefix && '/alt_domain/is_served_by_pages' ).
+    pages_health_check-alt_domain-is_valid = mo_json->value_boolean( iv_prefix && '/alt_domain/is_valid' ).
+    pages_health_check-alt_domain-reason = mo_json->value_string( iv_prefix && '/alt_domain/reason' ).
+    pages_health_check-alt_domain-responds_to_https = mo_json->value_boolean( iv_prefix && '/alt_domain/responds_to_https' ).
+    pages_health_check-alt_domain-enforces_https = mo_json->value_boolean( iv_prefix && '/alt_domain/enforces_https' ).
+    pages_health_check-alt_domain-https_error = mo_json->value_string( iv_prefix && '/alt_domain/https_error' ).
+    pages_health_check-alt_domain-is_https_eligible = mo_json->value_boolean( iv_prefix && '/alt_domain/is_https_eligible' ).
+    pages_health_check-alt_domain-caa_error = mo_json->value_string( iv_prefix && '/alt_domain/caa_error' ).
   ENDMETHOD.
 
   METHOD parse_pull_request.
@@ -7047,9 +7136,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, array, secrets
   ENDMETHOD.
 
-  METHOD parse_actions_create_or_update.
-  ENDMETHOD.
-
   METHOD parse_actions_list_selected_01.
     response_actions_list_select01-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
 * todo, array, repositories
@@ -7566,7 +7652,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, array, secrets
   ENDMETHOD.
 
-  METHOD parse_actions_create_or_upda01.
+  METHOD parse_actions_create_or_update.
   ENDMETHOD.
 
   METHOD parse_actions_list_repo_workfl.
@@ -10313,7 +10399,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ELSEIF data-production_environment = abap_false.
       json = json && |"production_environment": false,|.
     ENDIF.
-    json = json && |"created_at": "{ data-created_at }",|.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -10738,6 +10823,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
   METHOD json_repos_update_information_.
     json = json && '{'.
     json = json && |"cname": "{ data-cname }",|.
+    IF data-https_enforced = abap_true.
+      json = json && |"https_enforced": true,|.
+    ELSEIF data-https_enforced = abap_false.
+      json = json && |"https_enforced": false,|.
+    ENDIF.
     IF data-public = abap_true.
       json = json && |"public": true,|.
     ELSEIF data-public = abap_false.
@@ -10751,6 +10841,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
   METHOD json_repos_delete_pages_site.
     json = json && '{'.
     json = json && |"cname": "{ data-cname }",|.
+    IF data-https_enforced = abap_true.
+      json = json && |"https_enforced": true,|.
+    ELSEIF data-https_enforced = abap_false.
+      json = json && |"https_enforced": false,|.
+    ENDIF.
     IF data-public = abap_true.
       json = json && |"public": true,|.
     ELSEIF data-public = abap_false.
@@ -13663,7 +13758,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_actions_create_or_update( '' ).
+    return_data = parse_empty_object( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~actions_delete_org_secret.
@@ -16613,7 +16708,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_actions_create_or_upda01( '' ).
+    return_data = parse_actions_create_or_update( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~actions_delete_repo_secret.
@@ -20455,6 +20550,20 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_page_build( '' ).
   ENDMETHOD.
 
+  METHOD zif_githubcom~repos_get_pages_health_check.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/pages/health'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_pages_health_check( '' ).
+  ENDMETHOD.
+
   METHOD zif_githubcom~projects_list_for_repo.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -22000,8 +22109,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_cdata( json_actions_create_or_updat02( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
-    WRITE / mi_client->response->get_cdata( ).
-* todo, handle more responses
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_empty_object( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~actions_delete_environment_sec.
