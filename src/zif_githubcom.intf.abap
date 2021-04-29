@@ -1268,6 +1268,11 @@ INTERFACE zif_githubcom PUBLIC.
            created_at TYPE string,
          END OF actions_public_key.
 
+* Component schema: empty-object, object
+  TYPES: BEGIN OF empty_object,
+           dummy_workaround TYPE i,
+         END OF empty_object.
+
 * Component schema: credential-authorization, object
   TYPES: BEGIN OF credential_authorization,
            login TYPE string,
@@ -1743,7 +1748,7 @@ INTERFACE zif_githubcom PUBLIC.
            node_id TYPE string,
            name TYPE string,
            full_name TYPE string,
-           owner TYPE string,
+           owner TYPE simple_user,
            private TYPE abap_bool,
            html_url TYPE string,
            description TYPE string,
@@ -2504,6 +2509,9 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: code-scanning-analysis-environment, string
   TYPES code_scanning_analysis_environ TYPE string.
 
+* Component schema: code-scanning-analysis-category, string
+  TYPES code_scanning_analysis_categor TYPE string.
+
 * Component schema: code-scanning-analysis-created-at, string
   TYPES code_scanning_analysis_created TYPE string.
 
@@ -2516,6 +2524,7 @@ INTERFACE zif_githubcom PUBLIC.
            commit_sha TYPE code_scanning_analysis_commit_,
            analysis_key TYPE code_scanning_analysis_analysi,
            environment TYPE code_scanning_analysis_environ,
+           category TYPE code_scanning_analysis_categor,
            error TYPE string,
            created_at TYPE code_scanning_analysis_created,
            results_count TYPE i,
@@ -2525,6 +2534,7 @@ INTERFACE zif_githubcom PUBLIC.
            sarif_id TYPE code_scanning_analysis_sarif_i,
            tool TYPE code_scanning_analysis_tool,
            deletable TYPE abap_bool,
+           warning TYPE string,
          END OF code_scanning_analysis.
 
 * Component schema: code-scanning-analysis-deletion, object
@@ -3315,6 +3325,14 @@ INTERFACE zif_githubcom PUBLIC.
            path TYPE string,
          END OF pages_source_hash.
 
+* Component schema: pages-https-certificate, object
+  TYPES: BEGIN OF pages_https_certificate,
+           state TYPE string,
+           description TYPE string,
+           domains TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           expires_at TYPE string,
+         END OF pages_https_certificate.
+
 * Component schema: page, object
   TYPES: BEGIN OF page,
            url TYPE string,
@@ -3324,6 +3342,8 @@ INTERFACE zif_githubcom PUBLIC.
            html_url TYPE string,
            source TYPE pages_source_hash,
            public TYPE abap_bool,
+           https_certificate TYPE pages_https_certificate,
+           https_enforced TYPE abap_bool,
          END OF page.
 
 * Component schema: page-build, object
@@ -3346,6 +3366,72 @@ INTERFACE zif_githubcom PUBLIC.
            url TYPE string,
            status TYPE string,
          END OF page_build_status.
+
+* Component schema: pages-health-check, object
+  TYPES: BEGIN OF subpages_health_check_alt_doma,
+           host TYPE string,
+           uri TYPE string,
+           nameservers TYPE string,
+           dns_resolves TYPE abap_bool,
+           is_proxied TYPE abap_bool,
+           is_cloudflare_ip TYPE abap_bool,
+           is_fastly_ip TYPE abap_bool,
+           is_old_ip_address TYPE abap_bool,
+           is_a_record TYPE abap_bool,
+           has_cname_record TYPE abap_bool,
+           has_mx_records_present TYPE abap_bool,
+           is_valid_domain TYPE abap_bool,
+           is_apex_domain TYPE abap_bool,
+           should_be_a_record TYPE abap_bool,
+           is_cname_to_github_user_domain TYPE abap_bool,
+           is_cname_to_pages_dot_github_d TYPE abap_bool,
+           is_cname_to_fastly TYPE abap_bool,
+           is_pointed_to_github_pages_ip TYPE abap_bool,
+           is_non_github_pages_ip_present TYPE abap_bool,
+           is_pages_domain TYPE abap_bool,
+           is_served_by_pages TYPE abap_bool,
+           is_valid TYPE abap_bool,
+           reason TYPE string,
+           responds_to_https TYPE abap_bool,
+           enforces_https TYPE abap_bool,
+           https_error TYPE string,
+           is_https_eligible TYPE abap_bool,
+           caa_error TYPE string,
+         END OF subpages_health_check_alt_doma.
+  TYPES: BEGIN OF subpages_health_check_domain,
+           host TYPE string,
+           uri TYPE string,
+           nameservers TYPE string,
+           dns_resolves TYPE abap_bool,
+           is_proxied TYPE abap_bool,
+           is_cloudflare_ip TYPE abap_bool,
+           is_fastly_ip TYPE abap_bool,
+           is_old_ip_address TYPE abap_bool,
+           is_a_record TYPE abap_bool,
+           has_cname_record TYPE abap_bool,
+           has_mx_records_present TYPE abap_bool,
+           is_valid_domain TYPE abap_bool,
+           is_apex_domain TYPE abap_bool,
+           should_be_a_record TYPE abap_bool,
+           is_cname_to_github_user_domain TYPE abap_bool,
+           is_cname_to_pages_dot_github_d TYPE abap_bool,
+           is_cname_to_fastly TYPE abap_bool,
+           is_pointed_to_github_pages_ip TYPE abap_bool,
+           is_non_github_pages_ip_present TYPE abap_bool,
+           is_pages_domain TYPE abap_bool,
+           is_served_by_pages TYPE abap_bool,
+           is_valid TYPE abap_bool,
+           reason TYPE string,
+           responds_to_https TYPE abap_bool,
+           enforces_https TYPE abap_bool,
+           https_error TYPE string,
+           is_https_eligible TYPE abap_bool,
+           caa_error TYPE string,
+         END OF subpages_health_check_domain.
+  TYPES: BEGIN OF pages_health_check,
+           domain TYPE subpages_health_check_domain,
+           alt_domain TYPE subpages_health_check_alt_doma,
+         END OF pages_health_check.
 
 * Component schema: pull-request, object
   TYPES: BEGIN OF subpull_request__links,
@@ -5342,7 +5428,6 @@ INTERFACE zif_githubcom PUBLIC.
            description TYPE string,
            transient_environment TYPE abap_bool,
            production_environment TYPE abap_bool,
-           created_at TYPE string,
          END OF bodyrepos_create_deployment.
 
 * Component schema: bodyrepos_create_deployment_st, object
@@ -5695,6 +5780,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: bodyrepos_update_information_a, object
   TYPES: BEGIN OF bodyrepos_update_information_a,
            cname TYPE string,
+           https_enforced TYPE abap_bool,
            public TYPE abap_bool,
            source TYPE string,
          END OF bodyrepos_update_information_a.
@@ -5702,6 +5788,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: bodyrepos_delete_pages_site, object
   TYPES: BEGIN OF bodyrepos_delete_pages_site,
            cname TYPE string,
+           https_enforced TYPE abap_bool,
            public TYPE abap_bool,
            source TYPE string,
          END OF bodyrepos_delete_pages_site.
@@ -6295,11 +6382,6 @@ INTERFACE zif_githubcom PUBLIC.
            secrets TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF response_actions_list_org_secr.
 
-* Component schema: response_actions_create_or_update_org_s, object
-  TYPES: BEGIN OF response_actions_create_or_upd,
-           dummy_workaround TYPE i,
-         END OF response_actions_create_or_upd.
-
 * Component schema: response_actions_list_selected_repos_fo, object
   TYPES: BEGIN OF response_actions_list_select01,
            total_count TYPE i,
@@ -6538,9 +6620,9 @@ INTERFACE zif_githubcom PUBLIC.
          END OF response_actions_list_repo_sec.
 
 * Component schema: response_actions_create_or_update_repo_, object
-  TYPES: BEGIN OF response_actions_create_or_u01,
+  TYPES: BEGIN OF response_actions_create_or_upd,
            dummy_workaround TYPE i,
-         END OF response_actions_create_or_u01.
+         END OF response_actions_create_or_upd.
 
 * Component schema: response_actions_list_repo_workflows, object
   TYPES: BEGIN OF response_actions_list_repo_wor,
@@ -8914,7 +8996,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: org, required, path
 * Parameter: secret_name, required, path
 * Response: 201
-*     application/json, #/components/schemas/response_actions_create_or_update_org_s
+*     application/json, #/components/schemas/empty-object
 * Response: 204
 * Body ref: #/components/schemas/bodyactions_create_or_update_o
   METHODS actions_create_or_update_org_s
@@ -8923,7 +9005,7 @@ INTERFACE zif_githubcom PUBLIC.
       secret_name TYPE string
       body TYPE bodyactions_create_or_update_o
     RETURNING
-      VALUE(return_data) TYPE response_actions_create_or_upd
+      VALUE(return_data) TYPE empty_object
     RAISING cx_static_check.
 
 * DELETE - "Delete an organization secret"
@@ -11553,7 +11635,7 @@ INTERFACE zif_githubcom PUBLIC.
       secret_name TYPE string
       body TYPE bodyactions_create_or_update_r
     RETURNING
-      VALUE(return_data) TYPE response_actions_create_or_u01
+      VALUE(return_data) TYPE response_actions_create_or_upd
     RAISING cx_static_check.
 
 * DELETE - "Delete a repository secret"
@@ -12708,8 +12790,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Operation id: code-scanning/upload-sarif
 * Parameter: owner, required, path
 * Parameter: repo, required, path
-* Response: 200
-*     application/json, string
 * Response: 202
 *     application/json, #/components/schemas/code-scanning-sarifs-receipt
 * Response: 400
@@ -15311,6 +15391,25 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE page_build
     RAISING cx_static_check.
 
+* GET - "Get a DNS health check for GitHub Pages"
+* Operation id: repos/get-pages-health-check
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Response: 200
+*     application/json, #/components/schemas/pages-health-check
+* Response: 202
+*     application/json, #/components/schemas/empty-object
+* Response: 400
+* Response: 404
+* Response: 422
+  METHODS repos_get_pages_health_check
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+    RETURNING
+      VALUE(return_data) TYPE pages_health_check
+    RAISING cx_static_check.
+
 * GET - "List repository projects"
 * Operation id: projects/list-for-repo
 * Parameter: state, optional, query
@@ -16761,6 +16860,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: environment_name, required, path
 * Parameter: secret_name, required, path
 * Response: 201
+*     application/json, #/components/schemas/empty-object
 * Response: 204
 * Body ref: #/components/schemas/bodyactions_create_or_update_e
   METHODS actions_create_or_update_envir
@@ -16769,6 +16869,8 @@ INTERFACE zif_githubcom PUBLIC.
       environment_name TYPE string
       secret_name TYPE string
       body TYPE bodyactions_create_or_update_e
+    RETURNING
+      VALUE(return_data) TYPE empty_object
     RAISING cx_static_check.
 
 * DELETE - "Delete an environment secret"
