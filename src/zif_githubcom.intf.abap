@@ -470,14 +470,6 @@ INTERFACE zif_githubcom PUBLIC.
            html_url TYPE string,
          END OF code_of_conduct.
 
-* Component schema: content-reference-attachment, object
-  TYPES: BEGIN OF content_reference_attachment,
-           id TYPE i,
-           title TYPE string,
-           body TYPE string,
-           node_id TYPE string,
-         END OF content_reference_attachment.
-
 * Component schema: enabled-organizations, string
   TYPES enabled_organizations TYPE string.
 
@@ -576,6 +568,7 @@ INTERFACE zif_githubcom PUBLIC.
            content_type TYPE string,
            created_at TYPE i,
            deploy_key_fingerprint TYPE string,
+           _document_id TYPE string,
            emoji TYPE string,
            events TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            events_were TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
@@ -2766,6 +2759,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: community-profile, object
   TYPES: BEGIN OF subcommunity_profile_files,
            code_of_conduct TYPE string,
+           code_of_conduct_file TYPE string,
            license TYPE string,
            contributing TYPE string,
            readme TYPE string,
@@ -2812,6 +2806,14 @@ INTERFACE zif_githubcom PUBLIC.
            commits TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            files TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF commit_comparison.
+
+* Component schema: content-reference-attachment, object
+  TYPES: BEGIN OF content_reference_attachment,
+           id TYPE i,
+           title TYPE string,
+           body TYPE string,
+           node_id TYPE string,
+         END OF content_reference_attachment.
 
 * Component schema: content-tree, object
   TYPES: BEGIN OF subcontent_tree__links,
@@ -3932,6 +3934,7 @@ INTERFACE zif_githubcom PUBLIC.
            body_html TYPE string,
            body_text TYPE string,
            discussion_url TYPE string,
+           reactions TYPE reaction_rollup,
          END OF release.
 
 * Component schema: secret-scanning-alert-state, string
@@ -4567,6 +4570,23 @@ INTERFACE zif_githubcom PUBLIC.
            repo TYPE repository,
          END OF starred_repository.
 
+* Component schema: personal-access-token, object
+  TYPES: BEGIN OF personal_access_token,
+           id TYPE i,
+           url TYPE string,
+           scopes TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           token TYPE string,
+           token_last_eight TYPE string,
+           hashed_token TYPE string,
+           note TYPE string,
+           note_url TYPE string,
+           updated_at TYPE string,
+           created_at TYPE string,
+           fingerprint TYPE string,
+           user TYPE string,
+           expiration TYPE string,
+         END OF personal_access_token.
+
 * Component schema: hovercard, object
   TYPES: BEGIN OF hovercard,
            contexts TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
@@ -4627,12 +4647,6 @@ INTERFACE zif_githubcom PUBLIC.
            repository_ids TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            permissions TYPE app_permissions,
          END OF bodyapps_scope_token.
-
-* Component schema: bodyapps_create_content_attach, object
-  TYPES: BEGIN OF bodyapps_create_content_attach,
-           title TYPE string,
-           body TYPE string,
-         END OF bodyapps_create_content_attach.
 
 * Component schema: bodyenterprise_admin_set_githu, object
   TYPES: BEGIN OF bodyenterprise_admin_set_githu,
@@ -5380,6 +5394,12 @@ INTERFACE zif_githubcom PUBLIC.
            line TYPE i,
          END OF bodyrepos_create_commit_commen.
 
+* Component schema: bodyapps_create_content_attach, object
+  TYPES: BEGIN OF bodyapps_create_content_attach,
+           title TYPE string,
+           body TYPE string,
+         END OF bodyapps_create_content_attach.
+
 * Component schema: bodyrepos_create_or_update_fil, object
   TYPES: BEGIN OF subbodyrepos_create_or_updat01,
            name TYPE string,
@@ -5954,6 +5974,11 @@ INTERFACE zif_githubcom PUBLIC.
            discussion_category_name TYPE string,
          END OF bodyrepos_delete_release.
 
+* Component schema: bodyreactions_create_for_relea, object
+  TYPES: BEGIN OF bodyreactions_create_for_relea,
+           content TYPE string,
+         END OF bodyreactions_create_for_relea.
+
 * Component schema: bodysecret_scanning_update_ale, object
   TYPES: BEGIN OF bodysecret_scanning_update_ale,
            state TYPE secret_scanning_alert_state,
@@ -6272,8 +6297,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: response_enterprise_admin_list_runner_a, array
   TYPES response_enterprise_admin_li05 TYPE STANDARD TABLE OF runner_application WITH DEFAULT KEY.
 
-* Component schema: response_audit_log_get_audit_log, array
-  TYPES response_audit_log_get_audit_l TYPE STANDARD TABLE OF audit_log_event WITH DEFAULT KEY.
+* Component schema: response_enterprise_admin_get_audit_log, array
+  TYPES response_enterprise_admin_get_ TYPE STANDARD TABLE OF audit_log_event WITH DEFAULT KEY.
 
 * Component schema: response_activity_list_public_events, array
   TYPES response_activity_list_public_ TYPE STANDARD TABLE OF event WITH DEFAULT KEY.
@@ -6707,7 +6732,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: response_code_scanning_list_alerts_for_, array
   TYPES response_code_scanning_list_al TYPE STANDARD TABLE OF code_scanning_alert_items WITH DEFAULT KEY.
 
-* Component schema: response_code_scanning_list_alerts_inst, array
+* Component schema: response_code_scanning_list_alert_insta, array
   TYPES response_code_scanning_list_01 TYPE STANDARD TABLE OF code_scanning_alert_instance WITH DEFAULT KEY.
 
 * Component schema: response_code_scanning_list_recent_anal, array
@@ -7364,26 +7389,6 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE code_of_conduct
     RAISING cx_static_check.
 
-* POST - "Create a content attachment"
-* Operation id: apps/create-content-attachment
-* Parameter: content_reference_id, required, path
-* Response: 200
-*     application/json, #/components/schemas/content-reference-attachment
-* Response: 304
-* Response: 403
-* Response: 404
-* Response: 410
-* Response: 415
-* Response: 422
-* Body ref: #/components/schemas/bodyapps_create_content_attach
-  METHODS apps_create_content_attachment
-    IMPORTING
-      content_reference_id TYPE i
-      body TYPE bodyapps_create_content_attach
-    RETURNING
-      VALUE(return_data) TYPE content_reference_attachment
-    RAISING cx_static_check.
-
 * GET - "Get emojis"
 * Operation id: emojis/get
 * Response: 200
@@ -7754,7 +7759,7 @@ INTERFACE zif_githubcom PUBLIC.
     RAISING cx_static_check.
 
 * GET - "Get the audit log for an enterprise"
-* Operation id: audit-log/get-audit-log
+* Operation id: enterprise-admin/get-audit-log
 * Parameter: enterprise, required, path
 * Parameter: phrase, optional, query
 * Parameter: include, optional, query
@@ -7764,8 +7769,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: page, optional, query
 * Parameter: per_page, optional, query
 * Response: 200
-*     application/json, #/components/schemas/response_audit_log_get_audit_log
-  METHODS audit_log_get_audit_log
+*     application/json, #/components/schemas/response_enterprise_admin_get_audit_log
+  METHODS enterprise_admin_get_audit_log
     IMPORTING
       enterprise TYPE string
       phrase TYPE string OPTIONAL
@@ -7776,7 +7781,7 @@ INTERFACE zif_githubcom PUBLIC.
       page TYPE i DEFAULT 1
       per_page TYPE i DEFAULT 30
     RETURNING
-      VALUE(return_data) TYPE response_audit_log_get_audit_l
+      VALUE(return_data) TYPE response_enterprise_admin_get_
     RAISING cx_static_check.
 
 * GET - "Get GitHub Actions billing for an enterprise"
@@ -8591,11 +8596,11 @@ INTERFACE zif_githubcom PUBLIC.
     RAISING cx_static_check.
 
 * GET - "Get GitHub Actions permissions for an organization"
-* Operation id: actions/actions-policies/get-github-actions-permissions-organization
+* Operation id: actions/get-github-actions-permissions-organization
 * Parameter: org, required, path
 * Response: 200
 *     application/json, #/components/schemas/actions-organization-permissions
-  METHODS actions_actions_policies_get_g
+  METHODS actions_get_github_actions_per
     IMPORTING
       org TYPE string
     RETURNING
@@ -11089,6 +11094,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Response: 200
 *     application/json, #/components/schemas/full-repository
+* Response: 307
 * Response: 403
 * Response: 404
 * Response: 422
@@ -11107,6 +11113,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Response: 204
+* Response: 307
 * Response: 403
 *     application/json, #/components/schemas/response_repos_delete
 * Response: 404
@@ -11215,7 +11222,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: repo, required, path
 * Response: 200
 *     application/json, #/components/schemas/actions-repository-permissions
-  METHODS actions_get_github_actions_per
+  METHODS actions_get_github_actions_p01
     IMPORTING
       owner TYPE string
       repo TYPE string
@@ -11421,6 +11428,24 @@ INTERFACE zif_githubcom PUBLIC.
       run_id TYPE i
     RETURNING
       VALUE(return_data) TYPE response_actions_get_reviews_f
+    RAISING cx_static_check.
+
+* POST - "Approve a workflow run for a fork pull request"
+* Operation id: actions/approve-workflow-run
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: run_id, required, path
+* Response: 201
+*     application/json, #/components/schemas/empty-object
+* Response: 403
+* Response: 404
+  METHODS actions_approve_workflow_run
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      run_id TYPE i
+    RETURNING
+      VALUE(return_data) TYPE empty_object
     RAISING cx_static_check.
 
 * GET - "List workflow run artifacts"
@@ -12691,7 +12716,7 @@ INTERFACE zif_githubcom PUBLIC.
     RAISING cx_static_check.
 
 * GET - "List instances of a code scanning alert"
-* Operation id: code-scanning/list-alerts-instances
+* Operation id: code-scanning/list-alert-instances
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Parameter: alert_number, required, path
@@ -12699,11 +12724,11 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: per_page, optional, query
 * Parameter: ref, optional, query
 * Response: 200
-*     application/json, #/components/schemas/response_code_scanning_list_alerts_inst
+*     application/json, #/components/schemas/response_code_scanning_list_alert_insta
 * Response: 403
 * Response: 404
 * Response: 503
-  METHODS code_scanning_list_alerts_inst
+  METHODS code_scanning_list_alert_insta
     IMPORTING
       owner TYPE string
       repo TYPE string
@@ -13319,6 +13344,30 @@ INTERFACE zif_githubcom PUBLIC.
       per_page TYPE i DEFAULT 30
     RETURNING
       VALUE(return_data) TYPE commit_comparison
+    RAISING cx_static_check.
+
+* POST - "Create a content attachment"
+* Operation id: apps/create-content-attachment
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: content_reference_id, required, path
+* Response: 200
+*     application/json, #/components/schemas/content-reference-attachment
+* Response: 304
+* Response: 403
+* Response: 404
+* Response: 410
+* Response: 415
+* Response: 422
+* Body ref: #/components/schemas/bodyapps_create_content_attach
+  METHODS apps_create_content_attachment
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      content_reference_id TYPE i
+      body TYPE bodyapps_create_content_attach
+    RETURNING
+      VALUE(return_data) TYPE content_reference_attachment
     RAISING cx_static_check.
 
 * GET - "Get repository content"
@@ -16324,6 +16373,28 @@ INTERFACE zif_githubcom PUBLIC.
       release_id TYPE i
     RETURNING
       VALUE(return_data) TYPE release_asset
+    RAISING cx_static_check.
+
+* POST - "Create reaction for a release"
+* Operation id: reactions/create-for-release
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: release_id, required, path
+* Response: 200
+*     application/json, #/components/schemas/reaction
+* Response: 201
+*     application/json, #/components/schemas/reaction
+* Response: 415
+* Response: 422
+* Body ref: #/components/schemas/bodyreactions_create_for_relea
+  METHODS reactions_create_for_release
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      release_id TYPE i
+      body TYPE bodyreactions_create_for_relea
+    RETURNING
+      VALUE(return_data) TYPE reaction
     RAISING cx_static_check.
 
 * GET - "List secret scanning alerts for a repository"
