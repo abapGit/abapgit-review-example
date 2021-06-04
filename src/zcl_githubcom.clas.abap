@@ -88,10 +88,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(code_of_conduct) TYPE zif_githubcom=>code_of_conduct
       RAISING cx_static_check.
-    METHODS parse_content_reference_attach
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(content_reference_attachment) TYPE zif_githubcom=>content_reference_attachment
-      RAISING cx_static_check.
     METHODS parse_enabled_organizations
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(enabled_organizations) TYPE zif_githubcom=>enabled_organizations
@@ -704,6 +700,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(commit_comparison) TYPE zif_githubcom=>commit_comparison
       RAISING cx_static_check.
+    METHODS parse_content_reference_attach
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(content_reference_attachment) TYPE zif_githubcom=>content_reference_attachment
+      RAISING cx_static_check.
     METHODS parse_content_tree
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(content_tree) TYPE zif_githubcom=>content_tree
@@ -1040,6 +1040,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(starred_repository) TYPE zif_githubcom=>starred_repository
       RAISING cx_static_check.
+    METHODS parse_personal_access_token
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(personal_access_token) TYPE zif_githubcom=>personal_access_token
+      RAISING cx_static_check.
     METHODS parse_hovercard
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(hovercard) TYPE zif_githubcom=>hovercard
@@ -1078,10 +1082,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       RAISING cx_static_check.
     METHODS json_apps_scope_token
       IMPORTING data TYPE zif_githubcom=>bodyapps_scope_token
-      RETURNING VALUE(json) TYPE string
-      RAISING cx_static_check.
-    METHODS json_apps_create_content_attac
-      IMPORTING data TYPE zif_githubcom=>bodyapps_create_content_attach
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
     METHODS json_enterprise_admin_set_gith
@@ -1456,6 +1456,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING data TYPE zif_githubcom=>bodyrepos_create_commit_commen
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
+    METHODS json_apps_create_content_attac
+      IMPORTING data TYPE zif_githubcom=>bodyapps_create_content_attach
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
     METHODS json_repos_create_or_update_fi
       IMPORTING data TYPE zif_githubcom=>bodyrepos_create_or_update_fil
       RETURNING VALUE(json) TYPE string
@@ -1740,6 +1744,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING data TYPE zif_githubcom=>bodyrepos_delete_release
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
+    METHODS json_reactions_create_for_rele
+      IMPORTING data TYPE zif_githubcom=>bodyreactions_create_for_relea
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
     METHODS json_secret_scanning_update_al
       IMPORTING data TYPE zif_githubcom=>bodysecret_scanning_update_ale
       RETURNING VALUE(json) TYPE string
@@ -1896,9 +1904,9 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_enterprise_admin_li05) TYPE zif_githubcom=>response_enterprise_admin_li05
       RAISING cx_static_check.
-    METHODS parse_audit_log_get_audit_log
+    METHODS parse_enterprise_admin_get_aud
       IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(response_audit_log_get_audit_l) TYPE zif_githubcom=>response_audit_log_get_audit_l
+      RETURNING VALUE(response_enterprise_admin_get_) TYPE zif_githubcom=>response_enterprise_admin_get_
       RAISING cx_static_check.
     METHODS parse_activity_list_public_eve
       IMPORTING iv_prefix TYPE string
@@ -3238,13 +3246,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     code_of_conduct-html_url = mo_json->value_string( iv_prefix && '/html_url' ).
   ENDMETHOD.
 
-  METHOD parse_content_reference_attach.
-    content_reference_attachment-id = mo_json->value_string( iv_prefix && '/id' ).
-    content_reference_attachment-title = mo_json->value_string( iv_prefix && '/title' ).
-    content_reference_attachment-body = mo_json->value_string( iv_prefix && '/body' ).
-    content_reference_attachment-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
-  ENDMETHOD.
-
   METHOD parse_enabled_organizations.
 * todo, handle type string
   ENDMETHOD.
@@ -3334,6 +3335,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     audit_log_event-content_type = mo_json->value_string( iv_prefix && '/content_type' ).
     audit_log_event-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
     audit_log_event-deploy_key_fingerprint = mo_json->value_string( iv_prefix && '/deploy_key_fingerprint' ).
+    audit_log_event-_document_id = mo_json->value_string( iv_prefix && '/_document_id' ).
     audit_log_event-emoji = mo_json->value_string( iv_prefix && '/emoji' ).
 * todo, array, events
 * todo, array, events_were
@@ -5212,6 +5214,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     community_profile-description = mo_json->value_string( iv_prefix && '/description' ).
     community_profile-documentation = mo_json->value_string( iv_prefix && '/documentation' ).
     community_profile-files-code_of_conduct = mo_json->value_string( iv_prefix && '/files/code_of_conduct' ).
+    community_profile-files-code_of_conduct_file = mo_json->value_string( iv_prefix && '/files/code_of_conduct_file' ).
     community_profile-files-license = mo_json->value_string( iv_prefix && '/files/license' ).
     community_profile-files-contributing = mo_json->value_string( iv_prefix && '/files/contributing' ).
     community_profile-files-readme = mo_json->value_string( iv_prefix && '/files/readme' ).
@@ -5249,6 +5252,13 @@ CLASS zcl_githubcom IMPLEMENTATION.
     commit_comparison-total_commits = mo_json->value_string( iv_prefix && '/total_commits' ).
 * todo, array, commits
 * todo, array, files
+  ENDMETHOD.
+
+  METHOD parse_content_reference_attach.
+    content_reference_attachment-id = mo_json->value_string( iv_prefix && '/id' ).
+    content_reference_attachment-title = mo_json->value_string( iv_prefix && '/title' ).
+    content_reference_attachment-body = mo_json->value_string( iv_prefix && '/body' ).
+    content_reference_attachment-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
   ENDMETHOD.
 
   METHOD parse_content_tree.
@@ -6198,6 +6208,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     release-body_html = mo_json->value_string( iv_prefix && '/body_html' ).
     release-body_text = mo_json->value_string( iv_prefix && '/body_text' ).
     release-discussion_url = mo_json->value_string( iv_prefix && '/discussion_url' ).
+    release-reactions = parse_reaction_rollup( iv_prefix ).
   ENDMETHOD.
 
   METHOD parse_secret_scanning_alert_st.
@@ -6764,6 +6775,22 @@ CLASS zcl_githubcom IMPLEMENTATION.
     starred_repository-repo = parse_repository( iv_prefix ).
   ENDMETHOD.
 
+  METHOD parse_personal_access_token.
+    personal_access_token-id = mo_json->value_string( iv_prefix && '/id' ).
+    personal_access_token-url = mo_json->value_string( iv_prefix && '/url' ).
+* todo, array, scopes
+    personal_access_token-token = mo_json->value_string( iv_prefix && '/token' ).
+    personal_access_token-token_last_eight = mo_json->value_string( iv_prefix && '/token_last_eight' ).
+    personal_access_token-hashed_token = mo_json->value_string( iv_prefix && '/hashed_token' ).
+    personal_access_token-note = mo_json->value_string( iv_prefix && '/note' ).
+    personal_access_token-note_url = mo_json->value_string( iv_prefix && '/note_url' ).
+    personal_access_token-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
+    personal_access_token-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
+    personal_access_token-fingerprint = mo_json->value_string( iv_prefix && '/fingerprint' ).
+    personal_access_token-user = mo_json->value_string( iv_prefix && '/user' ).
+    personal_access_token-expiration = mo_json->value_string( iv_prefix && '/expiration' ).
+  ENDMETHOD.
+
   METHOD parse_hovercard.
 * todo, array, contexts
   ENDMETHOD.
@@ -6873,7 +6900,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD parse_audit_log_get_audit_log.
+  METHOD parse_enterprise_admin_get_aud.
     DATA lt_members TYPE string_table.
     DATA lv_member LIKE LINE OF lt_members.
     DATA audit_log_event TYPE zif_githubcom=>audit_log_event.
@@ -6881,7 +6908,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     LOOP AT lt_members INTO lv_member.
       CLEAR audit_log_event.
       audit_log_event = parse_audit_log_event( iv_prefix && '/' && lv_member ).
-      APPEND audit_log_event TO response_audit_log_get_audit_l.
+      APPEND audit_log_event TO response_enterprise_admin_get_.
     ENDLOOP.
   ENDMETHOD.
 
@@ -9221,14 +9248,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '}'.
   ENDMETHOD.
 
-  METHOD json_apps_create_content_attac.
-    json = json && '{'.
-    json = json && |"title": "{ data-title }",|.
-    json = json && |"body": "{ data-body }",|.
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
-  ENDMETHOD.
-
   METHOD json_enterprise_admin_set_gith.
     json = json && '{'.
 *  json = json && '"enabled_organizations":' not simple
@@ -10353,6 +10372,14 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '}'.
   ENDMETHOD.
 
+  METHOD json_apps_create_content_attac.
+    json = json && '{'.
+    json = json && |"title": "{ data-title }",|.
+    json = json && |"body": "{ data-body }",|.
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
   METHOD json_repos_create_or_update_fi.
     json = json && '{'.
     json = json && |"message": "{ data-message }",|.
@@ -11107,6 +11134,13 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '}'.
   ENDMETHOD.
 
+  METHOD json_reactions_create_for_rele.
+    json = json && '{'.
+    json = json && |"content": "{ data-content }",|.
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
   METHOD json_secret_scanning_update_al.
     json = json && '{'.
 *  json = json && '"state":' not simple
@@ -11749,22 +11783,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_code_of_conduct( '' ).
   ENDMETHOD.
 
-  METHOD zif_githubcom~apps_create_content_attachment.
-    DATA lv_code TYPE i.
-    DATA lv_temp TYPE string.
-    DATA lv_uri TYPE string VALUE '/content_references/{content_reference_id}/attachments'.
-    lv_temp = content_reference_id.
-    CONDENSE lv_temp.
-    REPLACE ALL OCCURRENCES OF '{content_reference_id}' IN lv_uri WITH lv_temp.
-    mi_client->request->set_method( 'POST' ).
-    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_apps_create_content_attac( body ) ).
-    lv_code = send_receive( ).
-    WRITE / lv_code.
-    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_content_reference_attach( '' ).
-  ENDMETHOD.
-
   METHOD zif_githubcom~emojis_get.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -12243,7 +12261,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, handle more responses
   ENDMETHOD.
 
-  METHOD zif_githubcom~audit_log_get_audit_log.
+  METHOD zif_githubcom~enterprise_admin_get_audit_log.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
     DATA lv_uri TYPE string VALUE '/enterprises/{enterprise}/audit-log'.
@@ -12278,7 +12296,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_audit_log_get_audit_log( '' ).
+    return_data = parse_enterprise_admin_get_aud( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~billing_get_github_actions_bil.
@@ -13230,7 +13248,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_organization_full( '' ).
   ENDMETHOD.
 
-  METHOD zif_githubcom~actions_actions_policies_get_g.
+  METHOD zif_githubcom~actions_get_github_actions_per.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
     DATA lv_uri TYPE string VALUE '/orgs/{org}/actions/permissions'.
@@ -16220,7 +16238,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, handle more responses
   ENDMETHOD.
 
-  METHOD zif_githubcom~actions_get_github_actions_per.
+  METHOD zif_githubcom~actions_get_github_actions_p01.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
     DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/actions/permissions'.
@@ -16463,6 +16481,23 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
     return_data = parse_actions_get_reviews_for_( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_approve_workflow_run.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/actions/runs/{run_id}/approve'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    lv_temp = run_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{run_id}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_empty_object( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~actions_list_workflow_run_arti.
@@ -17736,7 +17771,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_code_scanning_alert( '' ).
   ENDMETHOD.
 
-  METHOD zif_githubcom~code_scanning_list_alerts_inst.
+  METHOD zif_githubcom~code_scanning_list_alert_insta.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
     DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances'.
@@ -18419,6 +18454,24 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
     return_data = parse_commit_comparison( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~apps_create_content_attachment.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/content_references/{content_reference_id}/attachments'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    lv_temp = content_reference_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{content_reference_id}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_apps_create_content_attac( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_content_reference_attach( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~repos_get_content.
@@ -21530,6 +21583,24 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
     return_data = parse_release_asset( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~reactions_create_for_release.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/releases/{release_id}/reactions'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    lv_temp = release_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{release_id}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_reactions_create_for_rele( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_reaction( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~secret_scanning_list_alerts_fo.
