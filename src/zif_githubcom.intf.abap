@@ -1828,6 +1828,7 @@ INTERFACE zif_githubcom PUBLIC.
            watchers TYPE i,
            anonymous_access_enabled TYPE abap_bool,
            code_of_conduct TYPE code_of_conduct_simple,
+           has_advanced_security TYPE abap_bool,
          END OF full_repository.
 
 * Component schema: artifact, object
@@ -4584,7 +4585,7 @@ INTERFACE zif_githubcom PUBLIC.
            created_at TYPE string,
            fingerprint TYPE string,
            user TYPE string,
-           expiration TYPE string,
+           expires_at TYPE string,
          END OF personal_access_token.
 
 * Component schema: hovercard, object
