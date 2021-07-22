@@ -11964,6 +11964,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: status, optional, query
 * Parameter: per_page, optional, query
 * Parameter: page, optional, query
+* Parameter: created, optional, query
 * Response: 200
 *     application/json, #/components/schemas/response_actions_list_workflow_runs_for
   METHODS actions_list_workflow_runs_for
@@ -11976,6 +11977,7 @@ INTERFACE zif_githubcom PUBLIC.
       status TYPE string OPTIONAL
       per_page TYPE i DEFAULT 30
       page TYPE i DEFAULT 1
+      created TYPE string OPTIONAL
     RETURNING
       VALUE(return_data) TYPE response_actions_list_workflow
     RAISING cx_static_check.
@@ -12359,6 +12361,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: status, optional, query
 * Parameter: per_page, optional, query
 * Parameter: page, optional, query
+* Parameter: created, optional, query
 * Response: 200
 *     application/json, #/components/schemas/response_actions_list_workflow_runs
   METHODS actions_list_workflow_runs
@@ -12372,6 +12375,7 @@ INTERFACE zif_githubcom PUBLIC.
       status TYPE string OPTIONAL
       per_page TYPE i DEFAULT 30
       page TYPE i DEFAULT 1
+      created TYPE string OPTIONAL
     RETURNING
       VALUE(return_data) TYPE response_actions_list_workfl02
     RAISING cx_static_check.
