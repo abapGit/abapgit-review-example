@@ -2209,6 +2209,13 @@ INTERFACE zif_githubcom PUBLIC.
            billable TYPE subworkflow_usage_billable,
          END OF workflow_usage.
 
+* Component schema: autolink, object
+  TYPES: BEGIN OF autolink,
+           id TYPE i,
+           key_prefix TYPE string,
+           url_template TYPE string,
+         END OF autolink.
+
 * Component schema: protected-branch-admin-enforced, object
   TYPES: BEGIN OF protected_branch_admin_enforce,
            url TYPE string,
@@ -4470,6 +4477,7 @@ INTERFACE zif_githubcom PUBLIC.
            assets TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            body_html TYPE string,
            body_text TYPE string,
+           mentions_count TYPE i,
            discussion_url TYPE string,
            reactions TYPE reaction_rollup,
          END OF release.
@@ -5683,6 +5691,12 @@ INTERFACE zif_githubcom PUBLIC.
            ref TYPE string,
            inputs TYPE subbodyactions_create_workflow,
          END OF bodyactions_create_workflow_di.
+
+* Component schema: bodyrepos_create_autolink, object
+  TYPES: BEGIN OF bodyrepos_create_autolink,
+           key_prefix TYPE string,
+           url_template TYPE string,
+         END OF bodyrepos_create_autolink.
 
 * Component schema: bodyrepos_update_branch_protec, object
   TYPES: BEGIN OF subbodyrepos_update_branch_p02,
@@ -7163,6 +7177,9 @@ INTERFACE zif_githubcom PUBLIC.
 
 * Component schema: response_issues_list_assignees, array
   TYPES response_issues_list_assignees TYPE STANDARD TABLE OF simple_user WITH DEFAULT KEY.
+
+* Component schema: response_repos_list_autolinks, array
+  TYPES response_repos_list_autolinks TYPE STANDARD TABLE OF autolink WITH DEFAULT KEY.
 
 * Component schema: response_repos_list_branches, array
   TYPES response_repos_list_branches TYPE STANDARD TABLE OF short_branch WITH DEFAULT KEY.
@@ -12428,6 +12445,70 @@ INTERFACE zif_githubcom PUBLIC.
       assignee TYPE string
       owner TYPE string
       repo TYPE string
+    RAISING cx_static_check.
+
+* GET - "List all autolinks of a repository"
+* Operation id: repos/list-autolinks
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: page, optional, query
+* Response: 200
+*     application/json, #/components/schemas/response_repos_list_autolinks
+  METHODS repos_list_autolinks
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      page TYPE i DEFAULT 1
+    RETURNING
+      VALUE(return_data) TYPE response_repos_list_autolinks
+    RAISING cx_static_check.
+
+* POST - "Create an autolink reference for a repository"
+* Operation id: repos/create-autolink
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Response: 201
+*     application/json, #/components/schemas/autolink
+* Response: 422
+* Body ref: #/components/schemas/bodyrepos_create_autolink
+  METHODS repos_create_autolink
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      body TYPE bodyrepos_create_autolink
+    RETURNING
+      VALUE(return_data) TYPE autolink
+    RAISING cx_static_check.
+
+* GET - "Get an autolink reference of a repository"
+* Operation id: repos/get-autolink
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: autolink_id, required, path
+* Response: 200
+*     application/json, #/components/schemas/autolink
+* Response: 404
+  METHODS repos_get_autolink
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      autolink_id TYPE i
+    RETURNING
+      VALUE(return_data) TYPE autolink
+    RAISING cx_static_check.
+
+* DELETE - "Delete an autolink reference from a repository"
+* Operation id: repos/delete-autolink
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: autolink_id, required, path
+* Response: 204
+* Response: 404
+  METHODS repos_delete_autolink
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      autolink_id TYPE i
     RAISING cx_static_check.
 
 * PUT - "Enable automated security fixes"
