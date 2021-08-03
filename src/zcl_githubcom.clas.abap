@@ -460,6 +460,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(workflow_usage) TYPE zif_githubcom=>workflow_usage
       RAISING cx_static_check.
+    METHODS parse_autolink
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(autolink) TYPE zif_githubcom=>autolink
+      RAISING cx_static_check.
     METHODS parse_protected_branch_admin_e
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(protected_branch_admin_enforce) TYPE zif_githubcom=>protected_branch_admin_enforce
@@ -1484,6 +1488,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING data TYPE zif_githubcom=>bodyactions_create_workflow_di
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
+    METHODS json_repos_create_autolink
+      IMPORTING data TYPE zif_githubcom=>bodyrepos_create_autolink
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
     METHODS json_repos_update_branch_prote
       IMPORTING data TYPE zif_githubcom=>bodyrepos_update_branch_protec
       RETURNING VALUE(json) TYPE string
@@ -2367,6 +2375,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_issues_list_assignees
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_issues_list_assignees) TYPE zif_githubcom=>response_issues_list_assignees
+      RAISING cx_static_check.
+    METHODS parse_repos_list_autolinks
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_repos_list_autolinks) TYPE zif_githubcom=>response_repos_list_autolinks
       RAISING cx_static_check.
     METHODS parse_repos_list_branches
       IMPORTING iv_prefix TYPE string
@@ -4839,6 +4851,12 @@ CLASS zcl_githubcom IMPLEMENTATION.
     workflow_usage-billable-windows-total_ms = mo_json->value_string( iv_prefix && '/billable/WINDOWS/total_ms' ).
   ENDMETHOD.
 
+  METHOD parse_autolink.
+    autolink-id = mo_json->value_string( iv_prefix && '/id' ).
+    autolink-key_prefix = mo_json->value_string( iv_prefix && '/key_prefix' ).
+    autolink-url_template = mo_json->value_string( iv_prefix && '/url_template' ).
+  ENDMETHOD.
+
   METHOD parse_protected_branch_admin_e.
     protected_branch_admin_enforce-url = mo_json->value_string( iv_prefix && '/url' ).
     protected_branch_admin_enforce-enabled = mo_json->value_boolean( iv_prefix && '/enabled' ).
@@ -6742,6 +6760,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, array, assets
     release-body_html = mo_json->value_string( iv_prefix && '/body_html' ).
     release-body_text = mo_json->value_string( iv_prefix && '/body_text' ).
+    release-mentions_count = mo_json->value_string( iv_prefix && '/mentions_count' ).
     release-discussion_url = mo_json->value_string( iv_prefix && '/discussion_url' ).
     release-reactions = parse_reaction_rollup( iv_prefix ).
   ENDMETHOD.
@@ -8199,6 +8218,18 @@ CLASS zcl_githubcom IMPLEMENTATION.
       CLEAR simple_user.
       simple_user = parse_simple_user( iv_prefix && '/' && lv_member ).
       APPEND simple_user TO response_issues_list_assignees.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD parse_repos_list_autolinks.
+    DATA lt_members TYPE string_table.
+    DATA lv_member LIKE LINE OF lt_members.
+    DATA autolink TYPE zif_githubcom=>autolink.
+    lt_members = mo_json->members( iv_prefix && '/' ).
+    LOOP AT lt_members INTO lv_member.
+      CLEAR autolink.
+      autolink = parse_autolink( iv_prefix && '/' && lv_member ).
+      APPEND autolink TO response_repos_list_autolinks.
     ENDLOOP.
   ENDMETHOD.
 
@@ -10635,6 +10666,14 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '{'.
     json = json && |"ref": "{ data-ref }",|.
 *  json = json && '"inputs":' not simple
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
+  METHOD json_repos_create_autolink.
+    json = json && '{'.
+    json = json && |"key_prefix": "{ data-key_prefix }",|.
+    json = json && |"url_template": "{ data-url_template }",|.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -17570,6 +17609,74 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
     REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
     mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
+  ENDMETHOD.
+
+  METHOD zif_githubcom~repos_list_autolinks.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/autolinks'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    lv_temp = page.
+    CONDENSE lv_temp.
+    IF page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_repos_list_autolinks( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~repos_create_autolink.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/autolinks'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_repos_create_autolink( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_autolink( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~repos_get_autolink.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/autolinks/{autolink_id}'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    lv_temp = autolink_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{autolink_id}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_autolink( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~repos_delete_autolink.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/autolinks/{autolink_id}'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    lv_temp = autolink_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{autolink_id}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'DELETE' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
     WRITE / lv_code.
