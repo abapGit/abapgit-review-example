@@ -3165,7 +3165,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     repository-permissions-triage = mo_json->value_boolean( iv_prefix && '/permissions/triage' ).
     repository-permissions-push = mo_json->value_boolean( iv_prefix && '/permissions/push' ).
     repository-permissions-maintain = mo_json->value_boolean( iv_prefix && '/permissions/maintain' ).
-    repository-owner = mo_json->value_string( iv_prefix && '/owner' ).
+    repository-owner = parse_simple_user( iv_prefix ).
     repository-private = mo_json->value_boolean( iv_prefix && '/private' ).
     repository-html_url = mo_json->value_string( iv_prefix && '/html_url' ).
     repository-description = mo_json->value_string( iv_prefix && '/description' ).
@@ -3329,12 +3329,14 @@ CLASS zcl_githubcom IMPLEMENTATION.
     repository-template_repository-allow_rebase_merge = mo_json->value_boolean( iv_prefix && '/template_repository/allow_rebase_merge' ).
     repository-template_repository-temp_clone_token = mo_json->value_string( iv_prefix && '/template_repository/temp_clone_token' ).
     repository-template_repository-allow_squash_merge = mo_json->value_boolean( iv_prefix && '/template_repository/allow_squash_merge' ).
+    repository-template_repository-allow_auto_merge = mo_json->value_boolean( iv_prefix && '/template_repository/allow_auto_merge' ).
     repository-template_repository-delete_branch_on_merge = mo_json->value_boolean( iv_prefix && '/template_repository/delete_branch_on_merge' ).
     repository-template_repository-allow_merge_commit = mo_json->value_boolean( iv_prefix && '/template_repository/allow_merge_commit' ).
     repository-template_repository-subscribers_count = mo_json->value_string( iv_prefix && '/template_repository/subscribers_count' ).
     repository-template_repository-network_count = mo_json->value_string( iv_prefix && '/template_repository/network_count' ).
     repository-temp_clone_token = mo_json->value_string( iv_prefix && '/temp_clone_token' ).
     repository-allow_squash_merge = mo_json->value_boolean( iv_prefix && '/allow_squash_merge' ).
+    repository-allow_auto_merge = mo_json->value_boolean( iv_prefix && '/allow_auto_merge' ).
     repository-delete_branch_on_merge = mo_json->value_boolean( iv_prefix && '/delete_branch_on_merge' ).
     repository-allow_merge_commit = mo_json->value_boolean( iv_prefix && '/allow_merge_commit' ).
     repository-subscribers_count = mo_json->value_string( iv_prefix && '/subscribers_count' ).
@@ -3950,6 +3952,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     minimal_repository-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
     minimal_repository-name = mo_json->value_string( iv_prefix && '/name' ).
     minimal_repository-full_name = mo_json->value_string( iv_prefix && '/full_name' ).
+    minimal_repository-owner = parse_simple_user( iv_prefix ).
     minimal_repository-private = mo_json->value_boolean( iv_prefix && '/private' ).
     minimal_repository-html_url = mo_json->value_string( iv_prefix && '/html_url' ).
     minimal_repository-description = mo_json->value_string( iv_prefix && '/description' ).
@@ -4511,6 +4514,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     team_repository-allow_rebase_merge = mo_json->value_boolean( iv_prefix && '/allow_rebase_merge' ).
     team_repository-temp_clone_token = mo_json->value_string( iv_prefix && '/temp_clone_token' ).
     team_repository-allow_squash_merge = mo_json->value_boolean( iv_prefix && '/allow_squash_merge' ).
+    team_repository-allow_auto_merge = mo_json->value_boolean( iv_prefix && '/allow_auto_merge' ).
     team_repository-delete_branch_on_merge = mo_json->value_boolean( iv_prefix && '/delete_branch_on_merge' ).
     team_repository-allow_merge_commit = mo_json->value_boolean( iv_prefix && '/allow_merge_commit' ).
     team_repository-subscribers_count = mo_json->value_string( iv_prefix && '/subscribers_count' ).
@@ -4655,6 +4659,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     full_repository-allow_rebase_merge = mo_json->value_boolean( iv_prefix && '/allow_rebase_merge' ).
     full_repository-temp_clone_token = mo_json->value_string( iv_prefix && '/temp_clone_token' ).
     full_repository-allow_squash_merge = mo_json->value_boolean( iv_prefix && '/allow_squash_merge' ).
+    full_repository-allow_auto_merge = mo_json->value_boolean( iv_prefix && '/allow_auto_merge' ).
     full_repository-delete_branch_on_merge = mo_json->value_boolean( iv_prefix && '/delete_branch_on_merge' ).
     full_repository-allow_merge_commit = mo_json->value_boolean( iv_prefix && '/allow_merge_commit' ).
     full_repository-subscribers_count = mo_json->value_string( iv_prefix && '/subscribers_count' ).
@@ -7118,6 +7123,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     repo_search_result_item-allow_merge_commit = mo_json->value_boolean( iv_prefix && '/allow_merge_commit' ).
     repo_search_result_item-allow_squash_merge = mo_json->value_boolean( iv_prefix && '/allow_squash_merge' ).
     repo_search_result_item-allow_rebase_merge = mo_json->value_boolean( iv_prefix && '/allow_rebase_merge' ).
+    repo_search_result_item-allow_auto_merge = mo_json->value_boolean( iv_prefix && '/allow_auto_merge' ).
     repo_search_result_item-delete_branch_on_merge = mo_json->value_boolean( iv_prefix && '/delete_branch_on_merge' ).
   ENDMETHOD.
 
@@ -10236,6 +10242,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ELSEIF data-allow_rebase_merge = abap_false.
       json = json && |"allow_rebase_merge": false,|.
     ENDIF.
+    IF data-allow_auto_merge = abap_true.
+      json = json && |"allow_auto_merge": true,|.
+    ELSEIF data-allow_auto_merge = abap_false.
+      json = json && |"allow_auto_merge": false,|.
+    ENDIF.
     IF data-delete_branch_on_merge = abap_true.
       json = json && |"delete_branch_on_merge": true,|.
     ELSEIF data-delete_branch_on_merge = abap_false.
@@ -10553,6 +10564,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ELSEIF data-allow_rebase_merge = abap_false.
       json = json && |"allow_rebase_merge": false,|.
     ENDIF.
+    IF data-allow_auto_merge = abap_true.
+      json = json && |"allow_auto_merge": true,|.
+    ELSEIF data-allow_auto_merge = abap_false.
+      json = json && |"allow_auto_merge": false,|.
+    ENDIF.
     IF data-delete_branch_on_merge = abap_true.
       json = json && |"delete_branch_on_merge": true,|.
     ELSEIF data-delete_branch_on_merge = abap_false.
@@ -10614,6 +10630,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
       json = json && |"allow_rebase_merge": true,|.
     ELSEIF data-allow_rebase_merge = abap_false.
       json = json && |"allow_rebase_merge": false,|.
+    ENDIF.
+    IF data-allow_auto_merge = abap_true.
+      json = json && |"allow_auto_merge": true,|.
+    ELSEIF data-allow_auto_merge = abap_false.
+      json = json && |"allow_auto_merge": false,|.
     ENDIF.
     IF data-delete_branch_on_merge = abap_true.
       json = json && |"delete_branch_on_merge": true,|.
@@ -12048,6 +12069,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
       json = json && |"allow_rebase_merge": true,|.
     ELSEIF data-allow_rebase_merge = abap_false.
       json = json && |"allow_rebase_merge": false,|.
+    ENDIF.
+    IF data-allow_auto_merge = abap_true.
+      json = json && |"allow_auto_merge": true,|.
+    ELSEIF data-allow_auto_merge = abap_false.
+      json = json && |"allow_auto_merge": false,|.
     ENDIF.
     IF data-delete_branch_on_merge = abap_true.
       json = json && |"delete_branch_on_merge": true,|.
