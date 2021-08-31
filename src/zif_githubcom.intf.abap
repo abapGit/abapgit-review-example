@@ -152,6 +152,7 @@ INTERFACE zif_githubcom PUBLIC.
            action TYPE string,
            installation_id TYPE i,
            repository_id TYPE i,
+           url TYPE string,
            request TYPE subhook_delivery_request,
            response TYPE subhook_delivery_response,
          END OF hook_delivery.
@@ -1590,6 +1591,39 @@ INTERFACE zif_githubcom PUBLIC.
            private TYPE abap_bool,
          END OF project.
 
+* Component schema: alert-number, integer
+  TYPES alert_number TYPE i.
+
+* Component schema: alert-created-at, string
+  TYPES alert_created_at TYPE string.
+
+* Component schema: alert-url, string
+  TYPES alert_url TYPE string.
+
+* Component schema: alert-html-url, string
+  TYPES alert_html_url TYPE string.
+
+* Component schema: secret-scanning-alert-state, string
+  TYPES secret_scanning_alert_state TYPE string.
+
+* Component schema: secret-scanning-alert-resolution, string
+  TYPES secret_scanning_alert_resoluti TYPE string.
+
+* Component schema: organization-secret-scanning-alert, object
+  TYPES: BEGIN OF organization_secret_scanning_a,
+           number TYPE alert_number,
+           created_at TYPE alert_created_at,
+           url TYPE alert_url,
+           html_url TYPE alert_html_url,
+           state TYPE secret_scanning_alert_state,
+           resolution TYPE secret_scanning_alert_resoluti,
+           resolved_at TYPE string,
+           resolved_by TYPE simple_user,
+           secret_type TYPE string,
+           secret TYPE string,
+           repository TYPE minimal_repository,
+         END OF organization_secret_scanning_a.
+
 * Component schema: group-mapping, object
   TYPES: BEGIN OF group_mapping,
            groups TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
@@ -2531,18 +2565,6 @@ INTERFACE zif_githubcom PUBLIC.
 
 * Component schema: code-scanning-alert-state, string
   TYPES code_scanning_alert_state TYPE string.
-
-* Component schema: alert-number, integer
-  TYPES alert_number TYPE i.
-
-* Component schema: alert-created-at, string
-  TYPES alert_created_at TYPE string.
-
-* Component schema: alert-url, string
-  TYPES alert_url TYPE string.
-
-* Component schema: alert-html-url, string
-  TYPES alert_html_url TYPE string.
 
 * Component schema: alert-instances-url, string
   TYPES alert_instances_url TYPE string.
@@ -4492,12 +4514,6 @@ INTERFACE zif_githubcom PUBLIC.
            discussion_url TYPE string,
            reactions TYPE reaction_rollup,
          END OF release.
-
-* Component schema: secret-scanning-alert-state, string
-  TYPES secret_scanning_alert_state TYPE string.
-
-* Component schema: secret-scanning-alert-resolution, string
-  TYPES secret_scanning_alert_resoluti TYPE string.
 
 * Component schema: secret-scanning-alert, object
   TYPES: BEGIN OF secret_scanning_alert,
@@ -7001,6 +7017,9 @@ INTERFACE zif_githubcom PUBLIC.
            documentation_url TYPE string,
          END OF response_orgs_remove_outside_c.
 
+* Component schema: response_packages_list_packages_for_org, array
+  TYPES response_packages_list_package TYPE STANDARD TABLE OF package WITH DEFAULT KEY.
+
 * Component schema: response_packages_get_all_package_versi, array
   TYPES response_packages_get_all_pack TYPE STANDARD TABLE OF package_version WITH DEFAULT KEY.
 
@@ -7012,6 +7031,9 @@ INTERFACE zif_githubcom PUBLIC.
 
 * Component schema: response_repos_list_for_org, array
   TYPES response_repos_list_for_org TYPE STANDARD TABLE OF minimal_repository WITH DEFAULT KEY.
+
+* Component schema: response_secret_scanning_list_alerts_fo, array
+  TYPES response_secret_scanning_list_ TYPE STANDARD TABLE OF organization_secret_scanning_a WITH DEFAULT KEY.
 
 * Component schema: response_teams_list, array
   TYPES response_teams_list TYPE STANDARD TABLE OF team WITH DEFAULT KEY.
@@ -7464,8 +7486,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: response_repos_list_release_assets, array
   TYPES response_repos_list_release_as TYPE STANDARD TABLE OF release_asset WITH DEFAULT KEY.
 
-* Component schema: response_secret_scanning_list_alerts_fo, array
-  TYPES response_secret_scanning_list_ TYPE STANDARD TABLE OF secret_scanning_alert WITH DEFAULT KEY.
+* Component schema: response_secret_scanning_list_alerts_01, array
+  TYPES response_secret_scanning_lis01 TYPE STANDARD TABLE OF secret_scanning_alert WITH DEFAULT KEY.
 
 * Component schema: response_repos_get_code_frequency_stats, array
   TYPES response_repos_get_code_freque TYPE STANDARD TABLE OF code_frequency_stat WITH DEFAULT KEY.
@@ -7610,6 +7632,9 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: response_orgs_list_for_authenticated_us, array
   TYPES response_orgs_list_for_authent TYPE STANDARD TABLE OF organization_simple WITH DEFAULT KEY.
 
+* Component schema: response_packages_list_packages_for_aut, array
+  TYPES response_packages_list_packa01 TYPE STANDARD TABLE OF package WITH DEFAULT KEY.
+
 * Component schema: response_packages_get_all_package_ver01, array
   TYPES response_packages_get_all_pa01 TYPE STANDARD TABLE OF package_version WITH DEFAULT KEY.
 
@@ -7630,6 +7655,9 @@ INTERFACE zif_githubcom PUBLIC.
 
 * Component schema: response_teams_list_for_authenticated_u, array
   TYPES response_teams_list_for_authen TYPE STANDARD TABLE OF team_full WITH DEFAULT KEY.
+
+* Component schema: response_packages_list_packages_for_use, array
+  TYPES response_packages_list_packa02 TYPE STANDARD TABLE OF package WITH DEFAULT KEY.
 
 * Component schema: response_users_list, array
   TYPES response_users_list TYPE STANDARD TABLE OF simple_user WITH DEFAULT KEY.
@@ -10375,6 +10403,24 @@ INTERFACE zif_githubcom PUBLIC.
       username TYPE string
     RAISING cx_static_check.
 
+* GET - "List packages for an organization"
+* Operation id: packages/list-packages-for-organization
+* Parameter: package_type, required, query
+* Parameter: org, required, path
+* Parameter: visibility, optional, query
+* Response: 200
+*     application/json, #/components/schemas/response_packages_list_packages_for_org
+* Response: 401
+* Response: 403
+  METHODS packages_list_packages_for_org
+    IMPORTING
+      package_type TYPE string
+      org TYPE string
+      visibility TYPE string OPTIONAL
+    RETURNING
+      VALUE(return_data) TYPE response_packages_list_package
+    RAISING cx_static_check.
+
 * GET - "Get a package for an organization"
 * Operation id: packages/get-package-for-organization
 * Parameter: package_type, required, path
@@ -10629,6 +10675,28 @@ INTERFACE zif_githubcom PUBLIC.
       body TYPE bodyrepos_create_in_org
     RETURNING
       VALUE(return_data) TYPE repository
+    RAISING cx_static_check.
+
+* GET - "Lists secret scanning alerts by organization"
+* Operation id: secret-scanning/list-alerts-for-org
+* Parameter: state, optional, query
+* Parameter: secret_type, optional, query
+* Parameter: org, required, path
+* Parameter: page, optional, query
+* Parameter: per_page, optional, query
+* Response: 200
+*     application/json, #/components/schemas/response_secret_scanning_list_alerts_fo
+* Response: 404
+* Response: 503
+  METHODS secret_scanning_list_alerts_fo
+    IMPORTING
+      state TYPE string OPTIONAL
+      secret_type TYPE string OPTIONAL
+      org TYPE string
+      page TYPE i DEFAULT 1
+      per_page TYPE i DEFAULT 30
+    RETURNING
+      VALUE(return_data) TYPE response_secret_scanning_list_
     RAISING cx_static_check.
 
 * GET - "Get GitHub Actions billing for an organization"
@@ -17163,10 +17231,10 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: page, optional, query
 * Parameter: per_page, optional, query
 * Response: 200
-*     application/json, #/components/schemas/response_secret_scanning_list_alerts_fo
+*     application/json, #/components/schemas/response_secret_scanning_list_alerts_01
 * Response: 404
 * Response: 503
-  METHODS secret_scanning_list_alerts_fo
+  METHODS secret_scanning_list_alerts_01
     IMPORTING
       state TYPE string OPTIONAL
       secret_type TYPE string OPTIONAL
@@ -17175,7 +17243,7 @@ INTERFACE zif_githubcom PUBLIC.
       page TYPE i DEFAULT 1
       per_page TYPE i DEFAULT 30
     RETURNING
-      VALUE(return_data) TYPE response_secret_scanning_list_
+      VALUE(return_data) TYPE response_secret_scanning_lis01
     RAISING cx_static_check.
 
 * GET - "Get a secret scanning alert"
@@ -18846,6 +18914,20 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE response_orgs_list_for_authent
     RAISING cx_static_check.
 
+* GET - "List packages for the authenticated user's namespace"
+* Operation id: packages/list-packages-for-authenticated-user
+* Parameter: package_type, required, query
+* Parameter: visibility, optional, query
+* Response: 200
+*     application/json, #/components/schemas/response_packages_list_packages_for_aut
+  METHODS packages_list_packages_for_aut
+    IMPORTING
+      package_type TYPE string
+      visibility TYPE string OPTIONAL
+    RETURNING
+      VALUE(return_data) TYPE response_packages_list_packa01
+    RAISING cx_static_check.
+
 * GET - "Get a package for the authenticated user"
 * Operation id: packages/get-package-for-authenticated-user
 * Parameter: package_type, required, path
@@ -19192,6 +19274,24 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE response_teams_list_for_authen
     RAISING cx_static_check.
 
+* GET - "List packages for a user"
+* Operation id: packages/list-packages-for-user
+* Parameter: package_type, required, query
+* Parameter: visibility, optional, query
+* Parameter: username, required, path
+* Response: 200
+*     application/json, #/components/schemas/response_packages_list_packages_for_use
+* Response: 401
+* Response: 403
+  METHODS packages_list_packages_for_use
+    IMPORTING
+      package_type TYPE string
+      visibility TYPE string OPTIONAL
+      username TYPE string
+    RETURNING
+      VALUE(return_data) TYPE response_packages_list_packa02
+    RAISING cx_static_check.
+
 * GET - "List users"
 * Operation id: users/list
 * Parameter: since, optional, query
@@ -19426,6 +19526,40 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE package
     RAISING cx_static_check.
 
+* DELETE - "Delete a package for a user"
+* Operation id: packages/delete-package-for-user
+* Parameter: package_type, required, path
+* Parameter: package_name, required, path
+* Parameter: username, required, path
+* Response: 204
+* Response: 401
+* Response: 403
+* Response: 404
+  METHODS packages_delete_package_for_us
+    IMPORTING
+      package_type TYPE string
+      package_name TYPE string
+      username TYPE string
+    RAISING cx_static_check.
+
+* POST - "Restore a package for a user"
+* Operation id: packages/restore-package-for-user
+* Parameter: token, optional, query
+* Parameter: package_type, required, path
+* Parameter: package_name, required, path
+* Parameter: username, required, path
+* Response: 204
+* Response: 401
+* Response: 403
+* Response: 404
+  METHODS packages_restore_package_for_u
+    IMPORTING
+      token TYPE string OPTIONAL
+      package_type TYPE string
+      package_name TYPE string
+      username TYPE string
+    RAISING cx_static_check.
+
 * GET - "Get all package versions for a package owned by a user"
 * Operation id: packages/get-all-package-versions-for-package-owned-by-user
 * Parameter: package_type, required, path
@@ -19461,6 +19595,42 @@ INTERFACE zif_githubcom PUBLIC.
       username TYPE string
     RETURNING
       VALUE(return_data) TYPE package_version
+    RAISING cx_static_check.
+
+* DELETE - "Delete package version for a user"
+* Operation id: packages/delete-package-version-for-user
+* Parameter: package_type, required, path
+* Parameter: package_name, required, path
+* Parameter: username, required, path
+* Parameter: package_version_id, required, path
+* Response: 204
+* Response: 401
+* Response: 403
+* Response: 404
+  METHODS packages_delete_package_vers02
+    IMPORTING
+      package_type TYPE string
+      package_name TYPE string
+      username TYPE string
+      package_version_id TYPE i
+    RAISING cx_static_check.
+
+* POST - "Restore package version for a user"
+* Operation id: packages/restore-package-version-for-user
+* Parameter: package_type, required, path
+* Parameter: package_name, required, path
+* Parameter: username, required, path
+* Parameter: package_version_id, required, path
+* Response: 204
+* Response: 401
+* Response: 403
+* Response: 404
+  METHODS packages_restore_package_ver02
+    IMPORTING
+      package_type TYPE string
+      package_name TYPE string
+      username TYPE string
+      package_version_id TYPE i
     RAISING cx_static_check.
 
 * GET - "List user projects"
