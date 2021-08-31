@@ -340,6 +340,34 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(project) TYPE zif_githubcom=>project
       RAISING cx_static_check.
+    METHODS parse_alert_number
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(alert_number) TYPE zif_githubcom=>alert_number
+      RAISING cx_static_check.
+    METHODS parse_alert_created_at
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(alert_created_at) TYPE zif_githubcom=>alert_created_at
+      RAISING cx_static_check.
+    METHODS parse_alert_url
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(alert_url) TYPE zif_githubcom=>alert_url
+      RAISING cx_static_check.
+    METHODS parse_alert_html_url
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(alert_html_url) TYPE zif_githubcom=>alert_html_url
+      RAISING cx_static_check.
+    METHODS parse_secret_scanning_alert_st
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(secret_scanning_alert_state) TYPE zif_githubcom=>secret_scanning_alert_state
+      RAISING cx_static_check.
+    METHODS parse_secret_scanning_alert_re
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(secret_scanning_alert_resoluti) TYPE zif_githubcom=>secret_scanning_alert_resoluti
+      RAISING cx_static_check.
+    METHODS parse_organization_secret_scan
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(organization_secret_scanning_a) TYPE zif_githubcom=>organization_secret_scanning_a
+      RAISING cx_static_check.
     METHODS parse_group_mapping
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(group_mapping) TYPE zif_githubcom=>group_mapping
@@ -543,22 +571,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_code_scanning_alert_stat
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(code_scanning_alert_state) TYPE zif_githubcom=>code_scanning_alert_state
-      RAISING cx_static_check.
-    METHODS parse_alert_number
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(alert_number) TYPE zif_githubcom=>alert_number
-      RAISING cx_static_check.
-    METHODS parse_alert_created_at
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(alert_created_at) TYPE zif_githubcom=>alert_created_at
-      RAISING cx_static_check.
-    METHODS parse_alert_url
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(alert_url) TYPE zif_githubcom=>alert_url
-      RAISING cx_static_check.
-    METHODS parse_alert_html_url
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(alert_html_url) TYPE zif_githubcom=>alert_html_url
       RAISING cx_static_check.
     METHODS parse_alert_instances_url
       IMPORTING iv_prefix TYPE string
@@ -1003,14 +1015,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_release
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(release) TYPE zif_githubcom=>release
-      RAISING cx_static_check.
-    METHODS parse_secret_scanning_alert_st
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(secret_scanning_alert_state) TYPE zif_githubcom=>secret_scanning_alert_state
-      RAISING cx_static_check.
-    METHODS parse_secret_scanning_alert_re
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(secret_scanning_alert_resoluti) TYPE zif_githubcom=>secret_scanning_alert_resoluti
       RAISING cx_static_check.
     METHODS parse_secret_scanning_alert
       IMPORTING iv_prefix TYPE string
@@ -2204,6 +2208,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_orgs_remove_outside_c) TYPE zif_githubcom=>response_orgs_remove_outside_c
       RAISING cx_static_check.
+    METHODS parse_packages_list_packages_f
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_packages_list_package) TYPE zif_githubcom=>response_packages_list_package
+      RAISING cx_static_check.
     METHODS parse_packages_get_all_package
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_packages_get_all_pack) TYPE zif_githubcom=>response_packages_get_all_pack
@@ -2219,6 +2227,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_repos_list_for_org
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_repos_list_for_org) TYPE zif_githubcom=>response_repos_list_for_org
+      RAISING cx_static_check.
+    METHODS parse_secret_scanning_list_ale
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_secret_scanning_list_) TYPE zif_githubcom=>response_secret_scanning_list_
       RAISING cx_static_check.
     METHODS parse_teams_list
       IMPORTING iv_prefix TYPE string
@@ -2696,9 +2708,9 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_repos_list_release_as) TYPE zif_githubcom=>response_repos_list_release_as
       RAISING cx_static_check.
-    METHODS parse_secret_scanning_list_ale
+    METHODS parse_secret_scanning_list_a01
       IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(response_secret_scanning_list_) TYPE zif_githubcom=>response_secret_scanning_list_
+      RETURNING VALUE(response_secret_scanning_lis01) TYPE zif_githubcom=>response_secret_scanning_lis01
       RAISING cx_static_check.
     METHODS parse_repos_get_code_frequency
       IMPORTING iv_prefix TYPE string
@@ -2840,6 +2852,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_orgs_list_for_authent) TYPE zif_githubcom=>response_orgs_list_for_authent
       RAISING cx_static_check.
+    METHODS parse_packages_list_packages01
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_packages_list_packa01) TYPE zif_githubcom=>response_packages_list_packa01
+      RAISING cx_static_check.
     METHODS parse_packages_get_all_packa01
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_packages_get_all_pa01) TYPE zif_githubcom=>response_packages_get_all_pa01
@@ -2867,6 +2883,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_teams_list_for_authentic
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_teams_list_for_authen) TYPE zif_githubcom=>response_teams_list_for_authen
+      RAISING cx_static_check.
+    METHODS parse_packages_list_packages02
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_packages_list_packa02) TYPE zif_githubcom=>response_packages_list_packa02
       RAISING cx_static_check.
     METHODS parse_users_list
       IMPORTING iv_prefix TYPE string
@@ -3070,6 +3090,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     hook_delivery-action = mo_json->value_string( iv_prefix && '/action' ).
     hook_delivery-installation_id = mo_json->value_string( iv_prefix && '/installation_id' ).
     hook_delivery-repository_id = mo_json->value_string( iv_prefix && '/repository_id' ).
+    hook_delivery-url = mo_json->value_string( iv_prefix && '/url' ).
     hook_delivery-response-payload = mo_json->value_string( iv_prefix && '/response/payload' ).
   ENDMETHOD.
 
@@ -4336,6 +4357,44 @@ CLASS zcl_githubcom IMPLEMENTATION.
     project-private = mo_json->value_boolean( iv_prefix && '/private' ).
   ENDMETHOD.
 
+  METHOD parse_alert_number.
+* todo, handle type integer
+  ENDMETHOD.
+
+  METHOD parse_alert_created_at.
+* todo, handle type string
+  ENDMETHOD.
+
+  METHOD parse_alert_url.
+* todo, handle type string
+  ENDMETHOD.
+
+  METHOD parse_alert_html_url.
+* todo, handle type string
+  ENDMETHOD.
+
+  METHOD parse_secret_scanning_alert_st.
+* todo, handle type string
+  ENDMETHOD.
+
+  METHOD parse_secret_scanning_alert_re.
+* todo, handle type string
+  ENDMETHOD.
+
+  METHOD parse_organization_secret_scan.
+    organization_secret_scanning_a-number = parse_alert_number( iv_prefix ).
+    organization_secret_scanning_a-created_at = parse_alert_created_at( iv_prefix ).
+    organization_secret_scanning_a-url = parse_alert_url( iv_prefix ).
+    organization_secret_scanning_a-html_url = parse_alert_html_url( iv_prefix ).
+    organization_secret_scanning_a-state = parse_secret_scanning_alert_st( iv_prefix ).
+    organization_secret_scanning_a-resolution = parse_secret_scanning_alert_re( iv_prefix ).
+    organization_secret_scanning_a-resolved_at = mo_json->value_string( iv_prefix && '/resolved_at' ).
+    organization_secret_scanning_a-resolved_by = parse_simple_user( iv_prefix ).
+    organization_secret_scanning_a-secret_type = mo_json->value_string( iv_prefix && '/secret_type' ).
+    organization_secret_scanning_a-secret = mo_json->value_string( iv_prefix && '/secret' ).
+    organization_secret_scanning_a-repository = parse_minimal_repository( iv_prefix ).
+  ENDMETHOD.
+
   METHOD parse_group_mapping.
 * todo, array, groups
   ENDMETHOD.
@@ -5093,22 +5152,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD parse_code_scanning_alert_stat.
-* todo, handle type string
-  ENDMETHOD.
-
-  METHOD parse_alert_number.
-* todo, handle type integer
-  ENDMETHOD.
-
-  METHOD parse_alert_created_at.
-* todo, handle type string
-  ENDMETHOD.
-
-  METHOD parse_alert_url.
-* todo, handle type string
-  ENDMETHOD.
-
-  METHOD parse_alert_html_url.
 * todo, handle type string
   ENDMETHOD.
 
@@ -6780,14 +6823,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     release-reactions = parse_reaction_rollup( iv_prefix ).
   ENDMETHOD.
 
-  METHOD parse_secret_scanning_alert_st.
-* todo, handle type string
-  ENDMETHOD.
-
-  METHOD parse_secret_scanning_alert_re.
-* todo, handle type string
-  ENDMETHOD.
-
   METHOD parse_secret_scanning_alert.
     secret_scanning_alert-number = parse_alert_number( iv_prefix ).
     secret_scanning_alert-created_at = parse_alert_created_at( iv_prefix ).
@@ -7872,6 +7907,18 @@ CLASS zcl_githubcom IMPLEMENTATION.
     response_orgs_remove_outside_c-documentation_url = mo_json->value_string( iv_prefix && '/documentation_url' ).
   ENDMETHOD.
 
+  METHOD parse_packages_list_packages_f.
+    DATA lt_members TYPE string_table.
+    DATA lv_member LIKE LINE OF lt_members.
+    DATA package TYPE zif_githubcom=>package.
+    lt_members = mo_json->members( iv_prefix && '/' ).
+    LOOP AT lt_members INTO lv_member.
+      CLEAR package.
+      package = parse_package( iv_prefix && '/' && lv_member ).
+      APPEND package TO response_packages_list_package.
+    ENDLOOP.
+  ENDMETHOD.
+
   METHOD parse_packages_get_all_package.
     DATA lt_members TYPE string_table.
     DATA lv_member LIKE LINE OF lt_members.
@@ -7917,6 +7964,18 @@ CLASS zcl_githubcom IMPLEMENTATION.
       CLEAR minimal_repository.
       minimal_repository = parse_minimal_repository( iv_prefix && '/' && lv_member ).
       APPEND minimal_repository TO response_repos_list_for_org.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD parse_secret_scanning_list_ale.
+    DATA lt_members TYPE string_table.
+    DATA lv_member LIKE LINE OF lt_members.
+    DATA organization_secret_scanning_a TYPE zif_githubcom=>organization_secret_scanning_a.
+    lt_members = mo_json->members( iv_prefix && '/' ).
+    LOOP AT lt_members INTO lv_member.
+      CLEAR organization_secret_scanning_a.
+      organization_secret_scanning_a = parse_organization_secret_scan( iv_prefix && '/' && lv_member ).
+      APPEND organization_secret_scanning_a TO response_secret_scanning_list_.
     ENDLOOP.
   ENDMETHOD.
 
@@ -9094,7 +9153,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD parse_secret_scanning_list_ale.
+  METHOD parse_secret_scanning_list_a01.
     DATA lt_members TYPE string_table.
     DATA lv_member LIKE LINE OF lt_members.
     DATA secret_scanning_alert TYPE zif_githubcom=>secret_scanning_alert.
@@ -9102,7 +9161,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     LOOP AT lt_members INTO lv_member.
       CLEAR secret_scanning_alert.
       secret_scanning_alert = parse_secret_scanning_alert( iv_prefix && '/' && lv_member ).
-      APPEND secret_scanning_alert TO response_secret_scanning_list_.
+      APPEND secret_scanning_alert TO response_secret_scanning_lis01.
     ENDLOOP.
   ENDMETHOD.
 
@@ -9464,6 +9523,18 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
+  METHOD parse_packages_list_packages01.
+    DATA lt_members TYPE string_table.
+    DATA lv_member LIKE LINE OF lt_members.
+    DATA package TYPE zif_githubcom=>package.
+    lt_members = mo_json->members( iv_prefix && '/' ).
+    LOOP AT lt_members INTO lv_member.
+      CLEAR package.
+      package = parse_package( iv_prefix && '/' && lv_member ).
+      APPEND package TO response_packages_list_packa01.
+    ENDLOOP.
+  ENDMETHOD.
+
   METHOD parse_packages_get_all_packa01.
     DATA lt_members TYPE string_table.
     DATA lv_member LIKE LINE OF lt_members.
@@ -9545,6 +9616,18 @@ CLASS zcl_githubcom IMPLEMENTATION.
       CLEAR team_full.
       team_full = parse_team_full( iv_prefix && '/' && lv_member ).
       APPEND team_full TO response_teams_list_for_authen.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD parse_packages_list_packages02.
+    DATA lt_members TYPE string_table.
+    DATA lv_member LIKE LINE OF lt_members.
+    DATA package TYPE zif_githubcom=>package.
+    lt_members = mo_json->members( iv_prefix && '/' ).
+    LOOP AT lt_members INTO lv_member.
+      CLEAR package.
+      package = parse_package( iv_prefix && '/' && lv_member ).
+      APPEND package TO response_packages_list_packa02.
     ENDLOOP.
   ENDMETHOD.
 
@@ -15370,6 +15453,23 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, handle more responses
   ENDMETHOD.
 
+  METHOD zif_githubcom~packages_list_packages_for_org.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/orgs/{org}/packages'.
+    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH org.
+    mi_client->request->set_form_field( name = 'package_type' value = package_type ).
+    IF visibility IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'visibility' value = visibility ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_packages_list_packages_f( '' ).
+  ENDMETHOD.
+
   METHOD zif_githubcom~packages_get_package_for_organ.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -15649,6 +15749,35 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
     return_data = parse_repository( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~secret_scanning_list_alerts_fo.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/orgs/{org}/secret-scanning/alerts'.
+    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH org.
+    IF state IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'state' value = state ).
+    ENDIF.
+    IF secret_type IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'secret_type' value = secret_type ).
+    ENDIF.
+    lv_temp = page.
+    CONDENSE lv_temp.
+    IF page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
+    ENDIF.
+    lv_temp = per_page.
+    CONDENSE lv_temp.
+    IF per_page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'per_page' value = lv_temp ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_secret_scanning_list_ale( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~billing_get_github_actions_b01.
@@ -22450,7 +22579,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_reaction( '' ).
   ENDMETHOD.
 
-  METHOD zif_githubcom~secret_scanning_list_alerts_fo.
+  METHOD zif_githubcom~secret_scanning_list_alerts_01.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
     DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/secret-scanning/alerts'.
@@ -22477,7 +22606,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_secret_scanning_list_ale( '' ).
+    return_data = parse_secret_scanning_list_a01( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~secret_scanning_get_alert.
@@ -24307,6 +24436,22 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_orgs_list_for_authentica( '' ).
   ENDMETHOD.
 
+  METHOD zif_githubcom~packages_list_packages_for_aut.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/packages'.
+    mi_client->request->set_form_field( name = 'package_type' value = package_type ).
+    IF visibility IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'visibility' value = visibility ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_packages_list_packages01( '' ).
+  ENDMETHOD.
+
   METHOD zif_githubcom~packages_get_package_for_authe.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -24687,6 +24832,23 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_teams_list_for_authentic( '' ).
   ENDMETHOD.
 
+  METHOD zif_githubcom~packages_list_packages_for_use.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/{username}/packages'.
+    REPLACE ALL OCCURRENCES OF '{username}' IN lv_uri WITH username.
+    mi_client->request->set_form_field( name = 'package_type' value = package_type ).
+    IF visibility IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'visibility' value = visibility ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_packages_list_packages02( '' ).
+  ENDMETHOD.
+
   METHOD zif_githubcom~users_list.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -24994,6 +25156,39 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_package( '' ).
   ENDMETHOD.
 
+  METHOD zif_githubcom~packages_delete_package_for_us.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/users/{username}/packages/{package_type}/{package_name}'.
+    REPLACE ALL OCCURRENCES OF '{package_type}' IN lv_uri WITH package_type.
+    REPLACE ALL OCCURRENCES OF '{package_name}' IN lv_uri WITH package_name.
+    REPLACE ALL OCCURRENCES OF '{username}' IN lv_uri WITH username.
+    mi_client->request->set_method( 'DELETE' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
+  ENDMETHOD.
+
+  METHOD zif_githubcom~packages_restore_package_for_u.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/users/{username}/packages/{package_type}/{package_name}/restore'.
+    REPLACE ALL OCCURRENCES OF '{package_type}' IN lv_uri WITH package_type.
+    REPLACE ALL OCCURRENCES OF '{package_name}' IN lv_uri WITH package_name.
+    REPLACE ALL OCCURRENCES OF '{username}' IN lv_uri WITH username.
+    IF token IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'token' value = token ).
+    ENDIF.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
+  ENDMETHOD.
+
   METHOD zif_githubcom~packages_get_all_package_ver02.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -25025,6 +25220,42 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
     return_data = parse_package_version( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~packages_delete_package_vers02.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}'.
+    REPLACE ALL OCCURRENCES OF '{package_type}' IN lv_uri WITH package_type.
+    REPLACE ALL OCCURRENCES OF '{package_name}' IN lv_uri WITH package_name.
+    REPLACE ALL OCCURRENCES OF '{username}' IN lv_uri WITH username.
+    lv_temp = package_version_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{package_version_id}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'DELETE' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
+  ENDMETHOD.
+
+  METHOD zif_githubcom~packages_restore_package_ver02.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}/restore'.
+    REPLACE ALL OCCURRENCES OF '{package_type}' IN lv_uri WITH package_type.
+    REPLACE ALL OCCURRENCES OF '{package_name}' IN lv_uri WITH package_name.
+    REPLACE ALL OCCURRENCES OF '{username}' IN lv_uri WITH username.
+    lv_temp = package_version_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{package_version_id}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
   ENDMETHOD.
 
   METHOD zif_githubcom~projects_list_for_user.
