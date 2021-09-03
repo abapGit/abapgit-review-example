@@ -964,6 +964,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(license_content) TYPE zif_githubcom=>license_content
       RAISING cx_static_check.
+    METHODS parse_merged_upstream
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(merged_upstream) TYPE zif_githubcom=>merged_upstream
+      RAISING cx_static_check.
     METHODS parse_pages_source_hash
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(pages_source_hash) TYPE zif_githubcom=>pages_source_hash
@@ -1738,6 +1742,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       RAISING cx_static_check.
     METHODS json_issues_delete_label
       IMPORTING data TYPE zif_githubcom=>bodyissues_delete_label
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
+    METHODS json_repos_merge_upstream
+      IMPORTING data TYPE zif_githubcom=>bodyrepos_merge_upstream
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
     METHODS json_repos_merge
@@ -6315,6 +6323,12 @@ CLASS zcl_githubcom IMPLEMENTATION.
     license_content-_links-html = mo_json->value_string( iv_prefix && '/_links/html' ).
     license_content-_links-self = mo_json->value_string( iv_prefix && '/_links/self' ).
     license_content-license = mo_json->value_string( iv_prefix && '/license' ).
+  ENDMETHOD.
+
+  METHOD parse_merged_upstream.
+    merged_upstream-message = mo_json->value_string( iv_prefix && '/message' ).
+    merged_upstream-merge_type = mo_json->value_string( iv_prefix && '/merge_type' ).
+    merged_upstream-base_branch = mo_json->value_string( iv_prefix && '/base_branch' ).
   ENDMETHOD.
 
   METHOD parse_pages_source_hash.
@@ -11467,6 +11481,13 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && |"new_name": "{ data-new_name }",|.
     json = json && |"color": "{ data-color }",|.
     json = json && |"description": "{ data-description }",|.
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
+  METHOD json_repos_merge_upstream.
+    json = json && '{'.
+    json = json && |"branch": "{ data-branch }",|.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -21253,6 +21274,21 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
     return_data = parse_license_content( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~repos_merge_upstream.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/merge-upstream'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_repos_merge_upstream( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_merged_upstream( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~repos_merge.

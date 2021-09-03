@@ -3939,6 +3939,13 @@ INTERFACE zif_githubcom PUBLIC.
            license TYPE string,
          END OF license_content.
 
+* Component schema: merged-upstream, object
+  TYPES: BEGIN OF merged_upstream,
+           message TYPE string,
+           merge_type TYPE string,
+           base_branch TYPE string,
+         END OF merged_upstream.
+
 * Component schema: pages-source-hash, object
   TYPES: BEGIN OF pages_source_hash,
            branch TYPE string,
@@ -6293,6 +6300,11 @@ INTERFACE zif_githubcom PUBLIC.
            color TYPE string,
            description TYPE string,
          END OF bodyissues_delete_label.
+
+* Component schema: bodyrepos_merge_upstream, object
+  TYPES: BEGIN OF bodyrepos_merge_upstream,
+           branch TYPE string,
+         END OF bodyrepos_merge_upstream.
 
 * Component schema: bodyrepos_merge, object
   TYPES: BEGIN OF bodyrepos_merge,
@@ -15960,6 +15972,24 @@ INTERFACE zif_githubcom PUBLIC.
       repo TYPE string
     RETURNING
       VALUE(return_data) TYPE license_content
+    RAISING cx_static_check.
+
+* POST - "Sync a fork branch with the upstream repository"
+* Operation id: repos/merge-upstream
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Response: 200
+*     application/json, #/components/schemas/merged-upstream
+* Response: 409
+* Response: 422
+* Body ref: #/components/schemas/bodyrepos_merge_upstream
+  METHODS repos_merge_upstream
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      body TYPE bodyrepos_merge_upstream
+    RETURNING
+      VALUE(return_data) TYPE merged_upstream
     RAISING cx_static_check.
 
 * POST - "Merge a branch"
