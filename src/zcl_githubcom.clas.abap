@@ -2412,6 +2412,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_re_run_workfl) TYPE zif_githubcom=>response_actions_re_run_workfl
       RAISING cx_static_check.
+    METHODS parse_actions_retry_workflow
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_actions_retry_workflo) TYPE zif_githubcom=>response_actions_retry_workflo
+      RAISING cx_static_check.
     METHODS parse_actions_list_repo_secret
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_list_repo_sec) TYPE zif_githubcom=>response_actions_list_repo_sec
@@ -3430,6 +3434,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     repository-allow_auto_merge = mo_json->value_boolean( iv_prefix && '/allow_auto_merge' ).
     repository-delete_branch_on_merge = mo_json->value_boolean( iv_prefix && '/delete_branch_on_merge' ).
     repository-allow_merge_commit = mo_json->value_boolean( iv_prefix && '/allow_merge_commit' ).
+    repository-allow_forking = mo_json->value_boolean( iv_prefix && '/allow_forking' ).
     repository-subscribers_count = mo_json->value_string( iv_prefix && '/subscribers_count' ).
     repository-network_count = mo_json->value_string( iv_prefix && '/network_count' ).
     repository-open_issues = mo_json->value_string( iv_prefix && '/open_issues' ).
@@ -4061,6 +4066,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     api_overview-verifiable_password_authentica = mo_json->value_boolean( iv_prefix && '/verifiable_password_authentication' ).
     api_overview-ssh_key_fingerprints-sha256_rsa = mo_json->value_string( iv_prefix && '/ssh_key_fingerprints/SHA256_RSA' ).
     api_overview-ssh_key_fingerprints-sha256_dsa = mo_json->value_string( iv_prefix && '/ssh_key_fingerprints/SHA256_DSA' ).
+    api_overview-ssh_key_fingerprints-sha256_ecdsa = mo_json->value_string( iv_prefix && '/ssh_key_fingerprints/SHA256_ECDSA' ).
+    api_overview-ssh_key_fingerprints-sha256_ed25519 = mo_json->value_string( iv_prefix && '/ssh_key_fingerprints/SHA256_ED25519' ).
 * todo, array, hooks
 * todo, array, web
 * todo, array, api
@@ -4261,6 +4268,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     nullable_repository-allow_auto_merge = mo_json->value_boolean( iv_prefix && '/allow_auto_merge' ).
     nullable_repository-delete_branch_on_merge = mo_json->value_boolean( iv_prefix && '/delete_branch_on_merge' ).
     nullable_repository-allow_merge_commit = mo_json->value_boolean( iv_prefix && '/allow_merge_commit' ).
+    nullable_repository-allow_forking = mo_json->value_boolean( iv_prefix && '/allow_forking' ).
     nullable_repository-subscribers_count = mo_json->value_string( iv_prefix && '/subscribers_count' ).
     nullable_repository-network_count = mo_json->value_string( iv_prefix && '/network_count' ).
     nullable_repository-open_issues = mo_json->value_string( iv_prefix && '/open_issues' ).
@@ -4361,6 +4369,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     minimal_repository-forks = mo_json->value_string( iv_prefix && '/forks' ).
     minimal_repository-open_issues = mo_json->value_string( iv_prefix && '/open_issues' ).
     minimal_repository-watchers = mo_json->value_string( iv_prefix && '/watchers' ).
+    minimal_repository-allow_forking = mo_json->value_boolean( iv_prefix && '/allow_forking' ).
   ENDMETHOD.
 
   METHOD parse_thread.
@@ -4599,7 +4608,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     migration-guid = mo_json->value_string( iv_prefix && '/guid' ).
     migration-state = mo_json->value_string( iv_prefix && '/state' ).
     migration-lock_repositories = mo_json->value_boolean( iv_prefix && '/lock_repositories' ).
+    migration-exclude_metadata = mo_json->value_boolean( iv_prefix && '/exclude_metadata' ).
+    migration-exclude_git_data = mo_json->value_boolean( iv_prefix && '/exclude_git_data' ).
     migration-exclude_attachments = mo_json->value_boolean( iv_prefix && '/exclude_attachments' ).
+    migration-exclude_releases = mo_json->value_boolean( iv_prefix && '/exclude_releases' ).
+    migration-exclude_owner_projects = mo_json->value_boolean( iv_prefix && '/exclude_owner_projects' ).
 * todo, array, repositories
     migration-url = mo_json->value_string( iv_prefix && '/url' ).
     migration-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
@@ -4701,6 +4714,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     nullable_minimal_repository-forks = mo_json->value_string( iv_prefix && '/forks' ).
     nullable_minimal_repository-open_issues = mo_json->value_string( iv_prefix && '/open_issues' ).
     nullable_minimal_repository-watchers = mo_json->value_string( iv_prefix && '/watchers' ).
+    nullable_minimal_repository-allow_forking = mo_json->value_boolean( iv_prefix && '/allow_forking' ).
   ENDMETHOD.
 
   METHOD parse_package.
@@ -4974,6 +4988,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     team_repository-allow_auto_merge = mo_json->value_boolean( iv_prefix && '/allow_auto_merge' ).
     team_repository-delete_branch_on_merge = mo_json->value_boolean( iv_prefix && '/delete_branch_on_merge' ).
     team_repository-allow_merge_commit = mo_json->value_boolean( iv_prefix && '/allow_merge_commit' ).
+    team_repository-allow_forking = mo_json->value_boolean( iv_prefix && '/allow_forking' ).
     team_repository-subscribers_count = mo_json->value_string( iv_prefix && '/subscribers_count' ).
     team_repository-network_count = mo_json->value_string( iv_prefix && '/network_count' ).
     team_repository-open_issues = mo_json->value_string( iv_prefix && '/open_issues' ).
@@ -5122,6 +5137,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     full_repository-allow_auto_merge = mo_json->value_boolean( iv_prefix && '/allow_auto_merge' ).
     full_repository-delete_branch_on_merge = mo_json->value_boolean( iv_prefix && '/delete_branch_on_merge' ).
     full_repository-allow_merge_commit = mo_json->value_boolean( iv_prefix && '/allow_merge_commit' ).
+    full_repository-allow_forking = mo_json->value_boolean( iv_prefix && '/allow_forking' ).
     full_repository-subscribers_count = mo_json->value_string( iv_prefix && '/subscribers_count' ).
     full_repository-network_count = mo_json->value_string( iv_prefix && '/network_count' ).
     full_repository-license = parse_nullable_license_simple( iv_prefix ).
@@ -7009,6 +7025,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     pull_request-head-repo-watchers_count = mo_json->value_string( iv_prefix && '/head/repo/watchers_count' ).
     pull_request-head-repo-created_at = mo_json->value_string( iv_prefix && '/head/repo/created_at' ).
     pull_request-head-repo-updated_at = mo_json->value_string( iv_prefix && '/head/repo/updated_at' ).
+    pull_request-head-repo-allow_forking = mo_json->value_boolean( iv_prefix && '/head/repo/allow_forking' ).
     pull_request-head-sha = mo_json->value_string( iv_prefix && '/head/sha' ).
     pull_request-head-user-avatar_url = mo_json->value_string( iv_prefix && '/head/user/avatar_url' ).
     pull_request-head-user-events_url = mo_json->value_string( iv_prefix && '/head/user/events_url' ).
@@ -7131,6 +7148,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     pull_request-base-repo-watchers_count = mo_json->value_string( iv_prefix && '/base/repo/watchers_count' ).
     pull_request-base-repo-created_at = mo_json->value_string( iv_prefix && '/base/repo/created_at' ).
     pull_request-base-repo-updated_at = mo_json->value_string( iv_prefix && '/base/repo/updated_at' ).
+    pull_request-base-repo-allow_forking = mo_json->value_boolean( iv_prefix && '/base/repo/allow_forking' ).
     pull_request-base-sha = mo_json->value_string( iv_prefix && '/base/sha' ).
     pull_request-base-user-avatar_url = mo_json->value_string( iv_prefix && '/base/user/avatar_url' ).
     pull_request-base-user-events_url = mo_json->value_string( iv_prefix && '/base/user/events_url' ).
@@ -7628,6 +7646,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     repo_search_result_item-allow_rebase_merge = mo_json->value_boolean( iv_prefix && '/allow_rebase_merge' ).
     repo_search_result_item-allow_auto_merge = mo_json->value_boolean( iv_prefix && '/allow_auto_merge' ).
     repo_search_result_item-delete_branch_on_merge = mo_json->value_boolean( iv_prefix && '/delete_branch_on_merge' ).
+    repo_search_result_item-allow_forking = mo_json->value_boolean( iv_prefix && '/allow_forking' ).
   ENDMETHOD.
 
   METHOD parse_topic_search_result_item.
@@ -8722,6 +8741,9 @@ CLASS zcl_githubcom IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD parse_actions_re_run_workflow.
+  ENDMETHOD.
+
+  METHOD parse_actions_retry_workflow.
   ENDMETHOD.
 
   METHOD parse_actions_list_repo_secret.
@@ -10724,6 +10746,16 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ELSEIF data-exclude_attachments = abap_false.
       json = json && |"exclude_attachments": false,|.
     ENDIF.
+    IF data-exclude_releases = abap_true.
+      json = json && |"exclude_releases": true,|.
+    ELSEIF data-exclude_releases = abap_false.
+      json = json && |"exclude_releases": false,|.
+    ENDIF.
+    IF data-exclude_owner_projects = abap_true.
+      json = json && |"exclude_owner_projects": true,|.
+    ELSEIF data-exclude_owner_projects = abap_false.
+      json = json && |"exclude_owner_projects": false,|.
+    ENDIF.
 *  json = json && '"exclude":' not simple
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
@@ -11130,6 +11162,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ELSEIF data-archived = abap_false.
       json = json && |"archived": false,|.
     ENDIF.
+    IF data-allow_forking = abap_true.
+      json = json && |"allow_forking": true,|.
+    ELSEIF data-allow_forking = abap_false.
+      json = json && |"allow_forking": false,|.
+    ENDIF.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -11196,6 +11233,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
       json = json && |"archived": true,|.
     ELSEIF data-archived = abap_false.
       json = json && |"archived": false,|.
+    ENDIF.
+    IF data-allow_forking = abap_true.
+      json = json && |"allow_forking": true,|.
+    ELSEIF data-allow_forking = abap_false.
+      json = json && |"allow_forking": false,|.
     ENDIF.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
@@ -12563,6 +12605,16 @@ CLASS zcl_githubcom IMPLEMENTATION.
       json = json && |"exclude_attachments": true,|.
     ELSEIF data-exclude_attachments = abap_false.
       json = json && |"exclude_attachments": false,|.
+    ENDIF.
+    IF data-exclude_releases = abap_true.
+      json = json && |"exclude_releases": true,|.
+    ELSEIF data-exclude_releases = abap_false.
+      json = json && |"exclude_releases": false,|.
+    ENDIF.
+    IF data-exclude_owner_projects = abap_true.
+      json = json && |"exclude_owner_projects": true,|.
+    ELSEIF data-exclude_owner_projects = abap_false.
+      json = json && |"exclude_owner_projects": false,|.
     ENDIF.
 *  json = json && '"exclude":' not simple
 *  json = json && '"repositories":' not simple
@@ -17963,6 +18015,23 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
     return_data = parse_actions_re_run_workflow( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_retry_workflow.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/actions/runs/{run_id}/retry'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    lv_temp = run_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{run_id}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_actions_retry_workflow( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~actions_get_workflow_run_usage.
