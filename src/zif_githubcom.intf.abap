@@ -2492,6 +2492,7 @@ INTERFACE zif_githubcom PUBLIC.
            head_branch TYPE string,
            head_sha TYPE string,
            run_number TYPE i,
+           run_attempt TYPE i,
            event TYPE string,
            status TYPE string,
            conclusion TYPE string,
@@ -2507,6 +2508,7 @@ INTERFACE zif_githubcom PUBLIC.
            artifacts_url TYPE string,
            cancel_url TYPE string,
            rerun_url TYPE string,
+           previous_attempt_url TYPE string,
            workflow_url TYPE string,
            head_commit TYPE nullable_simple_commit,
            repository TYPE minimal_repository,
@@ -7650,11 +7652,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: response_actions_review_pending_deploym, array
   TYPES response_actions_review_pendin TYPE STANDARD TABLE OF deployment WITH DEFAULT KEY.
 
-* Component schema: response_actions_re_run_workflow, object
-  TYPES: BEGIN OF response_actions_re_run_workfl,
-           dummy_workaround TYPE i,
-         END OF response_actions_re_run_workfl.
-
 * Component schema: response_actions_retry_workflow, object
   TYPES: BEGIN OF response_actions_retry_workflo,
            dummy_workaround TYPE i,
@@ -12732,22 +12729,6 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE response_actions_review_pendin
     RAISING cx_static_check.
 
-* POST - "Re-run a workflow"
-* Operation id: actions/re-run-workflow
-* Parameter: owner, required, path
-* Parameter: repo, required, path
-* Parameter: run_id, required, path
-* Response: 201
-*     application/json, #/components/schemas/response_actions_re_run_workflow
-  METHODS actions_re_run_workflow
-    IMPORTING
-      owner TYPE string
-      repo TYPE string
-      run_id TYPE i
-    RETURNING
-      VALUE(return_data) TYPE response_actions_re_run_workfl
-    RAISING cx_static_check.
-
 * POST - "Retry a workflow"
 * Operation id: actions/retry-workflow
 * Parameter: owner, required, path
@@ -16254,7 +16235,6 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, #/components/schemas/response_issues_list_events_for_timelin
 * Response: 404
 * Response: 410
-* Response: 415
   METHODS issues_list_events_for_timelin
     IMPORTING
       owner TYPE string
@@ -16430,6 +16410,29 @@ INTERFACE zif_githubcom PUBLIC.
       repo TYPE string
     RETURNING
       VALUE(return_data) TYPE language
+    RAISING cx_static_check.
+
+* PUT - "Enable Git LFS for a repository"
+* Operation id: repos/enable-lfs-for-repo
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Response: 202
+* Response: 403
+  METHODS repos_enable_lfs_for_repo
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+    RAISING cx_static_check.
+
+* DELETE - "Disable Git LFS for a repository"
+* Operation id: repos/disable-lfs-for-repo
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Response: 204
+  METHODS repos_disable_lfs_for_repo
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
     RAISING cx_static_check.
 
 * GET - "Get the license for a repository"
