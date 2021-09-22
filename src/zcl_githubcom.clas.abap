@@ -2408,10 +2408,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_review_pendin) TYPE zif_githubcom=>response_actions_review_pendin
       RAISING cx_static_check.
-    METHODS parse_actions_re_run_workflow
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(response_actions_re_run_workfl) TYPE zif_githubcom=>response_actions_re_run_workfl
-      RAISING cx_static_check.
     METHODS parse_actions_retry_workflow
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_retry_workflo) TYPE zif_githubcom=>response_actions_retry_workflo
@@ -5230,6 +5226,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     workflow_run-head_branch = mo_json->value_string( iv_prefix && '/head_branch' ).
     workflow_run-head_sha = mo_json->value_string( iv_prefix && '/head_sha' ).
     workflow_run-run_number = mo_json->value_string( iv_prefix && '/run_number' ).
+    workflow_run-run_attempt = mo_json->value_string( iv_prefix && '/run_attempt' ).
     workflow_run-event = mo_json->value_string( iv_prefix && '/event' ).
     workflow_run-status = mo_json->value_string( iv_prefix && '/status' ).
     workflow_run-conclusion = mo_json->value_string( iv_prefix && '/conclusion' ).
@@ -5245,6 +5242,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     workflow_run-artifacts_url = mo_json->value_string( iv_prefix && '/artifacts_url' ).
     workflow_run-cancel_url = mo_json->value_string( iv_prefix && '/cancel_url' ).
     workflow_run-rerun_url = mo_json->value_string( iv_prefix && '/rerun_url' ).
+    workflow_run-previous_attempt_url = mo_json->value_string( iv_prefix && '/previous_attempt_url' ).
     workflow_run-workflow_url = mo_json->value_string( iv_prefix && '/workflow_url' ).
     workflow_run-head_commit = parse_nullable_simple_commit( iv_prefix ).
     workflow_run-repository = parse_minimal_repository( iv_prefix ).
@@ -8738,9 +8736,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
       deployment = parse_deployment( iv_prefix && '/' && lv_member ).
       APPEND deployment TO response_actions_review_pendin.
     ENDLOOP.
-  ENDMETHOD.
-
-  METHOD parse_actions_re_run_workflow.
   ENDMETHOD.
 
   METHOD parse_actions_retry_workflow.
@@ -18000,23 +17995,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_actions_review_pending_d( '' ).
   ENDMETHOD.
 
-  METHOD zif_githubcom~actions_re_run_workflow.
-    DATA lv_code TYPE i.
-    DATA lv_temp TYPE string.
-    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/actions/runs/{run_id}/rerun'.
-    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
-    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
-    lv_temp = run_id.
-    CONDENSE lv_temp.
-    REPLACE ALL OCCURRENCES OF '{run_id}' IN lv_uri WITH lv_temp.
-    mi_client->request->set_method( 'POST' ).
-    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    lv_code = send_receive( ).
-    WRITE / lv_code.
-    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_actions_re_run_workflow( '' ).
-  ENDMETHOD.
-
   METHOD zif_githubcom~actions_retry_workflow.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -21771,6 +21749,34 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
     return_data = parse_language( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~repos_enable_lfs_for_repo.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/lfs'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    mi_client->request->set_method( 'PUT' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
+  ENDMETHOD.
+
+  METHOD zif_githubcom~repos_disable_lfs_for_repo.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/lfs'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    mi_client->request->set_method( 'DELETE' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
   ENDMETHOD.
 
   METHOD zif_githubcom~licenses_get_for_repo.
