@@ -2264,6 +2264,7 @@ INTERFACE zif_githubcom PUBLIC.
            source_import TYPE rate_limit,
            integration_manifest TYPE rate_limit,
            code_scanning_upload TYPE rate_limit,
+           actions_runner_registration TYPE rate_limit,
          END OF subrate_limit_overview_resourc.
   TYPES: BEGIN OF rate_limit_overview,
            resources TYPE subrate_limit_overview_resourc,
@@ -4392,6 +4393,8 @@ INTERFACE zif_githubcom PUBLIC.
            url TYPE string,
            status TYPE string,
            cname TYPE string,
+           protected_domain_state TYPE string,
+           pending_domain_unverified_at TYPE string,
            custom_404 TYPE abap_bool,
            html_url TYPE string,
            source TYPE pages_source_hash,
@@ -8121,9 +8124,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: response_teams_list_for_authenticated_u, array
   TYPES response_teams_list_for_authen TYPE STANDARD TABLE OF team_full WITH DEFAULT KEY.
 
-* Component schema: response_packages_list_packages_for_use, array
-  TYPES response_packages_list_packa02 TYPE STANDARD TABLE OF package WITH DEFAULT KEY.
-
 * Component schema: response_users_list, array
   TYPES response_users_list TYPE STANDARD TABLE OF simple_user WITH DEFAULT KEY.
 
@@ -8153,6 +8153,9 @@ INTERFACE zif_githubcom PUBLIC.
 
 * Component schema: response_orgs_list_for_user, array
   TYPES response_orgs_list_for_user TYPE STANDARD TABLE OF organization_simple WITH DEFAULT KEY.
+
+* Component schema: response_packages_list_packages_for_use, array
+  TYPES response_packages_list_packa02 TYPE STANDARD TABLE OF package WITH DEFAULT KEY.
 
 * Component schema: response_packages_get_all_package_ver02, array
   TYPES response_packages_get_all_pa02 TYPE STANDARD TABLE OF package_version WITH DEFAULT KEY.
@@ -12116,7 +12119,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 401
 * Response: 403
 * Response: 404
-* Response: 415
 * Response: 422
   METHODS projects_list_collaborators
     IMPORTING
@@ -12137,7 +12139,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 401
 * Response: 403
 * Response: 404
-* Response: 415
 * Response: 422
 * Body ref: #/components/schemas/bodyprojects_add_collaborator
   METHODS projects_add_collaborator
@@ -12156,7 +12157,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 401
 * Response: 403
 * Response: 404
-* Response: 415
 * Response: 422
 * Body ref: #/components/schemas/bodyprojects_remove_collaborat
   METHODS projects_remove_collaborator
@@ -12176,7 +12176,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 401
 * Response: 403
 * Response: 404
-* Response: 415
 * Response: 422
   METHODS projects_get_permission_for_us
     IMPORTING
@@ -13150,7 +13149,6 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, #/components/schemas/protected-branch
 * Response: 403
 * Response: 404
-* Response: 415
 * Response: 422
 * Body ref: #/components/schemas/bodyrepos_update_branch_protec
   METHODS repos_update_branch_protection
@@ -14338,7 +14336,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: commit_sha, required, path
 * Response: 200
 *     application/json, #/components/schemas/response_repos_list_branches_for_head_c
-* Response: 415
 * Response: 422
   METHODS repos_list_branches_for_head_c
     IMPORTING
@@ -14398,7 +14395,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/response_repos_list_pull_requests_assoc
-* Response: 415
   METHODS repos_list_pull_requests_assoc
     IMPORTING
       owner TYPE string
@@ -17443,7 +17439,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 202
 *     application/json, #/components/schemas/response_pulls_update_branch
 * Response: 403
-* Response: 415
 * Response: 422
 * Body ref: #/components/schemas/bodypulls_update_branch
   METHODS pulls_update_branch
@@ -19779,24 +19774,6 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE response_teams_list_for_authen
     RAISING cx_static_check.
 
-* GET - "List packages for a user"
-* Operation id: packages/list-packages-for-user
-* Parameter: package_type, required, query
-* Parameter: visibility, optional, query
-* Parameter: username, required, path
-* Response: 200
-*     application/json, #/components/schemas/response_packages_list_packages_for_use
-* Response: 401
-* Response: 403
-  METHODS packages_list_packages_for_use
-    IMPORTING
-      package_type TYPE string
-      visibility TYPE string OPTIONAL
-      username TYPE string
-    RETURNING
-      VALUE(return_data) TYPE response_packages_list_packa02
-    RAISING cx_static_check.
-
 * GET - "List users"
 * Operation id: users/list
 * Parameter: since, optional, query
@@ -20015,6 +19992,24 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE response_orgs_list_for_user
     RAISING cx_static_check.
 
+* GET - "List packages for a user"
+* Operation id: packages/list-packages-for-user
+* Parameter: package_type, required, query
+* Parameter: visibility, optional, query
+* Parameter: username, required, path
+* Response: 200
+*     application/json, #/components/schemas/response_packages_list_packages_for_use
+* Response: 401
+* Response: 403
+  METHODS packages_list_packages_for_use
+    IMPORTING
+      package_type TYPE string
+      visibility TYPE string OPTIONAL
+      username TYPE string
+    RETURNING
+      VALUE(return_data) TYPE response_packages_list_packa02
+    RAISING cx_static_check.
+
 * GET - "Get a package for a user"
 * Operation id: packages/get-package-for-user
 * Parameter: package_type, required, path
@@ -20146,7 +20141,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/response_projects_list_for_user
-* Response: 415
 * Response: 422
   METHODS projects_list_for_user
     IMPORTING
