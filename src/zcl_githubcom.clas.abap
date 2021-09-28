@@ -2928,10 +2928,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_teams_list_for_authen) TYPE zif_githubcom=>response_teams_list_for_authen
       RAISING cx_static_check.
-    METHODS parse_packages_list_packages02
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(response_packages_list_packa02) TYPE zif_githubcom=>response_packages_list_packa02
-      RAISING cx_static_check.
     METHODS parse_users_list
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_users_list) TYPE zif_githubcom=>response_users_list
@@ -2971,6 +2967,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_orgs_list_for_user
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_orgs_list_for_user) TYPE zif_githubcom=>response_orgs_list_for_user
+      RAISING cx_static_check.
+    METHODS parse_packages_list_packages02
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_packages_list_packa02) TYPE zif_githubcom=>response_packages_list_packa02
       RAISING cx_static_check.
     METHODS parse_packages_get_all_packa02
       IMPORTING iv_prefix TYPE string
@@ -5038,6 +5038,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     rate_limit_overview-resources-source_import = parse_rate_limit( iv_prefix ).
     rate_limit_overview-resources-integration_manifest = parse_rate_limit( iv_prefix ).
     rate_limit_overview-resources-code_scanning_upload = parse_rate_limit( iv_prefix ).
+    rate_limit_overview-resources-actions_runner_registration = parse_rate_limit( iv_prefix ).
     rate_limit_overview-rate = parse_rate_limit( iv_prefix ).
   ENDMETHOD.
 
@@ -6787,6 +6788,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
     page-url = mo_json->value_string( iv_prefix && '/url' ).
     page-status = mo_json->value_string( iv_prefix && '/status' ).
     page-cname = mo_json->value_string( iv_prefix && '/cname' ).
+    page-protected_domain_state = mo_json->value_string( iv_prefix && '/protected_domain_state' ).
+    page-pending_domain_unverified_at = mo_json->value_string( iv_prefix && '/pending_domain_unverified_at' ).
     page-custom_404 = mo_json->value_boolean( iv_prefix && '/custom_404' ).
     page-html_url = mo_json->value_string( iv_prefix && '/html_url' ).
     page-source = parse_pages_source_hash( iv_prefix ).
@@ -10092,18 +10095,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD parse_packages_list_packages02.
-    DATA lt_members TYPE string_table.
-    DATA lv_member LIKE LINE OF lt_members.
-    DATA package TYPE zif_githubcom=>package.
-    lt_members = mo_json->members( iv_prefix && '/' ).
-    LOOP AT lt_members INTO lv_member.
-      CLEAR package.
-      package = parse_package( iv_prefix && '/' && lv_member ).
-      APPEND package TO response_packages_list_packa02.
-    ENDLOOP.
-  ENDMETHOD.
-
   METHOD parse_users_list.
     DATA lt_members TYPE string_table.
     DATA lv_member LIKE LINE OF lt_members.
@@ -10221,6 +10212,18 @@ CLASS zcl_githubcom IMPLEMENTATION.
       CLEAR organization_simple.
       organization_simple = parse_organization_simple( iv_prefix && '/' && lv_member ).
       APPEND organization_simple TO response_orgs_list_for_user.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD parse_packages_list_packages02.
+    DATA lt_members TYPE string_table.
+    DATA lv_member LIKE LINE OF lt_members.
+    DATA package TYPE zif_githubcom=>package.
+    lt_members = mo_json->members( iv_prefix && '/' ).
+    LOOP AT lt_members INTO lv_member.
+      CLEAR package.
+      package = parse_package( iv_prefix && '/' && lv_member ).
+      APPEND package TO response_packages_list_packa02.
     ENDLOOP.
   ENDMETHOD.
 
@@ -25385,23 +25388,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_teams_list_for_authentic( '' ).
   ENDMETHOD.
 
-  METHOD zif_githubcom~packages_list_packages_for_use.
-    DATA lv_code TYPE i.
-    DATA lv_temp TYPE string.
-    DATA lv_uri TYPE string VALUE '/user/{username}/packages'.
-    REPLACE ALL OCCURRENCES OF '{username}' IN lv_uri WITH username.
-    mi_client->request->set_form_field( name = 'package_type' value = package_type ).
-    IF visibility IS SUPPLIED.
-      mi_client->request->set_form_field( name = 'visibility' value = visibility ).
-    ENDIF.
-    mi_client->request->set_method( 'GET' ).
-    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    lv_code = send_receive( ).
-    WRITE / lv_code.
-    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_packages_list_packages02( '' ).
-  ENDMETHOD.
-
   METHOD zif_githubcom~users_list.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -25692,6 +25678,23 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
     return_data = parse_orgs_list_for_user( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~packages_list_packages_for_use.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/users/{username}/packages'.
+    REPLACE ALL OCCURRENCES OF '{username}' IN lv_uri WITH username.
+    mi_client->request->set_form_field( name = 'package_type' value = package_type ).
+    IF visibility IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'visibility' value = visibility ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_packages_list_packages02( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~packages_get_package_for_user.
