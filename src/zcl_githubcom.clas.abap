@@ -628,6 +628,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(code_scanning_alert_environmen) TYPE zif_githubcom=>code_scanning_alert_environmen
       RAISING cx_static_check.
+    METHODS parse_code_scanning_analysis_c
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(code_scanning_analysis_categor) TYPE zif_githubcom=>code_scanning_analysis_categor
+      RAISING cx_static_check.
     METHODS parse_code_scanning_alert_loca
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(code_scanning_alert_location) TYPE zif_githubcom=>code_scanning_alert_location
@@ -660,17 +664,13 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(code_scanning_analysis_sarif_i) TYPE zif_githubcom=>code_scanning_analysis_sarif_i
       RAISING cx_static_check.
-    METHODS parse_code_scanning_analysis_c
+    METHODS parse_code_scanning_analysis04
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(code_scanning_analysis_commit_) TYPE zif_githubcom=>code_scanning_analysis_commit_
       RAISING cx_static_check.
     METHODS parse_code_scanning_analysis_e
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(code_scanning_analysis_environ) TYPE zif_githubcom=>code_scanning_analysis_environ
-      RAISING cx_static_check.
-    METHODS parse_code_scanning_analysis04
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(code_scanning_analysis_categor) TYPE zif_githubcom=>code_scanning_analysis_categor
       RAISING cx_static_check.
     METHODS parse_code_scanning_analysis05
       IMPORTING iv_prefix TYPE string
@@ -5615,6 +5615,10 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, handle type string
   ENDMETHOD.
 
+  METHOD parse_code_scanning_analysis_c.
+* todo, handle type string
+  ENDMETHOD.
+
   METHOD parse_code_scanning_alert_loca.
     code_scanning_alert_location-path = mo_json->value_string( iv_prefix && '/path' ).
     code_scanning_alert_location-start_line = mo_json->value_string( iv_prefix && '/start_line' ).
@@ -5631,6 +5635,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     code_scanning_alert_instance-ref = parse_code_scanning_ref( iv_prefix ).
     code_scanning_alert_instance-analysis_key = parse_code_scanning_analysis_a( iv_prefix ).
     code_scanning_alert_instance-environment = parse_code_scanning_alert_envi( iv_prefix ).
+    code_scanning_alert_instance-category = parse_code_scanning_analysis_c( iv_prefix ).
     code_scanning_alert_instance-state = parse_code_scanning_alert_stat( iv_prefix ).
     code_scanning_alert_instance-commit_sha = mo_json->value_string( iv_prefix && '/commit_sha' ).
     code_scanning_alert_instance-message-text = mo_json->value_string( iv_prefix && '/message/text' ).
@@ -5689,15 +5694,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, handle type string
   ENDMETHOD.
 
-  METHOD parse_code_scanning_analysis_c.
+  METHOD parse_code_scanning_analysis04.
 * todo, handle type string
   ENDMETHOD.
 
   METHOD parse_code_scanning_analysis_e.
-* todo, handle type string
-  ENDMETHOD.
-
-  METHOD parse_code_scanning_analysis04.
 * todo, handle type string
   ENDMETHOD.
 
@@ -5711,10 +5712,10 @@ CLASS zcl_githubcom IMPLEMENTATION.
 
   METHOD parse_code_scanning_analysis.
     code_scanning_analysis-ref = parse_code_scanning_ref( iv_prefix ).
-    code_scanning_analysis-commit_sha = parse_code_scanning_analysis_c( iv_prefix ).
+    code_scanning_analysis-commit_sha = parse_code_scanning_analysis04( iv_prefix ).
     code_scanning_analysis-analysis_key = parse_code_scanning_analysis_a( iv_prefix ).
     code_scanning_analysis-environment = parse_code_scanning_analysis_e( iv_prefix ).
-    code_scanning_analysis-category = parse_code_scanning_analysis04( iv_prefix ).
+    code_scanning_analysis-category = parse_code_scanning_analysis_c( iv_prefix ).
     code_scanning_analysis-error = mo_json->value_string( iv_prefix && '/error' ).
     code_scanning_analysis-created_at = parse_code_scanning_analysis05( iv_prefix ).
     code_scanning_analysis-results_count = mo_json->value_string( iv_prefix && '/results_count' ).
@@ -19827,20 +19828,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
     return_data = parse_repos_list_commit_status( '' ).
-  ENDMETHOD.
-
-  METHOD zif_githubcom~codes_of_conduct_get_for_repo.
-    DATA lv_code TYPE i.
-    DATA lv_temp TYPE string.
-    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/community/code_of_conduct'.
-    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
-    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
-    mi_client->request->set_method( 'GET' ).
-    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    lv_code = send_receive( ).
-    WRITE / lv_code.
-    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_code_of_conduct( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~repos_get_community_profile_me.
