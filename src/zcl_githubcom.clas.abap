@@ -17785,6 +17785,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     IF created IS SUPPLIED.
       mi_client->request->set_form_field( name = 'created' value = created ).
     ENDIF.
+    lv_temp = exclude_pull_requests.
+    CONDENSE lv_temp.
+    IF exclude_pull_requests IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'exclude_pull_requests' value = lv_temp ).
+    ENDIF.
     mi_client->request->set_method( 'GET' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
@@ -17802,6 +17807,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     lv_temp = run_id.
     CONDENSE lv_temp.
     REPLACE ALL OCCURRENCES OF '{run_id}' IN lv_uri WITH lv_temp.
+    lv_temp = exclude_pull_requests.
+    CONDENSE lv_temp.
+    IF exclude_pull_requests IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'exclude_pull_requests' value = lv_temp ).
+    ENDIF.
     mi_client->request->set_method( 'GET' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
@@ -17900,6 +17910,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     lv_temp = attempt_number.
     CONDENSE lv_temp.
     REPLACE ALL OCCURRENCES OF '{attempt_number}' IN lv_uri WITH lv_temp.
+    lv_temp = exclude_pull_requests.
+    CONDENSE lv_temp.
+    IF exclude_pull_requests IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'exclude_pull_requests' value = lv_temp ).
+    ENDIF.
     mi_client->request->set_method( 'GET' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
@@ -18262,6 +18277,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ENDIF.
     IF created IS SUPPLIED.
       mi_client->request->set_form_field( name = 'created' value = created ).
+    ENDIF.
+    lv_temp = exclude_pull_requests.
+    CONDENSE lv_temp.
+    IF exclude_pull_requests IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'exclude_pull_requests' value = lv_temp ).
     ENDIF.
     mi_client->request->set_method( 'GET' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
