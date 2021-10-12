@@ -7628,16 +7628,22 @@ INTERFACE zif_githubcom PUBLIC.
            artifacts TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF response_actions_list_workfl01.
 
-* Component schema: response_actions_cancel_workflow_run, object
-  TYPES: BEGIN OF response_actions_cancel_workfl,
-           dummy_workaround TYPE i,
-         END OF response_actions_cancel_workfl.
-
 * Component schema: response_actions_list_jobs_for_workflow, object
   TYPES: BEGIN OF response_actions_list_jobs_for,
            total_count TYPE i,
            jobs TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF response_actions_list_jobs_for.
+
+* Component schema: response_actions_cancel_workflow_run, object
+  TYPES: BEGIN OF response_actions_cancel_workfl,
+           dummy_workaround TYPE i,
+         END OF response_actions_cancel_workfl.
+
+* Component schema: response_actions_list_jobs_for_workfl01, object
+  TYPES: BEGIN OF response_actions_list_jobs_f01,
+           total_count TYPE i,
+           jobs TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF response_actions_list_jobs_f01.
 
 * Component schema: response_actions_get_pending_deployment, array
   TYPES response_actions_get_pending_d TYPE STANDARD TABLE OF pending_deployment WITH DEFAULT KEY.
@@ -12647,6 +12653,29 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE workflow_run
     RAISING cx_static_check.
 
+* GET - "List jobs for a workflow run attempt"
+* Operation id: actions/list-jobs-for-workflow-run-attempt
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: run_id, required, path
+* Parameter: attempt_number, required, path
+* Parameter: per_page, optional, query
+* Parameter: page, optional, query
+* Response: 200
+*     application/json, #/components/schemas/response_actions_list_jobs_for_workflow
+* Response: 404
+  METHODS actions_list_jobs_for_workflow
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      run_id TYPE i
+      attempt_number TYPE i
+      per_page TYPE i DEFAULT 30
+      page TYPE i DEFAULT 1
+    RETURNING
+      VALUE(return_data) TYPE response_actions_list_jobs_for
+    RAISING cx_static_check.
+
 * GET - "Download workflow run attempt logs"
 * Operation id: actions/download-workflow-run-attempt-logs
 * Parameter: owner, required, path
@@ -12685,8 +12714,8 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: per_page, optional, query
 * Parameter: page, optional, query
 * Response: 200
-*     application/json, #/components/schemas/response_actions_list_jobs_for_workflow
-  METHODS actions_list_jobs_for_workflow
+*     application/json, #/components/schemas/response_actions_list_jobs_for_workfl01
+  METHODS actions_list_jobs_for_workfl01
     IMPORTING
       filter TYPE string DEFAULT 'latest'
       owner TYPE string
@@ -12695,7 +12724,7 @@ INTERFACE zif_githubcom PUBLIC.
       per_page TYPE i DEFAULT 30
       page TYPE i DEFAULT 1
     RETURNING
-      VALUE(return_data) TYPE response_actions_list_jobs_for
+      VALUE(return_data) TYPE response_actions_list_jobs_f01
     RAISING cx_static_check.
 
 * GET - "Download workflow run logs"
@@ -17719,6 +17748,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: release_id, required, path
 * Response: 201
 *     application/json, #/components/schemas/release-asset
+* Response: 422
   METHODS repos_upload_release_asset
     IMPORTING
       name TYPE string

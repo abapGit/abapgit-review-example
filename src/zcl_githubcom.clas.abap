@@ -2396,13 +2396,17 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_list_workfl01) TYPE zif_githubcom=>response_actions_list_workfl01
       RAISING cx_static_check.
+    METHODS parse_actions_list_jobs_for_wo
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_actions_list_jobs_for) TYPE zif_githubcom=>response_actions_list_jobs_for
+      RAISING cx_static_check.
     METHODS parse_actions_cancel_workflow_
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_cancel_workfl) TYPE zif_githubcom=>response_actions_cancel_workfl
       RAISING cx_static_check.
-    METHODS parse_actions_list_jobs_for_wo
+    METHODS parse_actions_list_jobs_for_01
       IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(response_actions_list_jobs_for) TYPE zif_githubcom=>response_actions_list_jobs_for
+      RETURNING VALUE(response_actions_list_jobs_f01) TYPE zif_githubcom=>response_actions_list_jobs_f01
       RAISING cx_static_check.
     METHODS parse_actions_get_pending_depl
       IMPORTING iv_prefix TYPE string
@@ -8697,11 +8701,16 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, array, artifacts
   ENDMETHOD.
 
+  METHOD parse_actions_list_jobs_for_wo.
+    response_actions_list_jobs_for-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
+* todo, array, jobs
+  ENDMETHOD.
+
   METHOD parse_actions_cancel_workflow_.
   ENDMETHOD.
 
-  METHOD parse_actions_list_jobs_for_wo.
-    response_actions_list_jobs_for-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
+  METHOD parse_actions_list_jobs_for_01.
+    response_actions_list_jobs_f01-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
 * todo, array, jobs
   ENDMETHOD.
 
@@ -17923,6 +17932,36 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_workflow_run( '' ).
   ENDMETHOD.
 
+  METHOD zif_githubcom~actions_list_jobs_for_workflow.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/jobs'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    lv_temp = run_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{run_id}' IN lv_uri WITH lv_temp.
+    lv_temp = attempt_number.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{attempt_number}' IN lv_uri WITH lv_temp.
+    lv_temp = per_page.
+    CONDENSE lv_temp.
+    IF per_page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'per_page' value = lv_temp ).
+    ENDIF.
+    lv_temp = page.
+    CONDENSE lv_temp.
+    IF page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_actions_list_jobs_for_wo( '' ).
+  ENDMETHOD.
+
   METHOD zif_githubcom~actions_download_workflow_run_.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -17960,7 +17999,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, handle more responses
   ENDMETHOD.
 
-  METHOD zif_githubcom~actions_list_jobs_for_workflow.
+  METHOD zif_githubcom~actions_list_jobs_for_workfl01.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
     DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/actions/runs/{run_id}/jobs'.
@@ -17987,7 +18026,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_actions_list_jobs_for_wo( '' ).
+    return_data = parse_actions_list_jobs_for_01( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~actions_download_workflow_ru01.
