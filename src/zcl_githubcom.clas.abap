@@ -4462,6 +4462,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     credential_authorization-authorized_credential_id = mo_json->value_string( iv_prefix && '/authorized_credential_id' ).
     credential_authorization-authorized_credential_title = mo_json->value_string( iv_prefix && '/authorized_credential_title' ).
     credential_authorization-authorized_credential_note = mo_json->value_string( iv_prefix && '/authorized_credential_note' ).
+    credential_authorization-authorized_credential_expires_ = mo_json->value_string( iv_prefix && '/authorized_credential_expires_at' ).
   ENDMETHOD.
 
   METHOD parse_organization_invitation.
