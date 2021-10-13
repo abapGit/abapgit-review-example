@@ -1627,6 +1627,7 @@ INTERFACE zif_githubcom PUBLIC.
            authorized_credential_id TYPE i,
            authorized_credential_title TYPE string,
            authorized_credential_note TYPE string,
+           authorized_credential_expires_ TYPE string,
          END OF credential_authorization.
 
 * Component schema: organization-invitation, object
