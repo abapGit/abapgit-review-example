@@ -296,6 +296,14 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(credential_authorization) TYPE zif_githubcom=>credential_authorization
       RAISING cx_static_check.
+    METHODS parse_external_group
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(external_group) TYPE zif_githubcom=>external_group
+      RAISING cx_static_check.
+    METHODS parse_external_groups
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(external_groups) TYPE zif_githubcom=>external_groups
+      RAISING cx_static_check.
     METHODS parse_organization_invitation
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(organization_invitation) TYPE zif_githubcom=>organization_invitation
@@ -420,9 +428,9 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(project_column) TYPE zif_githubcom=>project_column
       RAISING cx_static_check.
-    METHODS parse_repository_collaborator_
+    METHODS parse_project_collaborator_per
       IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(repository_collaborator_permis) TYPE zif_githubcom=>repository_collaborator_permis
+      RETURNING VALUE(project_collaborator_permissio) TYPE zif_githubcom=>project_collaborator_permissio
       RAISING cx_static_check.
     METHODS parse_rate_limit
       IMPORTING iv_prefix TYPE string
@@ -699,6 +707,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_repository_invitation
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(repository_invitation) TYPE zif_githubcom=>repository_invitation
+      RAISING cx_static_check.
+    METHODS parse_repository_collaborator_
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(repository_collaborator_permis) TYPE zif_githubcom=>repository_collaborator_permis
       RAISING cx_static_check.
     METHODS parse_commit_comment
       IMPORTING iv_prefix TYPE string
@@ -1430,6 +1442,14 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       RAISING cx_static_check.
     METHODS json_reactions_create_for_te01
       IMPORTING data TYPE zif_githubcom=>bodyreactions_create_for_tea01
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
+    METHODS json_operations_teams_link_ext
+      IMPORTING data TYPE zif_githubcom=>bodyoperations_teams_link_exte
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
+    METHODS json_operations_teams_unlink_e
+      IMPORTING data TYPE zif_githubcom=>bodyoperations_teams_unlink_ex
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
     METHODS json_teams_add_or_update_membe
@@ -4465,6 +4485,18 @@ CLASS zcl_githubcom IMPLEMENTATION.
     credential_authorization-authorized_credential_expires_ = mo_json->value_string( iv_prefix && '/authorized_credential_expires_at' ).
   ENDMETHOD.
 
+  METHOD parse_external_group.
+    external_group-group_id = mo_json->value_string( iv_prefix && '/group_id' ).
+    external_group-group_name = mo_json->value_string( iv_prefix && '/group_name' ).
+    external_group-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
+* todo, array, teams
+* todo, array, members
+  ENDMETHOD.
+
+  METHOD parse_external_groups.
+* todo, array, groups
+  ENDMETHOD.
+
   METHOD parse_organization_invitation.
     organization_invitation-id = mo_json->value_string( iv_prefix && '/id' ).
     organization_invitation-login = mo_json->value_string( iv_prefix && '/login' ).
@@ -4981,9 +5013,9 @@ CLASS zcl_githubcom IMPLEMENTATION.
     project_column-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
   ENDMETHOD.
 
-  METHOD parse_repository_collaborator_.
-    repository_collaborator_permis-permission = mo_json->value_string( iv_prefix && '/permission' ).
-    repository_collaborator_permis-user = parse_nullable_simple_user( iv_prefix ).
+  METHOD parse_project_collaborator_per.
+    project_collaborator_permissio-permission = mo_json->value_string( iv_prefix && '/permission' ).
+    project_collaborator_permissio-user = parse_nullable_simple_user( iv_prefix ).
   ENDMETHOD.
 
   METHOD parse_rate_limit.
@@ -5757,6 +5789,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     repository_invitation-url = mo_json->value_string( iv_prefix && '/url' ).
     repository_invitation-html_url = mo_json->value_string( iv_prefix && '/html_url' ).
     repository_invitation-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
+  ENDMETHOD.
+
+  METHOD parse_repository_collaborator_.
+    repository_collaborator_permis-permission = mo_json->value_string( iv_prefix && '/permission' ).
+    repository_collaborator_permis-user = parse_nullable_simple_user( iv_prefix ).
   ENDMETHOD.
 
   METHOD parse_commit_comment.
@@ -10940,6 +10977,24 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '}'.
   ENDMETHOD.
 
+  METHOD json_operations_teams_link_ext.
+    json = json && '{'.
+    IF data-group_id <> cl_abap_math=>max_int4.
+      json = json && |"group_id": { data-group_id },|.
+    ENDIF.
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
+  METHOD json_operations_teams_unlink_e.
+    json = json && '{'.
+    IF data-group_id <> cl_abap_math=>max_int4.
+      json = json && |"group_id": { data-group_id },|.
+    ENDIF.
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
   METHOD json_teams_add_or_update_membe.
     json = json && '{'.
     json = json && |"role": "{ data-role }",|.
@@ -15269,6 +15324,48 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_activity_list_public_org( '' ).
   ENDMETHOD.
 
+  METHOD zif_githubcom~teams_external_idp_group_info_.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/orgs/{org}/external-group/{group_id}'.
+    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH org.
+    lv_temp = group_id.
+    CONDENSE lv_temp.
+    IF group_id IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'group_id' value = lv_temp ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_external_group( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~teams_list_external_idp_groups.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/orgs/{org}/external-groups'.
+    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH org.
+    IF page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'page' value = page ).
+    ENDIF.
+    IF display_name IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'display_name' value = display_name ).
+    ENDIF.
+    lv_temp = per_page.
+    CONDENSE lv_temp.
+    IF per_page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'per_page' value = lv_temp ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_external_groups( '' ).
+  ENDMETHOD.
+
   METHOD zif_githubcom~orgs_list_failed_invitations.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -16803,6 +16900,36 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, handle more responses
   ENDMETHOD.
 
+  METHOD zif_githubcom~operations_teams_link_external.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/orgs/{org}/teams/{team_slug}/external-groups'.
+    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH org.
+    REPLACE ALL OCCURRENCES OF '{team_slug}' IN lv_uri WITH team_slug.
+    mi_client->request->set_method( 'PATCH' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_operations_teams_link_ext( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_external_group( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~operations_teams_unlink_extern.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/orgs/{org}/teams/{team_slug}/external-groups'.
+    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH org.
+    REPLACE ALL OCCURRENCES OF '{team_slug}' IN lv_uri WITH team_slug.
+    mi_client->request->set_method( 'DELETE' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_operations_teams_unlink_e( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
+  ENDMETHOD.
+
   METHOD zif_githubcom~teams_list_pending_invitations.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -17396,7 +17523,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-    return_data = parse_repository_collaborator_( '' ).
+    return_data = parse_project_collaborator_per( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~projects_list_columns.

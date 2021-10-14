@@ -1630,6 +1630,20 @@ INTERFACE zif_githubcom PUBLIC.
            authorized_credential_expires_ TYPE string,
          END OF credential_authorization.
 
+* Component schema: external-group, object
+  TYPES: BEGIN OF external_group,
+           group_id TYPE i,
+           group_name TYPE string,
+           updated_at TYPE string,
+           teams TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           members TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF external_group.
+
+* Component schema: external-groups, object
+  TYPES: BEGIN OF external_groups,
+           groups TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF external_groups.
+
 * Component schema: organization-invitation, object
   TYPES: BEGIN OF organization_invitation,
            id TYPE i,
@@ -2191,11 +2205,11 @@ INTERFACE zif_githubcom PUBLIC.
            updated_at TYPE string,
          END OF project_column.
 
-* Component schema: repository-collaborator-permission, object
-  TYPES: BEGIN OF repository_collaborator_permis,
+* Component schema: project-collaborator-permission, object
+  TYPES: BEGIN OF project_collaborator_permissio,
            permission TYPE string,
            user TYPE nullable_simple_user,
-         END OF repository_collaborator_permis.
+         END OF project_collaborator_permissio.
 
 * Component schema: rate-limit, object
   TYPES: BEGIN OF rate_limit,
@@ -3137,6 +3151,12 @@ INTERFACE zif_githubcom PUBLIC.
            html_url TYPE string,
            node_id TYPE string,
          END OF repository_invitation.
+
+* Component schema: repository-collaborator-permission, object
+  TYPES: BEGIN OF repository_collaborator_permis,
+           permission TYPE string,
+           user TYPE nullable_simple_user,
+         END OF repository_collaborator_permis.
 
 * Component schema: commit-comment, object
   TYPES: BEGIN OF commit_comment,
@@ -5968,6 +5988,16 @@ INTERFACE zif_githubcom PUBLIC.
   TYPES: BEGIN OF bodyreactions_create_for_tea01,
            content TYPE string,
          END OF bodyreactions_create_for_tea01.
+
+* Component schema: bodyoperations_teams_link_exte, object
+  TYPES: BEGIN OF bodyoperations_teams_link_exte,
+           group_id TYPE i,
+         END OF bodyoperations_teams_link_exte.
+
+* Component schema: bodyoperations_teams_unlink_ex, object
+  TYPES: BEGIN OF bodyoperations_teams_unlink_ex,
+           group_id TYPE i,
+         END OF bodyoperations_teams_unlink_ex.
 
 * Component schema: bodyteams_add_or_update_member, object
   TYPES: BEGIN OF bodyteams_add_or_update_member,
@@ -10269,6 +10299,38 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE response_activity_list_publi02
     RAISING cx_static_check.
 
+* GET - "Get an external group"
+* Operation id: teams/external-idp-group-info-for-org
+* Parameter: group_id, optional, query
+* Parameter: org, required, path
+* Response: 200
+*     application/json, #/components/schemas/external-group
+  METHODS teams_external_idp_group_info_
+    IMPORTING
+      group_id TYPE i OPTIONAL
+      org TYPE string
+    RETURNING
+      VALUE(return_data) TYPE external_group
+    RAISING cx_static_check.
+
+* GET - "List external groups in an organization"
+* Operation id: teams/list-external-idp-groups-for-org
+* Parameter: page, optional, query
+* Parameter: display_name, optional, query
+* Parameter: org, required, path
+* Parameter: per_page, optional, query
+* Response: 200
+*     application/json, #/components/schemas/external-groups
+  METHODS teams_list_external_idp_groups
+    IMPORTING
+      page TYPE string OPTIONAL
+      display_name TYPE string OPTIONAL
+      org TYPE string
+      per_page TYPE i DEFAULT 30
+    RETURNING
+      VALUE(return_data) TYPE external_groups
+    RAISING cx_static_check.
+
 * GET - "List failed organization invitations"
 * Operation id: orgs/list-failed-invitations
 * Parameter: org, required, path
@@ -11596,6 +11658,35 @@ INTERFACE zif_githubcom PUBLIC.
       reaction_id TYPE i
     RAISING cx_static_check.
 
+* PATCH - "Update the connection between an external group and a team"
+* Operation id: operations/teams/link-external-idp-group-to-team-for-org
+* Parameter: org, required, path
+* Parameter: team_slug, required, path
+* Response: 200
+*     application/json, #/components/schemas/external-group
+* Body ref: #/components/schemas/bodyoperations_teams_link_exte
+  METHODS operations_teams_link_external
+    IMPORTING
+      org TYPE string
+      team_slug TYPE string
+      body TYPE bodyoperations_teams_link_exte
+    RETURNING
+      VALUE(return_data) TYPE external_group
+    RAISING cx_static_check.
+
+* DELETE - "Remove the connection between an external group and a team"
+* Operation id: operations/teams/unlink-external-idp-group-from-team-for-org
+* Parameter: org, required, path
+* Parameter: team_slug, required, path
+* Response: 204
+* Body ref: #/components/schemas/bodyoperations_teams_unlink_ex
+  METHODS operations_teams_unlink_extern
+    IMPORTING
+      org TYPE string
+      team_slug TYPE string
+      body TYPE bodyoperations_teams_unlink_ex
+    RAISING cx_static_check.
+
 * GET - "List pending team invitations"
 * Operation id: teams/list-pending-invitations-in-org
 * Parameter: org, required, path
@@ -12169,7 +12260,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: project_id, required, path
 * Parameter: username, required, path
 * Response: 200
-*     application/json, #/components/schemas/repository-collaborator-permission
+*     application/json, #/components/schemas/project-collaborator-permission
 * Response: 304
 * Response: 401
 * Response: 403
@@ -12180,7 +12271,7 @@ INTERFACE zif_githubcom PUBLIC.
       project_id TYPE i
       username TYPE string
     RETURNING
-      VALUE(return_data) TYPE repository_collaborator_permis
+      VALUE(return_data) TYPE project_collaborator_permissio
     RAISING cx_static_check.
 
 * GET - "List project columns"
