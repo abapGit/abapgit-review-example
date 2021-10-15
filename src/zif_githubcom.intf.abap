@@ -5989,15 +5989,15 @@ INTERFACE zif_githubcom PUBLIC.
            content TYPE string,
          END OF bodyreactions_create_for_tea01.
 
-* Component schema: bodyoperations_teams_link_exte, object
-  TYPES: BEGIN OF bodyoperations_teams_link_exte,
+* Component schema: bodyteams_link_external_idp_gr, object
+  TYPES: BEGIN OF bodyteams_link_external_idp_gr,
            group_id TYPE i,
-         END OF bodyoperations_teams_link_exte.
+         END OF bodyteams_link_external_idp_gr.
 
-* Component schema: bodyoperations_teams_unlink_ex, object
-  TYPES: BEGIN OF bodyoperations_teams_unlink_ex,
+* Component schema: bodyteams_unlink_external_idp_, object
+  TYPES: BEGIN OF bodyteams_unlink_external_idp_,
            group_id TYPE i,
-         END OF bodyoperations_teams_unlink_ex.
+         END OF bodyteams_unlink_external_idp_.
 
 * Component schema: bodyteams_add_or_update_member, object
   TYPES: BEGIN OF bodyteams_add_or_update_member,
@@ -10301,13 +10301,13 @@ INTERFACE zif_githubcom PUBLIC.
 
 * GET - "Get an external group"
 * Operation id: teams/external-idp-group-info-for-org
-* Parameter: group_id, optional, query
+* Parameter: group_id, required, path
 * Parameter: org, required, path
 * Response: 200
 *     application/json, #/components/schemas/external-group
   METHODS teams_external_idp_group_info_
     IMPORTING
-      group_id TYPE i OPTIONAL
+      group_id TYPE i
       org TYPE string
     RETURNING
       VALUE(return_data) TYPE external_group
@@ -10323,7 +10323,7 @@ INTERFACE zif_githubcom PUBLIC.
 *     application/json, #/components/schemas/external-groups
   METHODS teams_list_external_idp_groups
     IMPORTING
-      page TYPE string OPTIONAL
+      page TYPE i OPTIONAL
       display_name TYPE string OPTIONAL
       org TYPE string
       per_page TYPE i DEFAULT 30
@@ -11659,32 +11659,32 @@ INTERFACE zif_githubcom PUBLIC.
     RAISING cx_static_check.
 
 * PATCH - "Update the connection between an external group and a team"
-* Operation id: operations/teams/link-external-idp-group-to-team-for-org
+* Operation id: teams/link-external-idp-group-to-team-for-org
 * Parameter: org, required, path
 * Parameter: team_slug, required, path
 * Response: 200
 *     application/json, #/components/schemas/external-group
-* Body ref: #/components/schemas/bodyoperations_teams_link_exte
-  METHODS operations_teams_link_external
+* Body ref: #/components/schemas/bodyteams_link_external_idp_gr
+  METHODS teams_link_external_idp_group_
     IMPORTING
       org TYPE string
       team_slug TYPE string
-      body TYPE bodyoperations_teams_link_exte
+      body TYPE bodyteams_link_external_idp_gr
     RETURNING
       VALUE(return_data) TYPE external_group
     RAISING cx_static_check.
 
 * DELETE - "Remove the connection between an external group and a team"
-* Operation id: operations/teams/unlink-external-idp-group-from-team-for-org
+* Operation id: teams/unlink-external-idp-group-from-team-for-org
 * Parameter: org, required, path
 * Parameter: team_slug, required, path
 * Response: 204
-* Body ref: #/components/schemas/bodyoperations_teams_unlink_ex
-  METHODS operations_teams_unlink_extern
+* Body ref: #/components/schemas/bodyteams_unlink_external_idp_
+  METHODS teams_unlink_external_idp_grou
     IMPORTING
       org TYPE string
       team_slug TYPE string
-      body TYPE bodyoperations_teams_unlink_ex
+      body TYPE bodyteams_unlink_external_idp_
     RAISING cx_static_check.
 
 * GET - "List pending team invitations"
@@ -19947,7 +19947,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: username, required, path
 * Response: 200
 *     application/json, string
-* Response: 202
 * Response: 404
   METHODS users_get_by_username
     IMPORTING
