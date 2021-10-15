@@ -1444,12 +1444,12 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING data TYPE zif_githubcom=>bodyreactions_create_for_tea01
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
-    METHODS json_operations_teams_link_ext
-      IMPORTING data TYPE zif_githubcom=>bodyoperations_teams_link_exte
+    METHODS json_teams_link_external_idp_g
+      IMPORTING data TYPE zif_githubcom=>bodyteams_link_external_idp_gr
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
-    METHODS json_operations_teams_unlink_e
-      IMPORTING data TYPE zif_githubcom=>bodyoperations_teams_unlink_ex
+    METHODS json_teams_unlink_external_idp
+      IMPORTING data TYPE zif_githubcom=>bodyteams_unlink_external_idp_
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
     METHODS json_teams_add_or_update_membe
@@ -10977,7 +10977,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '}'.
   ENDMETHOD.
 
-  METHOD json_operations_teams_link_ext.
+  METHOD json_teams_link_external_idp_g.
     json = json && '{'.
     IF data-group_id <> cl_abap_math=>max_int4.
       json = json && |"group_id": { data-group_id },|.
@@ -10986,7 +10986,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '}'.
   ENDMETHOD.
 
-  METHOD json_operations_teams_unlink_e.
+  METHOD json_teams_unlink_external_idp.
     json = json && '{'.
     IF data-group_id <> cl_abap_math=>max_int4.
       json = json && |"group_id": { data-group_id },|.
@@ -15328,12 +15328,10 @@ CLASS zcl_githubcom IMPLEMENTATION.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
     DATA lv_uri TYPE string VALUE '/orgs/{org}/external-group/{group_id}'.
-    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH org.
     lv_temp = group_id.
     CONDENSE lv_temp.
-    IF group_id IS SUPPLIED.
-      mi_client->request->set_form_field( name = 'group_id' value = lv_temp ).
-    ENDIF.
+    REPLACE ALL OCCURRENCES OF '{group_id}' IN lv_uri WITH lv_temp.
+    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH org.
     mi_client->request->set_method( 'GET' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
@@ -15347,8 +15345,10 @@ CLASS zcl_githubcom IMPLEMENTATION.
     DATA lv_temp TYPE string.
     DATA lv_uri TYPE string VALUE '/orgs/{org}/external-groups'.
     REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH org.
+    lv_temp = page.
+    CONDENSE lv_temp.
     IF page IS SUPPLIED.
-      mi_client->request->set_form_field( name = 'page' value = page ).
+      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
     ENDIF.
     IF display_name IS SUPPLIED.
       mi_client->request->set_form_field( name = 'display_name' value = display_name ).
@@ -16900,7 +16900,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, handle more responses
   ENDMETHOD.
 
-  METHOD zif_githubcom~operations_teams_link_external.
+  METHOD zif_githubcom~teams_link_external_idp_group_.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
     DATA lv_uri TYPE string VALUE '/orgs/{org}/teams/{team_slug}/external-groups'.
@@ -16908,14 +16908,14 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{team_slug}' IN lv_uri WITH team_slug.
     mi_client->request->set_method( 'PATCH' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_operations_teams_link_ext( body ) ).
+    mi_client->request->set_cdata( json_teams_link_external_idp_g( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
     return_data = parse_external_group( '' ).
   ENDMETHOD.
 
-  METHOD zif_githubcom~operations_teams_unlink_extern.
+  METHOD zif_githubcom~teams_unlink_external_idp_grou.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
     DATA lv_uri TYPE string VALUE '/orgs/{org}/teams/{team_slug}/external-groups'.
@@ -16923,7 +16923,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{team_slug}' IN lv_uri WITH team_slug.
     mi_client->request->set_method( 'DELETE' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_operations_teams_unlink_e( body ) ).
+    mi_client->request->set_cdata( json_teams_unlink_external_idp( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     WRITE / mi_client->response->get_cdata( ).
