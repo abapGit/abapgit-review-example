@@ -15328,10 +15328,10 @@ CLASS zcl_githubcom IMPLEMENTATION.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
     DATA lv_uri TYPE string VALUE '/orgs/{org}/external-group/{group_id}'.
+    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH org.
     lv_temp = group_id.
     CONDENSE lv_temp.
     REPLACE ALL OCCURRENCES OF '{group_id}' IN lv_uri WITH lv_temp.
-    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH org.
     mi_client->request->set_method( 'GET' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).

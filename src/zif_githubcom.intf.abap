@@ -10301,14 +10301,14 @@ INTERFACE zif_githubcom PUBLIC.
 
 * GET - "Get an external group"
 * Operation id: teams/external-idp-group-info-for-org
-* Parameter: group_id, required, path
 * Parameter: org, required, path
+* Parameter: group_id, required, path
 * Response: 200
 *     application/json, #/components/schemas/external-group
   METHODS teams_external_idp_group_info_
     IMPORTING
-      group_id TYPE i
       org TYPE string
+      group_id TYPE i
     RETURNING
       VALUE(return_data) TYPE external_group
     RAISING cx_static_check.
