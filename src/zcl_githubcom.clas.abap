@@ -708,6 +708,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(repository_invitation) TYPE zif_githubcom=>repository_invitation
       RAISING cx_static_check.
+    METHODS parse_nullable_collaborator
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(nullable_collaborator) TYPE zif_githubcom=>nullable_collaborator
+      RAISING cx_static_check.
     METHODS parse_repository_collaborator_
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(repository_collaborator_permis) TYPE zif_githubcom=>repository_collaborator_permis
@@ -855,6 +859,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_porter_large_file
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(porter_large_file) TYPE zif_githubcom=>porter_large_file
+      RAISING cx_static_check.
+    METHODS parse_nullable_issue
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(nullable_issue) TYPE zif_githubcom=>nullable_issue
       RAISING cx_static_check.
     METHODS parse_issue_event_label
       IMPORTING iv_prefix TYPE string
@@ -5791,9 +5799,37 @@ CLASS zcl_githubcom IMPLEMENTATION.
     repository_invitation-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
   ENDMETHOD.
 
+  METHOD parse_nullable_collaborator.
+    nullable_collaborator-login = mo_json->value_string( iv_prefix && '/login' ).
+    nullable_collaborator-id = mo_json->value_string( iv_prefix && '/id' ).
+    nullable_collaborator-email = mo_json->value_string( iv_prefix && '/email' ).
+    nullable_collaborator-name = mo_json->value_string( iv_prefix && '/name' ).
+    nullable_collaborator-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
+    nullable_collaborator-avatar_url = mo_json->value_string( iv_prefix && '/avatar_url' ).
+    nullable_collaborator-gravatar_id = mo_json->value_string( iv_prefix && '/gravatar_id' ).
+    nullable_collaborator-url = mo_json->value_string( iv_prefix && '/url' ).
+    nullable_collaborator-html_url = mo_json->value_string( iv_prefix && '/html_url' ).
+    nullable_collaborator-followers_url = mo_json->value_string( iv_prefix && '/followers_url' ).
+    nullable_collaborator-following_url = mo_json->value_string( iv_prefix && '/following_url' ).
+    nullable_collaborator-gists_url = mo_json->value_string( iv_prefix && '/gists_url' ).
+    nullable_collaborator-starred_url = mo_json->value_string( iv_prefix && '/starred_url' ).
+    nullable_collaborator-subscriptions_url = mo_json->value_string( iv_prefix && '/subscriptions_url' ).
+    nullable_collaborator-organizations_url = mo_json->value_string( iv_prefix && '/organizations_url' ).
+    nullable_collaborator-repos_url = mo_json->value_string( iv_prefix && '/repos_url' ).
+    nullable_collaborator-events_url = mo_json->value_string( iv_prefix && '/events_url' ).
+    nullable_collaborator-received_events_url = mo_json->value_string( iv_prefix && '/received_events_url' ).
+    nullable_collaborator-type = mo_json->value_string( iv_prefix && '/type' ).
+    nullable_collaborator-site_admin = mo_json->value_boolean( iv_prefix && '/site_admin' ).
+    nullable_collaborator-permissions-pull = mo_json->value_boolean( iv_prefix && '/permissions/pull' ).
+    nullable_collaborator-permissions-triage = mo_json->value_boolean( iv_prefix && '/permissions/triage' ).
+    nullable_collaborator-permissions-push = mo_json->value_boolean( iv_prefix && '/permissions/push' ).
+    nullable_collaborator-permissions-maintain = mo_json->value_boolean( iv_prefix && '/permissions/maintain' ).
+    nullable_collaborator-permissions-admin = mo_json->value_boolean( iv_prefix && '/permissions/admin' ).
+  ENDMETHOD.
+
   METHOD parse_repository_collaborator_.
     repository_collaborator_permis-permission = mo_json->value_string( iv_prefix && '/permission' ).
-    repository_collaborator_permis-user = parse_nullable_simple_user( iv_prefix ).
+    repository_collaborator_permis-user = parse_nullable_collaborator( iv_prefix ).
   ENDMETHOD.
 
   METHOD parse_commit_comment.
@@ -6295,6 +6331,45 @@ CLASS zcl_githubcom IMPLEMENTATION.
     porter_large_file-size = mo_json->value_string( iv_prefix && '/size' ).
   ENDMETHOD.
 
+  METHOD parse_nullable_issue.
+    nullable_issue-id = mo_json->value_string( iv_prefix && '/id' ).
+    nullable_issue-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
+    nullable_issue-url = mo_json->value_string( iv_prefix && '/url' ).
+    nullable_issue-repository_url = mo_json->value_string( iv_prefix && '/repository_url' ).
+    nullable_issue-labels_url = mo_json->value_string( iv_prefix && '/labels_url' ).
+    nullable_issue-comments_url = mo_json->value_string( iv_prefix && '/comments_url' ).
+    nullable_issue-events_url = mo_json->value_string( iv_prefix && '/events_url' ).
+    nullable_issue-html_url = mo_json->value_string( iv_prefix && '/html_url' ).
+    nullable_issue-number = mo_json->value_string( iv_prefix && '/number' ).
+    nullable_issue-state = mo_json->value_string( iv_prefix && '/state' ).
+    nullable_issue-title = mo_json->value_string( iv_prefix && '/title' ).
+    nullable_issue-body = mo_json->value_string( iv_prefix && '/body' ).
+    nullable_issue-user = parse_nullable_simple_user( iv_prefix ).
+* todo, array, labels
+    nullable_issue-assignee = parse_nullable_simple_user( iv_prefix ).
+* todo, array, assignees
+    nullable_issue-milestone = parse_nullable_milestone( iv_prefix ).
+    nullable_issue-locked = mo_json->value_boolean( iv_prefix && '/locked' ).
+    nullable_issue-active_lock_reason = mo_json->value_string( iv_prefix && '/active_lock_reason' ).
+    nullable_issue-comments = mo_json->value_string( iv_prefix && '/comments' ).
+    nullable_issue-pull_request-merged_at = mo_json->value_string( iv_prefix && '/pull_request/merged_at' ).
+    nullable_issue-pull_request-diff_url = mo_json->value_string( iv_prefix && '/pull_request/diff_url' ).
+    nullable_issue-pull_request-html_url = mo_json->value_string( iv_prefix && '/pull_request/html_url' ).
+    nullable_issue-pull_request-patch_url = mo_json->value_string( iv_prefix && '/pull_request/patch_url' ).
+    nullable_issue-pull_request-url = mo_json->value_string( iv_prefix && '/pull_request/url' ).
+    nullable_issue-closed_at = mo_json->value_string( iv_prefix && '/closed_at' ).
+    nullable_issue-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
+    nullable_issue-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
+    nullable_issue-closed_by = parse_nullable_simple_user( iv_prefix ).
+    nullable_issue-body_html = mo_json->value_string( iv_prefix && '/body_html' ).
+    nullable_issue-body_text = mo_json->value_string( iv_prefix && '/body_text' ).
+    nullable_issue-timeline_url = mo_json->value_string( iv_prefix && '/timeline_url' ).
+    nullable_issue-repository = parse_repository( iv_prefix ).
+    nullable_issue-performed_via_github_app = parse_nullable_integration( iv_prefix ).
+    nullable_issue-author_association = parse_author_association( iv_prefix ).
+    nullable_issue-reactions = parse_reaction_rollup( iv_prefix ).
+  ENDMETHOD.
+
   METHOD parse_issue_event_label.
     issue_event_label-name = mo_json->value_string( iv_prefix && '/name' ).
     issue_event_label-color = mo_json->value_string( iv_prefix && '/color' ).
@@ -6334,7 +6409,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     issue_event-commit_id = mo_json->value_string( iv_prefix && '/commit_id' ).
     issue_event-commit_url = mo_json->value_string( iv_prefix && '/commit_url' ).
     issue_event-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
-    issue_event-issue = parse_issue( iv_prefix ).
+    issue_event-issue = parse_nullable_issue( iv_prefix ).
     issue_event-label = parse_issue_event_label( iv_prefix ).
     issue_event-assignee = parse_nullable_simple_user( iv_prefix ).
     issue_event-assigner = parse_nullable_simple_user( iv_prefix ).
