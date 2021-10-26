@@ -3152,10 +3152,42 @@ INTERFACE zif_githubcom PUBLIC.
            node_id TYPE string,
          END OF repository_invitation.
 
+* Component schema: nullable-collaborator, object
+  TYPES: BEGIN OF subnullable_collaborator_permi,
+           pull TYPE abap_bool,
+           triage TYPE abap_bool,
+           push TYPE abap_bool,
+           maintain TYPE abap_bool,
+           admin TYPE abap_bool,
+         END OF subnullable_collaborator_permi.
+  TYPES: BEGIN OF nullable_collaborator,
+           login TYPE string,
+           id TYPE i,
+           email TYPE string,
+           name TYPE string,
+           node_id TYPE string,
+           avatar_url TYPE string,
+           gravatar_id TYPE string,
+           url TYPE string,
+           html_url TYPE string,
+           followers_url TYPE string,
+           following_url TYPE string,
+           gists_url TYPE string,
+           starred_url TYPE string,
+           subscriptions_url TYPE string,
+           organizations_url TYPE string,
+           repos_url TYPE string,
+           events_url TYPE string,
+           received_events_url TYPE string,
+           type TYPE string,
+           site_admin TYPE abap_bool,
+           permissions TYPE subnullable_collaborator_permi,
+         END OF nullable_collaborator.
+
 * Component schema: repository-collaborator-permission, object
   TYPES: BEGIN OF repository_collaborator_permis,
            permission TYPE string,
-           user TYPE nullable_simple_user,
+           user TYPE nullable_collaborator,
          END OF repository_collaborator_permis.
 
 * Component schema: commit-comment, object
@@ -3761,6 +3793,49 @@ INTERFACE zif_githubcom PUBLIC.
            size TYPE i,
          END OF porter_large_file.
 
+* Component schema: nullable-issue, object
+  TYPES: BEGIN OF subnullable_issue_pull_request,
+           merged_at TYPE string,
+           diff_url TYPE string,
+           html_url TYPE string,
+           patch_url TYPE string,
+           url TYPE string,
+         END OF subnullable_issue_pull_request.
+  TYPES: BEGIN OF nullable_issue,
+           id TYPE i,
+           node_id TYPE string,
+           url TYPE string,
+           repository_url TYPE string,
+           labels_url TYPE string,
+           comments_url TYPE string,
+           events_url TYPE string,
+           html_url TYPE string,
+           number TYPE i,
+           state TYPE string,
+           title TYPE string,
+           body TYPE string,
+           user TYPE nullable_simple_user,
+           labels TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           assignee TYPE nullable_simple_user,
+           assignees TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           milestone TYPE nullable_milestone,
+           locked TYPE abap_bool,
+           active_lock_reason TYPE string,
+           comments TYPE i,
+           pull_request TYPE subnullable_issue_pull_request,
+           closed_at TYPE string,
+           created_at TYPE string,
+           updated_at TYPE string,
+           closed_by TYPE nullable_simple_user,
+           body_html TYPE string,
+           body_text TYPE string,
+           timeline_url TYPE string,
+           repository TYPE repository,
+           performed_via_github_app TYPE nullable_integration,
+           author_association TYPE author_association,
+           reactions TYPE reaction_rollup,
+         END OF nullable_issue.
+
 * Component schema: issue-event-label, object
   TYPES: BEGIN OF issue_event_label,
            name TYPE string,
@@ -3806,7 +3881,7 @@ INTERFACE zif_githubcom PUBLIC.
            commit_id TYPE string,
            commit_url TYPE string,
            created_at TYPE string,
-           issue TYPE issue,
+           issue TYPE nullable_issue,
            label TYPE issue_event_label,
            assignee TYPE nullable_simple_user,
            assigner TYPE nullable_simple_user,
@@ -18173,7 +18248,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 200
 *     application/json, #/components/schemas/topic
 * Response: 404
-* Response: 415
   METHODS repos_get_all_topics
     IMPORTING
       owner TYPE string
@@ -18191,7 +18265,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 200
 *     application/json, #/components/schemas/topic
 * Response: 404
-* Response: 415
 * Response: 422
 * Body ref: #/components/schemas/bodyrepos_replace_all_topics
   METHODS repos_replace_all_topics
@@ -18858,7 +18931,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 200
 *     application/json, #/components/schemas/response_search_topics
 * Response: 304
-* Response: 415
   METHODS search_topics
     IMPORTING
       q TYPE string
