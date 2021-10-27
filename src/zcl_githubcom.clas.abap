@@ -264,6 +264,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(thread_subscription) TYPE zif_githubcom=>thread_subscription
       RAISING cx_static_check.
+    METHODS parse_organization_custom_repo
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(organization_custom_repository) TYPE zif_githubcom=>organization_custom_repository
+      RAISING cx_static_check.
     METHODS parse_organization_full
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(organization_full) TYPE zif_githubcom=>organization_full
@@ -699,6 +703,14 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_code_scanning_sarifs_sta
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(code_scanning_sarifs_status) TYPE zif_githubcom=>code_scanning_sarifs_status
+      RAISING cx_static_check.
+    METHODS parse_codespace_machine
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(codespace_machine) TYPE zif_githubcom=>codespace_machine
+      RAISING cx_static_check.
+    METHODS parse_codespace
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(codespace) TYPE zif_githubcom=>codespace
       RAISING cx_static_check.
     METHODS parse_collaborator
       IMPORTING iv_prefix TYPE string
@@ -1192,6 +1204,14 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(private_user) TYPE zif_githubcom=>private_user
       RAISING cx_static_check.
+    METHODS parse_codespaces_secret
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(codespaces_secret) TYPE zif_githubcom=>codespaces_secret
+      RAISING cx_static_check.
+    METHODS parse_codespaces_user_public_k
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(codespaces_user_public_key) TYPE zif_githubcom=>codespaces_user_public_key
+      RAISING cx_static_check.
     METHODS parse_email
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(email) TYPE zif_githubcom=>email
@@ -1616,6 +1636,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING data TYPE zif_githubcom=>bodycode_scanning_upload_sarif
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
+    METHODS json_codespaces_create_with_re
+      IMPORTING data TYPE zif_githubcom=>bodycodespaces_create_with_rep
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
     METHODS json_repos_add_collaborator
       IMPORTING data TYPE zif_githubcom=>bodyrepos_add_collaborator
       RETURNING VALUE(json) TYPE string
@@ -1868,6 +1892,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING data TYPE zif_githubcom=>bodypulls_update
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
+    METHODS json_codespaces_create_with_pr
+      IMPORTING data TYPE zif_githubcom=>bodycodespaces_create_with_pr_
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
     METHODS json_pulls_create_review_comme
       IMPORTING data TYPE zif_githubcom=>bodypulls_create_review_commen
       RETURNING VALUE(json) TYPE string
@@ -2028,6 +2056,26 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING data TYPE zif_githubcom=>bodyusers_update_authenticated
       RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
+    METHODS json_codespaces_create_or_upda
+      IMPORTING data TYPE zif_githubcom=>bodycodespaces_create_or_updat
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
+    METHODS json_codespaces_delete_secret_
+      IMPORTING data TYPE zif_githubcom=>bodycodespaces_delete_secret_f
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
+    METHODS json_codespaces_set_repositori
+      IMPORTING data TYPE zif_githubcom=>bodycodespaces_set_repositorie
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
+    METHODS json_codespaces_update_for_aut
+      IMPORTING data TYPE zif_githubcom=>bodycodespaces_update_for_auth
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
+    METHODS json_codespaces_delete_for_aut
+      IMPORTING data TYPE zif_githubcom=>bodycodespaces_delete_for_auth
+      RETURNING VALUE(json) TYPE string
+      RAISING cx_static_check.
     METHODS json_users_set_primary_email_v
       IMPORTING data TYPE zif_githubcom=>bodyusers_set_primary_email_vi
       RETURNING VALUE(json) TYPE string
@@ -2183,6 +2231,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_orgs_list
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_orgs_list) TYPE zif_githubcom=>response_orgs_list
+      RAISING cx_static_check.
+    METHODS parse_orgs_list_custom_roles
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_orgs_list_custom_role) TYPE zif_githubcom=>response_orgs_list_custom_role
       RAISING cx_static_check.
     METHODS parse_actions_list_selected_re
       IMPORTING iv_prefix TYPE string
@@ -2564,6 +2616,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_code_scanning_list_re) TYPE zif_githubcom=>response_code_scanning_list_re
       RAISING cx_static_check.
+    METHODS parse_codespaces_repo_machines
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_codespaces_repo_machi) TYPE zif_githubcom=>response_codespaces_repo_machi
+      RAISING cx_static_check.
     METHODS parse_repos_list_collaborators
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_repos_list_collaborat) TYPE zif_githubcom=>response_repos_list_collaborat
@@ -2867,6 +2923,26 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_users_list_blocked_by_au
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_users_list_blocked_by) TYPE zif_githubcom=>response_users_list_blocked_by
+      RAISING cx_static_check.
+    METHODS parse_codespaces_list_for_auth
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_codespaces_list_for_a) TYPE zif_githubcom=>response_codespaces_list_for_a
+      RAISING cx_static_check.
+    METHODS parse_codespaces_list_secrets_
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_codespaces_list_secre) TYPE zif_githubcom=>response_codespaces_list_secre
+      RAISING cx_static_check.
+    METHODS parse_codespaces_create_or_upd
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_codespaces_create_or_) TYPE zif_githubcom=>response_codespaces_create_or_
+      RAISING cx_static_check.
+    METHODS parse_codespaces_list_reposito
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_codespaces_list_repos) TYPE zif_githubcom=>response_codespaces_list_repos
+      RAISING cx_static_check.
+    METHODS parse_codespaces_codespace_mac
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_codespaces_codespace_) TYPE zif_githubcom=>response_codespaces_codespace_
       RAISING cx_static_check.
     METHODS parse_users_set_primary_email_
       IMPORTING iv_prefix TYPE string
@@ -4340,6 +4416,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     minimal_repository-permissions-push = mo_json->value_boolean( iv_prefix && '/permissions/push' ).
     minimal_repository-permissions-triage = mo_json->value_boolean( iv_prefix && '/permissions/triage' ).
     minimal_repository-permissions-pull = mo_json->value_boolean( iv_prefix && '/permissions/pull' ).
+    minimal_repository-role_name = mo_json->value_string( iv_prefix && '/role_name' ).
     minimal_repository-template_repository = parse_nullable_repository( iv_prefix ).
     minimal_repository-temp_clone_token = mo_json->value_string( iv_prefix && '/temp_clone_token' ).
     minimal_repository-delete_branch_on_merge = mo_json->value_boolean( iv_prefix && '/delete_branch_on_merge' ).
@@ -4380,6 +4457,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     thread_subscription-url = mo_json->value_string( iv_prefix && '/url' ).
     thread_subscription-thread_url = mo_json->value_string( iv_prefix && '/thread_url' ).
     thread_subscription-repository_url = mo_json->value_string( iv_prefix && '/repository_url' ).
+  ENDMETHOD.
+
+  METHOD parse_organization_custom_repo.
+    organization_custom_repository-id = mo_json->value_string( iv_prefix && '/id' ).
+    organization_custom_repository-name = mo_json->value_string( iv_prefix && '/name' ).
   ENDMETHOD.
 
   METHOD parse_organization_full.
@@ -4698,6 +4780,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     nullable_minimal_repository-permissions-push = mo_json->value_boolean( iv_prefix && '/permissions/push' ).
     nullable_minimal_repository-permissions-triage = mo_json->value_boolean( iv_prefix && '/permissions/triage' ).
     nullable_minimal_repository-permissions-pull = mo_json->value_boolean( iv_prefix && '/permissions/pull' ).
+    nullable_minimal_repository-role_name = mo_json->value_string( iv_prefix && '/role_name' ).
     nullable_minimal_repository-template_repository = parse_nullable_repository( iv_prefix ).
     nullable_minimal_repository-temp_clone_token = mo_json->value_string( iv_prefix && '/temp_clone_token' ).
     nullable_minimal_repository-delete_branch_on_merge = mo_json->value_boolean( iv_prefix && '/delete_branch_on_merge' ).
@@ -4911,6 +4994,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     team_repository-permissions-triage = mo_json->value_boolean( iv_prefix && '/permissions/triage' ).
     team_repository-permissions-push = mo_json->value_boolean( iv_prefix && '/permissions/push' ).
     team_repository-permissions-maintain = mo_json->value_boolean( iv_prefix && '/permissions/maintain' ).
+    team_repository-role_name = mo_json->value_string( iv_prefix && '/role_name' ).
     team_repository-owner = parse_nullable_simple_user( iv_prefix ).
     team_repository-private = mo_json->value_boolean( iv_prefix && '/private' ).
     team_repository-html_url = mo_json->value_string( iv_prefix && '/html_url' ).
@@ -5758,6 +5842,43 @@ CLASS zcl_githubcom IMPLEMENTATION.
     code_scanning_sarifs_status-analyses_url = mo_json->value_string( iv_prefix && '/analyses_url' ).
   ENDMETHOD.
 
+  METHOD parse_codespace_machine.
+    codespace_machine-name = mo_json->value_string( iv_prefix && '/name' ).
+    codespace_machine-display_name = mo_json->value_string( iv_prefix && '/display_name' ).
+    codespace_machine-operating_system = mo_json->value_string( iv_prefix && '/operating_system' ).
+    codespace_machine-storage_in_bytes = mo_json->value_string( iv_prefix && '/storage_in_bytes' ).
+    codespace_machine-memory_in_bytes = mo_json->value_string( iv_prefix && '/memory_in_bytes' ).
+    codespace_machine-cpus = mo_json->value_string( iv_prefix && '/cpus' ).
+  ENDMETHOD.
+
+  METHOD parse_codespace.
+    codespace-id = mo_json->value_string( iv_prefix && '/id' ).
+    codespace-name = mo_json->value_string( iv_prefix && '/name' ).
+    codespace-environment_id = mo_json->value_string( iv_prefix && '/environment_id' ).
+    codespace-owner = parse_simple_user( iv_prefix ).
+    codespace-billable_owner = parse_simple_user( iv_prefix ).
+    codespace-repository = parse_minimal_repository( iv_prefix ).
+    codespace-machine = parse_codespace_machine( iv_prefix ).
+    codespace-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
+    codespace-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
+    codespace-last_used_at = mo_json->value_string( iv_prefix && '/last_used_at' ).
+    codespace-state = mo_json->value_string( iv_prefix && '/state' ).
+    codespace-url = mo_json->value_string( iv_prefix && '/url' ).
+    codespace-git_status-ahead = mo_json->value_string( iv_prefix && '/git_status/ahead' ).
+    codespace-git_status-behind = mo_json->value_string( iv_prefix && '/git_status/behind' ).
+    codespace-git_status-has_unpushed_changes = mo_json->value_boolean( iv_prefix && '/git_status/has_unpushed_changes' ).
+    codespace-git_status-has_uncommitted_changes = mo_json->value_boolean( iv_prefix && '/git_status/has_uncommitted_changes' ).
+    codespace-git_status-ref = mo_json->value_string( iv_prefix && '/git_status/ref' ).
+    codespace-location = mo_json->value_string( iv_prefix && '/location' ).
+    codespace-auto_stop_delay_minutes = mo_json->value_string( iv_prefix && '/auto_stop_delay_minutes' ).
+    codespace-web_url = mo_json->value_string( iv_prefix && '/web_url' ).
+    codespace-machines_url = mo_json->value_string( iv_prefix && '/machines_url' ).
+    codespace-start_url = mo_json->value_string( iv_prefix && '/start_url' ).
+    codespace-stop_url = mo_json->value_string( iv_prefix && '/stop_url' ).
+    codespace-pulls_url = mo_json->value_string( iv_prefix && '/pulls_url' ).
+* todo, array, recent_folders
+  ENDMETHOD.
+
   METHOD parse_collaborator.
     collaborator-login = mo_json->value_string( iv_prefix && '/login' ).
     collaborator-id = mo_json->value_string( iv_prefix && '/id' ).
@@ -5784,6 +5905,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     collaborator-permissions-push = mo_json->value_boolean( iv_prefix && '/permissions/push' ).
     collaborator-permissions-maintain = mo_json->value_boolean( iv_prefix && '/permissions/maintain' ).
     collaborator-permissions-admin = mo_json->value_boolean( iv_prefix && '/permissions/admin' ).
+    collaborator-role_name = mo_json->value_string( iv_prefix && '/role_name' ).
   ENDMETHOD.
 
   METHOD parse_repository_invitation.
@@ -5825,10 +5947,12 @@ CLASS zcl_githubcom IMPLEMENTATION.
     nullable_collaborator-permissions-push = mo_json->value_boolean( iv_prefix && '/permissions/push' ).
     nullable_collaborator-permissions-maintain = mo_json->value_boolean( iv_prefix && '/permissions/maintain' ).
     nullable_collaborator-permissions-admin = mo_json->value_boolean( iv_prefix && '/permissions/admin' ).
+    nullable_collaborator-role_name = mo_json->value_string( iv_prefix && '/role_name' ).
   ENDMETHOD.
 
   METHOD parse_repository_collaborator_.
     repository_collaborator_permis-permission = mo_json->value_string( iv_prefix && '/permission' ).
+    repository_collaborator_permis-role_name = mo_json->value_string( iv_prefix && '/role_name' ).
     repository_collaborator_permis-user = parse_nullable_collaborator( iv_prefix ).
   ENDMETHOD.
 
@@ -7859,6 +7983,19 @@ CLASS zcl_githubcom IMPLEMENTATION.
     private_user-ldap_dn = mo_json->value_string( iv_prefix && '/ldap_dn' ).
   ENDMETHOD.
 
+  METHOD parse_codespaces_secret.
+    codespaces_secret-name = mo_json->value_string( iv_prefix && '/name' ).
+    codespaces_secret-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
+    codespaces_secret-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
+    codespaces_secret-visibility = mo_json->value_string( iv_prefix && '/visibility' ).
+    codespaces_secret-selected_repositories_url = mo_json->value_string( iv_prefix && '/selected_repositories_url' ).
+  ENDMETHOD.
+
+  METHOD parse_codespaces_user_public_k.
+    codespaces_user_public_key-key_id = mo_json->value_string( iv_prefix && '/key_id' ).
+    codespaces_user_public_key-key = mo_json->value_string( iv_prefix && '/key' ).
+  ENDMETHOD.
+
   METHOD parse_email.
     email-email = mo_json->value_string( iv_prefix && '/email' ).
     email-primary = mo_json->value_boolean( iv_prefix && '/primary' ).
@@ -8258,6 +8395,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
       organization_simple = parse_organization_simple( iv_prefix && '/' && lv_member ).
       APPEND organization_simple TO response_orgs_list.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD parse_orgs_list_custom_roles.
+    response_orgs_list_custom_role-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
+* todo, array, custom_roles
   ENDMETHOD.
 
   METHOD parse_actions_list_selected_re.
@@ -9124,6 +9266,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
+  METHOD parse_codespaces_repo_machines.
+    response_codespaces_repo_machi-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
+* todo, array, machines
+  ENDMETHOD.
+
   METHOD parse_repos_list_collaborators.
     DATA lt_members TYPE string_table.
     DATA lv_member LIKE LINE OF lt_members.
@@ -9928,6 +10075,29 @@ CLASS zcl_githubcom IMPLEMENTATION.
       simple_user = parse_simple_user( iv_prefix && '/' && lv_member ).
       APPEND simple_user TO response_users_list_blocked_by.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD parse_codespaces_list_for_auth.
+    response_codespaces_list_for_a-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
+* todo, array, codespaces
+  ENDMETHOD.
+
+  METHOD parse_codespaces_list_secrets_.
+    response_codespaces_list_secre-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
+* todo, array, secrets
+  ENDMETHOD.
+
+  METHOD parse_codespaces_create_or_upd.
+  ENDMETHOD.
+
+  METHOD parse_codespaces_list_reposito.
+    response_codespaces_list_repos-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
+* todo, array, repositories
+  ENDMETHOD.
+
+  METHOD parse_codespaces_codespace_mac.
+    response_codespaces_codespace_-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
+* todo, array, machines
   ENDMETHOD.
 
   METHOD parse_users_set_primary_email_.
@@ -11622,6 +11792,16 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '}'.
   ENDMETHOD.
 
+  METHOD json_codespaces_create_with_re.
+    json = json && '{'.
+    json = json && |"ref": "{ data-ref }",|.
+    json = json && |"location": "{ data-location }",|.
+    json = json && |"machine": "{ data-machine }",|.
+    json = json && |"working_directory": "{ data-working_directory }",|.
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
   METHOD json_repos_add_collaborator.
     json = json && '{'.
     json = json && |"permission": "{ data-permission }",|.
@@ -12258,6 +12438,15 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '}'.
   ENDMETHOD.
 
+  METHOD json_codespaces_create_with_pr.
+    json = json && '{'.
+    json = json && |"location": "{ data-location }",|.
+    json = json && |"machine": "{ data-machine }",|.
+    json = json && |"working_directory": "{ data-working_directory }",|.
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
   METHOD json_pulls_create_review_comme.
     json = json && '{'.
     json = json && |"body": "{ data-body }",|.
@@ -12702,6 +12891,45 @@ CLASS zcl_githubcom IMPLEMENTATION.
       json = json && |"hireable": false,|.
     ENDIF.
     json = json && |"bio": "{ data-bio }",|.
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
+  METHOD json_codespaces_create_or_upda.
+    json = json && '{'.
+    json = json && |"encrypted_value": "{ data-encrypted_value }",|.
+    json = json && |"key_id": "{ data-key_id }",|.
+*  json = json && '"selected_repository_ids":' not simple
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
+  METHOD json_codespaces_delete_secret_.
+    json = json && '{'.
+    json = json && |"encrypted_value": "{ data-encrypted_value }",|.
+    json = json && |"key_id": "{ data-key_id }",|.
+*  json = json && '"selected_repository_ids":' not simple
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
+  METHOD json_codespaces_set_repositori.
+    json = json && '{'.
+*  json = json && '"selected_repository_ids":' not simple
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
+  METHOD json_codespaces_update_for_aut.
+    json = json && '{'.
+    json = json && |"machine": "{ data-machine }",|.
+    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
+    json = json && '}'.
+  ENDMETHOD.
+
+  METHOD json_codespaces_delete_for_aut.
+    json = json && '{'.
+    json = json && |"machine": "{ data-machine }",|.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -14608,6 +14836,19 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_orgs_list( '' ).
   ENDMETHOD.
 
+  METHOD zif_githubcom~orgs_list_custom_roles.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/organizations/{organization_id}/custom_roles'.
+    REPLACE ALL OCCURRENCES OF '{organization_id}' IN lv_uri WITH organization_id.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_orgs_list_custom_roles( '' ).
+  ENDMETHOD.
+
   METHOD zif_githubcom~orgs_get.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -15278,11 +15519,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     CONDENSE lv_temp.
     IF per_page IS SUPPLIED.
       mi_client->request->set_form_field( name = 'per_page' value = lv_temp ).
-    ENDIF.
-    lv_temp = page.
-    CONDENSE lv_temp.
-    IF page IS SUPPLIED.
-      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
     ENDIF.
     mi_client->request->set_method( 'GET' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
@@ -19636,6 +19872,36 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_code_scanning_sarifs_sta( '' ).
   ENDMETHOD.
 
+  METHOD zif_githubcom~codespaces_create_with_repo_fo.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/codespaces'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_codespaces_create_with_re( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespace( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_repo_machines_for_a.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/codespaces/machines'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    mi_client->request->set_form_field( name = 'location' value = location ).
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespaces_repo_machines( '' ).
+  ENDMETHOD.
+
   METHOD zif_githubcom~repos_list_collaborators.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -22730,6 +22996,24 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_pull_request( '' ).
   ENDMETHOD.
 
+  METHOD zif_githubcom~codespaces_create_with_pr_for_.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/pulls/{pull_number}/codespaces'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    lv_temp = pull_number.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{pull_number}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_codespaces_create_with_pr( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespace( '' ).
+  ENDMETHOD.
+
   METHOD zif_githubcom~pulls_list_review_comments.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -24626,6 +24910,254 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     WRITE / mi_client->response->get_cdata( ).
 * todo, handle more responses
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_list_for_authentica.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces'.
+    lv_temp = per_page.
+    CONDENSE lv_temp.
+    IF per_page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'per_page' value = lv_temp ).
+    ENDIF.
+    lv_temp = page.
+    CONDENSE lv_temp.
+    IF page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespaces_list_for_auth( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_create_for_authenti.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces'.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespace( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_list_secrets_for_au.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/secrets'.
+    lv_temp = per_page.
+    CONDENSE lv_temp.
+    IF per_page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'per_page' value = lv_temp ).
+    ENDIF.
+    lv_temp = page.
+    CONDENSE lv_temp.
+    IF page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespaces_list_secrets_( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_get_public_key_for_.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/secrets/public-key'.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespaces_user_public_k( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_get_secret_for_auth.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/secrets/{secret_name}'.
+    REPLACE ALL OCCURRENCES OF '{secret_name}' IN lv_uri WITH secret_name.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespaces_secret( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_create_or_update_se.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/secrets/{secret_name}'.
+    REPLACE ALL OCCURRENCES OF '{secret_name}' IN lv_uri WITH secret_name.
+    mi_client->request->set_method( 'PUT' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_codespaces_create_or_upda( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespaces_create_or_upd( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_delete_secret_for_a.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/secrets/{secret_name}'.
+    REPLACE ALL OCCURRENCES OF '{secret_name}' IN lv_uri WITH secret_name.
+    mi_client->request->set_method( 'DELETE' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_codespaces_delete_secret_( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_list_repositories_f.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/secrets/{secret_name}/repositories'.
+    REPLACE ALL OCCURRENCES OF '{secret_name}' IN lv_uri WITH secret_name.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespaces_list_reposito( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_set_repositories_fo.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/secrets/{secret_name}/repositories'.
+    REPLACE ALL OCCURRENCES OF '{secret_name}' IN lv_uri WITH secret_name.
+    mi_client->request->set_method( 'PUT' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_codespaces_set_repositori( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_add_repository_for_.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/secrets/{secret_name}/repositories/{repository_id}'.
+    lv_temp = repository_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{repository_id}' IN lv_uri WITH lv_temp.
+    REPLACE ALL OCCURRENCES OF '{secret_name}' IN lv_uri WITH secret_name.
+    mi_client->request->set_method( 'PUT' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_remove_repository_f.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/secrets/{secret_name}/repositories/{repository_id}'.
+    lv_temp = repository_id.
+    CONDENSE lv_temp.
+    REPLACE ALL OCCURRENCES OF '{repository_id}' IN lv_uri WITH lv_temp.
+    REPLACE ALL OCCURRENCES OF '{secret_name}' IN lv_uri WITH secret_name.
+    mi_client->request->set_method( 'DELETE' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_get_for_authenticat.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/{codespace_name}'.
+    REPLACE ALL OCCURRENCES OF '{codespace_name}' IN lv_uri WITH codespace_name.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespace( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_update_for_authenti.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/{codespace_name}'.
+    REPLACE ALL OCCURRENCES OF '{codespace_name}' IN lv_uri WITH codespace_name.
+    mi_client->request->set_method( 'PATCH' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_codespaces_update_for_aut( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespace( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_delete_for_authenti.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/{codespace_name}'.
+    REPLACE ALL OCCURRENCES OF '{codespace_name}' IN lv_uri WITH codespace_name.
+    mi_client->request->set_method( 'DELETE' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    mi_client->request->set_cdata( json_codespaces_delete_for_aut( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    WRITE / mi_client->response->get_cdata( ).
+* todo, handle more responses
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_codespace_machines_.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/{codespace_name}/machines'.
+    REPLACE ALL OCCURRENCES OF '{codespace_name}' IN lv_uri WITH codespace_name.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespaces_codespace_mac( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_start_for_authentic.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/{codespace_name}/start'.
+    REPLACE ALL OCCURRENCES OF '{codespace_name}' IN lv_uri WITH codespace_name.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespace( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_stop_for_authentica.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/user/codespaces/{codespace_name}/stop'.
+    REPLACE ALL OCCURRENCES OF '{codespace_name}' IN lv_uri WITH codespace_name.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespace( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~users_set_primary_email_visibi.
