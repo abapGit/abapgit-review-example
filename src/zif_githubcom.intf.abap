@@ -1466,6 +1466,7 @@ INTERFACE zif_githubcom PUBLIC.
            created_at TYPE string,
            updated_at TYPE string,
            permissions TYPE subminimal_repository_permissi,
+           role_name TYPE string,
            template_repository TYPE nullable_repository,
            temp_clone_token TYPE string,
            delete_branch_on_merge TYPE abap_bool,
@@ -1508,6 +1509,12 @@ INTERFACE zif_githubcom PUBLIC.
            thread_url TYPE string,
            repository_url TYPE string,
          END OF thread_subscription.
+
+* Component schema: organization-custom-repository-role, object
+  TYPES: BEGIN OF organization_custom_repository,
+           id TYPE i,
+           name TYPE string,
+         END OF organization_custom_repository.
 
 * Component schema: organization-full, object
   TYPES: BEGIN OF suborganization_full_plan,
@@ -1863,6 +1870,7 @@ INTERFACE zif_githubcom PUBLIC.
            created_at TYPE string,
            updated_at TYPE string,
            permissions TYPE subnullable_minimal_repository,
+           role_name TYPE string,
            template_repository TYPE nullable_repository,
            temp_clone_token TYPE string,
            delete_branch_on_merge TYPE abap_bool,
@@ -2093,6 +2101,7 @@ INTERFACE zif_githubcom PUBLIC.
            license TYPE nullable_license_simple,
            forks TYPE i,
            permissions TYPE subteam_repository_permissions,
+           role_name TYPE string,
            owner TYPE nullable_simple_user,
            private TYPE abap_bool,
            html_url TYPE string,
@@ -3106,6 +3115,48 @@ INTERFACE zif_githubcom PUBLIC.
            analyses_url TYPE string,
          END OF code_scanning_sarifs_status.
 
+* Component schema: codespace-machine, object
+  TYPES: BEGIN OF codespace_machine,
+           name TYPE string,
+           display_name TYPE string,
+           operating_system TYPE string,
+           storage_in_bytes TYPE i,
+           memory_in_bytes TYPE i,
+           cpus TYPE i,
+         END OF codespace_machine.
+
+* Component schema: codespace, object
+  TYPES: BEGIN OF subcodespace_git_status,
+           ahead TYPE i,
+           behind TYPE i,
+           has_unpushed_changes TYPE abap_bool,
+           has_uncommitted_changes TYPE abap_bool,
+           ref TYPE string,
+         END OF subcodespace_git_status.
+  TYPES: BEGIN OF codespace,
+           id TYPE i,
+           name TYPE string,
+           environment_id TYPE string,
+           owner TYPE simple_user,
+           billable_owner TYPE simple_user,
+           repository TYPE minimal_repository,
+           machine TYPE codespace_machine,
+           created_at TYPE string,
+           updated_at TYPE string,
+           last_used_at TYPE string,
+           state TYPE string,
+           url TYPE string,
+           git_status TYPE subcodespace_git_status,
+           location TYPE string,
+           auto_stop_delay_minutes TYPE i,
+           web_url TYPE string,
+           machines_url TYPE string,
+           start_url TYPE string,
+           stop_url TYPE string,
+           pulls_url TYPE string,
+           recent_folders TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF codespace.
+
 * Component schema: collaborator, object
   TYPES: BEGIN OF subcollaborator_permissions,
            pull TYPE abap_bool,
@@ -3136,6 +3187,7 @@ INTERFACE zif_githubcom PUBLIC.
            type TYPE string,
            site_admin TYPE abap_bool,
            permissions TYPE subcollaborator_permissions,
+           role_name TYPE string,
          END OF collaborator.
 
 * Component schema: repository-invitation, object
@@ -3182,11 +3234,13 @@ INTERFACE zif_githubcom PUBLIC.
            type TYPE string,
            site_admin TYPE abap_bool,
            permissions TYPE subnullable_collaborator_permi,
+           role_name TYPE string,
          END OF nullable_collaborator.
 
 * Component schema: repository-collaborator-permission, object
   TYPES: BEGIN OF repository_collaborator_permis,
            permission TYPE string,
+           role_name TYPE string,
            user TYPE nullable_collaborator,
          END OF repository_collaborator_permis.
 
@@ -5565,6 +5619,21 @@ INTERFACE zif_githubcom PUBLIC.
            ldap_dn TYPE string,
          END OF private_user.
 
+* Component schema: codespaces-secret, object
+  TYPES: BEGIN OF codespaces_secret,
+           name TYPE string,
+           created_at TYPE string,
+           updated_at TYPE string,
+           visibility TYPE string,
+           selected_repositories_url TYPE string,
+         END OF codespaces_secret.
+
+* Component schema: codespaces-user-public-key, object
+  TYPES: BEGIN OF codespaces_user_public_key,
+           key_id TYPE string,
+           key TYPE string,
+         END OF codespaces_user_public_key.
+
 * Component schema: email, object
   TYPES: BEGIN OF email,
            email TYPE string,
@@ -6449,6 +6518,14 @@ INTERFACE zif_githubcom PUBLIC.
            tool_name TYPE string,
          END OF bodycode_scanning_upload_sarif.
 
+* Component schema: bodycodespaces_create_with_rep, object
+  TYPES: BEGIN OF bodycodespaces_create_with_rep,
+           ref TYPE string,
+           location TYPE string,
+           machine TYPE string,
+           working_directory TYPE string,
+         END OF bodycodespaces_create_with_rep.
+
 * Component schema: bodyrepos_add_collaborator, object
   TYPES: BEGIN OF bodyrepos_add_collaborator,
            permission TYPE string,
@@ -6949,6 +7026,13 @@ INTERFACE zif_githubcom PUBLIC.
            maintainer_can_modify TYPE abap_bool,
          END OF bodypulls_update.
 
+* Component schema: bodycodespaces_create_with_pr_, object
+  TYPES: BEGIN OF bodycodespaces_create_with_pr_,
+           location TYPE string,
+           machine TYPE string,
+           working_directory TYPE string,
+         END OF bodycodespaces_create_with_pr_.
+
 * Component schema: bodypulls_create_review_commen, object
   TYPES: BEGIN OF bodypulls_create_review_commen,
            body TYPE string,
@@ -7263,6 +7347,35 @@ INTERFACE zif_githubcom PUBLIC.
            bio TYPE string,
          END OF bodyusers_update_authenticated.
 
+* Component schema: bodycodespaces_create_or_updat, object
+  TYPES: BEGIN OF bodycodespaces_create_or_updat,
+           encrypted_value TYPE string,
+           key_id TYPE string,
+           selected_repository_ids TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF bodycodespaces_create_or_updat.
+
+* Component schema: bodycodespaces_delete_secret_f, object
+  TYPES: BEGIN OF bodycodespaces_delete_secret_f,
+           encrypted_value TYPE string,
+           key_id TYPE string,
+           selected_repository_ids TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF bodycodespaces_delete_secret_f.
+
+* Component schema: bodycodespaces_set_repositorie, object
+  TYPES: BEGIN OF bodycodespaces_set_repositorie,
+           selected_repository_ids TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF bodycodespaces_set_repositorie.
+
+* Component schema: bodycodespaces_update_for_auth, object
+  TYPES: BEGIN OF bodycodespaces_update_for_auth,
+           machine TYPE string,
+         END OF bodycodespaces_update_for_auth.
+
+* Component schema: bodycodespaces_delete_for_auth, object
+  TYPES: BEGIN OF bodycodespaces_delete_for_auth,
+           machine TYPE string,
+         END OF bodycodespaces_delete_for_auth.
+
 * Component schema: bodyusers_set_primary_email_vi, object
   TYPES: BEGIN OF bodyusers_set_primary_email_vi,
            visibility TYPE string,
@@ -7476,6 +7589,12 @@ INTERFACE zif_githubcom PUBLIC.
 
 * Component schema: response_orgs_list, array
   TYPES response_orgs_list TYPE STANDARD TABLE OF organization_simple WITH DEFAULT KEY.
+
+* Component schema: response_orgs_list_custom_roles, object
+  TYPES: BEGIN OF response_orgs_list_custom_role,
+           total_count TYPE i,
+           custom_roles TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF response_orgs_list_custom_role.
 
 * Component schema: response_actions_list_selected_reposito, object
   TYPES: BEGIN OF response_actions_list_selected,
@@ -7865,6 +7984,12 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: response_code_scanning_list_recent_anal, array
   TYPES response_code_scanning_list_re TYPE STANDARD TABLE OF code_scanning_analysis WITH DEFAULT KEY.
 
+* Component schema: response_codespaces_repo_machines_for_a, object
+  TYPES: BEGIN OF response_codespaces_repo_machi,
+           total_count TYPE i,
+           machines TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF response_codespaces_repo_machi.
+
 * Component schema: response_repos_list_collaborators, array
   TYPES response_repos_list_collaborat TYPE STANDARD TABLE OF collaborator WITH DEFAULT KEY.
 
@@ -8146,6 +8271,35 @@ INTERFACE zif_githubcom PUBLIC.
 
 * Component schema: response_users_list_blocked_by_authenti, array
   TYPES response_users_list_blocked_by TYPE STANDARD TABLE OF simple_user WITH DEFAULT KEY.
+
+* Component schema: response_codespaces_list_for_authentica, object
+  TYPES: BEGIN OF response_codespaces_list_for_a,
+           total_count TYPE i,
+           codespaces TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF response_codespaces_list_for_a.
+
+* Component schema: response_codespaces_list_secrets_for_au, object
+  TYPES: BEGIN OF response_codespaces_list_secre,
+           total_count TYPE i,
+           secrets TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF response_codespaces_list_secre.
+
+* Component schema: response_codespaces_create_or_update_se, object
+  TYPES: BEGIN OF response_codespaces_create_or_,
+           dummy_workaround TYPE i,
+         END OF response_codespaces_create_or_.
+
+* Component schema: response_codespaces_list_repositories_f, object
+  TYPES: BEGIN OF response_codespaces_list_repos,
+           total_count TYPE i,
+           repositories TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF response_codespaces_list_repos.
+
+* Component schema: response_codespaces_codespace_machines_, object
+  TYPES: BEGIN OF response_codespaces_codespace_,
+           total_count TYPE i,
+           machines TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF response_codespaces_codespace_.
 
 * Component schema: response_users_set_primary_email_visibi, array
   TYPES response_users_set_primary_ema TYPE STANDARD TABLE OF email WITH DEFAULT KEY.
@@ -9739,6 +9893,18 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE response_orgs_list
     RAISING cx_static_check.
 
+* GET - "List custom repository roles in an organization"
+* Operation id: orgs/list-custom-roles
+* Parameter: organization_id, required, path
+* Response: 200
+*     application/json, #/components/schemas/response_orgs_list_custom_roles
+  METHODS orgs_list_custom_roles
+    IMPORTING
+      organization_id TYPE string
+    RETURNING
+      VALUE(return_data) TYPE response_orgs_list_custom_role
+    RAISING cx_static_check.
+
 * GET - "Get an organization"
 * Operation id: orgs/get
 * Parameter: org, required, path
@@ -10268,7 +10434,6 @@ INTERFACE zif_githubcom PUBLIC.
 * Parameter: before, optional, query
 * Parameter: order, optional, query
 * Parameter: per_page, optional, query
-* Parameter: page, optional, query
 * Response: 200
 *     application/json, #/components/schemas/response_orgs_get_audit_log
   METHODS orgs_get_audit_log
@@ -10280,7 +10445,6 @@ INTERFACE zif_githubcom PUBLIC.
       before TYPE string OPTIONAL
       order TYPE string OPTIONAL
       per_page TYPE i DEFAULT 30
-      page TYPE i DEFAULT 1
     RETURNING
       VALUE(return_data) TYPE response_orgs_get_audit_log
     RAISING cx_static_check.
@@ -14311,6 +14475,48 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE code_scanning_sarifs_status
     RAISING cx_static_check.
 
+* POST - "Create a codespace in a repository"
+* Operation id: codespaces/create-with-repo-for-authenticated-user
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Response: 201
+*     application/json, #/components/schemas/codespace
+* Response: 202
+*     application/json, #/components/schemas/codespace
+* Response: 401
+* Response: 403
+* Response: 404
+* Body ref: #/components/schemas/bodycodespaces_create_with_rep
+  METHODS codespaces_create_with_repo_fo
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      body TYPE bodycodespaces_create_with_rep
+    RETURNING
+      VALUE(return_data) TYPE codespace
+    RAISING cx_static_check.
+
+* GET - "List available machine types for a repository"
+* Operation id: codespaces/repo-machines-for-authenticated-user
+* Parameter: location, required, query
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Response: 200
+*     application/json, #/components/schemas/response_codespaces_repo_machines_for_a
+* Response: 304
+* Response: 401
+* Response: 403
+* Response: 404
+* Response: 500
+  METHODS codespaces_repo_machines_for_a
+    IMPORTING
+      location TYPE string
+      owner TYPE string
+      repo TYPE string
+    RETURNING
+      VALUE(return_data) TYPE response_codespaces_repo_machi
+    RAISING cx_static_check.
+
 * GET - "List repository collaborators"
 * Operation id: repos/list-collaborators
 * Parameter: affiliation, optional, query
@@ -17263,6 +17469,29 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE pull_request
     RAISING cx_static_check.
 
+* POST - "Create a codespace from a pull request"
+* Operation id: codespaces/create-with-pr-for-authenticated-user
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: pull_number, required, path
+* Response: 201
+*     application/json, #/components/schemas/codespace
+* Response: 202
+*     application/json, #/components/schemas/codespace
+* Response: 401
+* Response: 403
+* Response: 404
+* Body ref: #/components/schemas/bodycodespaces_create_with_pr_
+  METHODS codespaces_create_with_pr_for_
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      pull_number TYPE i
+      body TYPE bodycodespaces_create_with_pr_
+    RETURNING
+      VALUE(return_data) TYPE codespace
+    RAISING cx_static_check.
+
 * GET - "List review comments on a pull request"
 * Operation id: pulls/list-review-comments
 * Parameter: direction, optional, query
@@ -19043,6 +19272,268 @@ INTERFACE zif_githubcom PUBLIC.
   METHODS users_unblock
     IMPORTING
       username TYPE string
+    RAISING cx_static_check.
+
+* GET - "List codespaces for the authenticated user"
+* Operation id: codespaces/list-for-authenticated-user
+* Parameter: per_page, optional, query
+* Parameter: page, optional, query
+* Response: 200
+*     application/json, #/components/schemas/response_codespaces_list_for_authentica
+* Response: 304
+* Response: 401
+* Response: 403
+* Response: 404
+* Response: 500
+  METHODS codespaces_list_for_authentica
+    IMPORTING
+      per_page TYPE i DEFAULT 30
+      page TYPE i DEFAULT 1
+    RETURNING
+      VALUE(return_data) TYPE response_codespaces_list_for_a
+    RAISING cx_static_check.
+
+* POST - "Create a codespace for the authenticated user"
+* Operation id: codespaces/create-for-authenticated-user
+* Response: 201
+*     application/json, #/components/schemas/codespace
+* Response: 202
+*     application/json, #/components/schemas/codespace
+* Response: 401
+* Response: 403
+* Response: 404
+* Body schema: string
+  METHODS codespaces_create_for_authenti
+    RETURNING
+      VALUE(return_data) TYPE codespace
+    RAISING cx_static_check.
+
+* GET - "List secrets for the authenticated user"
+* Operation id: codespaces/list-secrets-for-authenticated-user
+* Parameter: per_page, optional, query
+* Parameter: page, optional, query
+* Response: 200
+*     application/json, #/components/schemas/response_codespaces_list_secrets_for_au
+  METHODS codespaces_list_secrets_for_au
+    IMPORTING
+      per_page TYPE i DEFAULT 30
+      page TYPE i DEFAULT 1
+    RETURNING
+      VALUE(return_data) TYPE response_codespaces_list_secre
+    RAISING cx_static_check.
+
+* GET - "Get public key for the authenticated user"
+* Operation id: codespaces/get-public-key-for-authenticated-user
+* Response: 200
+*     application/json, #/components/schemas/codespaces-user-public-key
+  METHODS codespaces_get_public_key_for_
+    RETURNING
+      VALUE(return_data) TYPE codespaces_user_public_key
+    RAISING cx_static_check.
+
+* GET - "Get a secret for the authenticated user"
+* Operation id: codespaces/get-secret-for-authenticated-user
+* Parameter: secret_name, required, path
+* Response: 200
+*     application/json, #/components/schemas/codespaces-secret
+  METHODS codespaces_get_secret_for_auth
+    IMPORTING
+      secret_name TYPE string
+    RETURNING
+      VALUE(return_data) TYPE codespaces_secret
+    RAISING cx_static_check.
+
+* PUT - "Create or update a secret for the authenticated user"
+* Operation id: codespaces/create-or-update-secret-for-authenticated-user
+* Parameter: secret_name, required, path
+* Response: 201
+*     application/json, #/components/schemas/response_codespaces_create_or_update_se
+* Response: 204
+* Response: 404
+* Response: 422
+* Body ref: #/components/schemas/bodycodespaces_create_or_updat
+  METHODS codespaces_create_or_update_se
+    IMPORTING
+      secret_name TYPE string
+      body TYPE bodycodespaces_create_or_updat
+    RETURNING
+      VALUE(return_data) TYPE response_codespaces_create_or_
+    RAISING cx_static_check.
+
+* DELETE - "Delete a secret for the authenticated user"
+* Operation id: codespaces/delete-secret-for-authenticated-user
+* Parameter: secret_name, required, path
+* Response: 204
+* Body ref: #/components/schemas/bodycodespaces_delete_secret_f
+  METHODS codespaces_delete_secret_for_a
+    IMPORTING
+      secret_name TYPE string
+      body TYPE bodycodespaces_delete_secret_f
+    RAISING cx_static_check.
+
+* GET - "List selected repositories for a user secret"
+* Operation id: codespaces/list-repositories-for-secret-for-authenticated-user
+* Parameter: secret_name, required, path
+* Response: 200
+*     application/json, #/components/schemas/response_codespaces_list_repositories_f
+* Response: 401
+* Response: 403
+* Response: 404
+* Response: 500
+  METHODS codespaces_list_repositories_f
+    IMPORTING
+      secret_name TYPE string
+    RETURNING
+      VALUE(return_data) TYPE response_codespaces_list_repos
+    RAISING cx_static_check.
+
+* PUT - "Set selected repositories for a user secret"
+* Operation id: codespaces/set-repositories-for-secret-for-authenticated-user
+* Parameter: secret_name, required, path
+* Response: 204
+* Response: 401
+* Response: 403
+* Response: 404
+* Response: 500
+* Body ref: #/components/schemas/bodycodespaces_set_repositorie
+  METHODS codespaces_set_repositories_fo
+    IMPORTING
+      secret_name TYPE string
+      body TYPE bodycodespaces_set_repositorie
+    RAISING cx_static_check.
+
+* PUT - "Add a selected repository to a user secret"
+* Operation id: codespaces/add-repository-for-secret-for-authenticated-user
+* Parameter: repository_id, required, path
+* Parameter: secret_name, required, path
+* Response: 204
+* Response: 401
+* Response: 403
+* Response: 404
+* Response: 500
+  METHODS codespaces_add_repository_for_
+    IMPORTING
+      repository_id TYPE i
+      secret_name TYPE string
+    RAISING cx_static_check.
+
+* DELETE - "Remove a selected repository from a user secret"
+* Operation id: codespaces/remove-repository-for-secret-for-authenticated-user
+* Parameter: repository_id, required, path
+* Parameter: secret_name, required, path
+* Response: 204
+* Response: 401
+* Response: 403
+* Response: 404
+* Response: 500
+  METHODS codespaces_remove_repository_f
+    IMPORTING
+      repository_id TYPE i
+      secret_name TYPE string
+    RAISING cx_static_check.
+
+* GET - "Get a codespace for the authenticated user"
+* Operation id: codespaces/get-for-authenticated-user
+* Parameter: codespace_name, required, path
+* Response: 200
+*     application/json, #/components/schemas/codespace
+* Response: 304
+* Response: 401
+* Response: 403
+* Response: 404
+* Response: 500
+  METHODS codespaces_get_for_authenticat
+    IMPORTING
+      codespace_name TYPE string
+    RETURNING
+      VALUE(return_data) TYPE codespace
+    RAISING cx_static_check.
+
+* PATCH - "Update a codespace for the authenticated user"
+* Operation id: codespaces/update-for-authenticated-user
+* Parameter: codespace_name, required, path
+* Response: 200
+*     application/json, #/components/schemas/codespace
+* Response: 401
+* Response: 403
+* Response: 404
+* Body ref: #/components/schemas/bodycodespaces_update_for_auth
+  METHODS codespaces_update_for_authenti
+    IMPORTING
+      codespace_name TYPE string
+      body TYPE bodycodespaces_update_for_auth
+    RETURNING
+      VALUE(return_data) TYPE codespace
+    RAISING cx_static_check.
+
+* DELETE - "Delete a codespace for the authenticated user"
+* Operation id: codespaces/delete-for-authenticated-user
+* Parameter: codespace_name, required, path
+* Response: 202
+* Response: 304
+* Response: 401
+* Response: 403
+* Response: 404
+* Response: 500
+* Body ref: #/components/schemas/bodycodespaces_delete_for_auth
+  METHODS codespaces_delete_for_authenti
+    IMPORTING
+      codespace_name TYPE string
+      body TYPE bodycodespaces_delete_for_auth
+    RAISING cx_static_check.
+
+* GET - "List machine types for a codespace"
+* Operation id: codespaces/codespace-machines-for-authenticated-user
+* Parameter: codespace_name, required, path
+* Response: 200
+*     application/json, #/components/schemas/response_codespaces_codespace_machines_
+* Response: 304
+* Response: 401
+* Response: 403
+* Response: 404
+* Response: 500
+  METHODS codespaces_codespace_machines_
+    IMPORTING
+      codespace_name TYPE string
+    RETURNING
+      VALUE(return_data) TYPE response_codespaces_codespace_
+    RAISING cx_static_check.
+
+* POST - "Start a codespace for the authenticated user"
+* Operation id: codespaces/start-for-authenticated-user
+* Parameter: codespace_name, required, path
+* Response: 200
+*     application/json, #/components/schemas/codespace
+* Response: 304
+* Response: 400
+* Response: 401
+* Response: 402
+*     application/json, #/components/schemas/basic-error
+* Response: 403
+* Response: 404
+* Response: 409
+* Response: 500
+  METHODS codespaces_start_for_authentic
+    IMPORTING
+      codespace_name TYPE string
+    RETURNING
+      VALUE(return_data) TYPE codespace
+    RAISING cx_static_check.
+
+* POST - "Stop a codespace for the authenticated user"
+* Operation id: codespaces/stop-for-authenticated-user
+* Parameter: codespace_name, required, path
+* Response: 200
+*     application/json, #/components/schemas/codespace
+* Response: 401
+* Response: 403
+* Response: 404
+* Response: 500
+  METHODS codespaces_stop_for_authentica
+    IMPORTING
+      codespace_name TYPE string
+    RETURNING
+      VALUE(return_data) TYPE codespace
     RAISING cx_static_check.
 
 * PATCH - "Set primary email visibility for the authenticated user"
