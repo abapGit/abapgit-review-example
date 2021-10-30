@@ -544,6 +544,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(verification) TYPE zif_githubcom=>verification
       RAISING cx_static_check.
+    METHODS parse_diff_entry
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(diff_entry) TYPE zif_githubcom=>diff_entry
+      RAISING cx_static_check.
     METHODS parse_commit
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(commit) TYPE zif_githubcom=>commit
@@ -771,10 +775,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_community_profile
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(community_profile) TYPE zif_githubcom=>community_profile
-      RAISING cx_static_check.
-    METHODS parse_diff_entry
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(diff_entry) TYPE zif_githubcom=>diff_entry
       RAISING cx_static_check.
     METHODS parse_commit_comparison
       IMPORTING iv_prefix TYPE string
@@ -5503,6 +5503,20 @@ CLASS zcl_githubcom IMPLEMENTATION.
     verification-signature = mo_json->value_string( iv_prefix && '/signature' ).
   ENDMETHOD.
 
+  METHOD parse_diff_entry.
+    diff_entry-sha = mo_json->value_string( iv_prefix && '/sha' ).
+    diff_entry-filename = mo_json->value_string( iv_prefix && '/filename' ).
+    diff_entry-status = mo_json->value_string( iv_prefix && '/status' ).
+    diff_entry-additions = mo_json->value_string( iv_prefix && '/additions' ).
+    diff_entry-deletions = mo_json->value_string( iv_prefix && '/deletions' ).
+    diff_entry-changes = mo_json->value_string( iv_prefix && '/changes' ).
+    diff_entry-blob_url = mo_json->value_string( iv_prefix && '/blob_url' ).
+    diff_entry-raw_url = mo_json->value_string( iv_prefix && '/raw_url' ).
+    diff_entry-contents_url = mo_json->value_string( iv_prefix && '/contents_url' ).
+    diff_entry-patch = mo_json->value_string( iv_prefix && '/patch' ).
+    diff_entry-previous_filename = mo_json->value_string( iv_prefix && '/previous_filename' ).
+  ENDMETHOD.
+
   METHOD parse_commit.
     commit-url = mo_json->value_string( iv_prefix && '/url' ).
     commit-sha = mo_json->value_string( iv_prefix && '/sha' ).
@@ -6108,20 +6122,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     community_profile-files-pull_request_template = parse_nullable_community_healt( iv_prefix ).
     community_profile-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
     community_profile-content_reports_enabled = mo_json->value_boolean( iv_prefix && '/content_reports_enabled' ).
-  ENDMETHOD.
-
-  METHOD parse_diff_entry.
-    diff_entry-sha = mo_json->value_string( iv_prefix && '/sha' ).
-    diff_entry-filename = mo_json->value_string( iv_prefix && '/filename' ).
-    diff_entry-status = mo_json->value_string( iv_prefix && '/status' ).
-    diff_entry-additions = mo_json->value_string( iv_prefix && '/additions' ).
-    diff_entry-deletions = mo_json->value_string( iv_prefix && '/deletions' ).
-    diff_entry-changes = mo_json->value_string( iv_prefix && '/changes' ).
-    diff_entry-blob_url = mo_json->value_string( iv_prefix && '/blob_url' ).
-    diff_entry-raw_url = mo_json->value_string( iv_prefix && '/raw_url' ).
-    diff_entry-contents_url = mo_json->value_string( iv_prefix && '/contents_url' ).
-    diff_entry-patch = mo_json->value_string( iv_prefix && '/patch' ).
-    diff_entry-previous_filename = mo_json->value_string( iv_prefix && '/previous_filename' ).
   ENDMETHOD.
 
   METHOD parse_commit_comparison.
@@ -10667,6 +10667,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && |"visibility": "{ data-visibility }",|.
 *  json = json && '"selected_organization_ids":' not simple
 *  json = json && '"runners":' not simple
+    IF data-allows_public_repositories = abap_true.
+      json = json && |"allows_public_repositories": true,|.
+    ELSEIF data-allows_public_repositories = abap_false.
+      json = json && |"allows_public_repositories": false,|.
+    ENDIF.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -10675,6 +10680,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '{'.
     json = json && |"name": "{ data-name }",|.
     json = json && |"visibility": "{ data-visibility }",|.
+    IF data-allows_public_repositories = abap_true.
+      json = json && |"allows_public_repositories": true,|.
+    ELSEIF data-allows_public_repositories = abap_false.
+      json = json && |"allows_public_repositories": false,|.
+    ENDIF.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -10683,6 +10693,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '{'.
     json = json && |"name": "{ data-name }",|.
     json = json && |"visibility": "{ data-visibility }",|.
+    IF data-allows_public_repositories = abap_true.
+      json = json && |"allows_public_repositories": true,|.
+    ELSEIF data-allows_public_repositories = abap_false.
+      json = json && |"allows_public_repositories": false,|.
+    ENDIF.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -10872,6 +10887,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && |"visibility": "{ data-visibility }",|.
 *  json = json && '"selected_repository_ids":' not simple
 *  json = json && '"runners":' not simple
+    IF data-allows_public_repositories = abap_true.
+      json = json && |"allows_public_repositories": true,|.
+    ELSEIF data-allows_public_repositories = abap_false.
+      json = json && |"allows_public_repositories": false,|.
+    ENDIF.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -10880,6 +10900,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '{'.
     json = json && |"name": "{ data-name }",|.
     json = json && |"visibility": "{ data-visibility }",|.
+    IF data-allows_public_repositories = abap_true.
+      json = json && |"allows_public_repositories": true,|.
+    ELSEIF data-allows_public_repositories = abap_false.
+      json = json && |"allows_public_repositories": false,|.
+    ENDIF.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.
@@ -10888,6 +10913,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     json = json && '{'.
     json = json && |"name": "{ data-name }",|.
     json = json && |"visibility": "{ data-visibility }",|.
+    IF data-allows_public_repositories = abap_true.
+      json = json && |"allows_public_repositories": true,|.
+    ELSEIF data-allows_public_repositories = abap_false.
+      json = json && |"allows_public_repositories": false,|.
+    ENDIF.
     json = substring( val = json off = 0 len = strlen( json ) - 1 ).
     json = json && '}'.
   ENDMETHOD.

@@ -2720,6 +2720,21 @@ INTERFACE zif_githubcom PUBLIC.
            signature TYPE string,
          END OF verification.
 
+* Component schema: diff-entry, object
+  TYPES: BEGIN OF diff_entry,
+           sha TYPE string,
+           filename TYPE string,
+           status TYPE string,
+           additions TYPE i,
+           deletions TYPE i,
+           changes TYPE i,
+           blob_url TYPE string,
+           raw_url TYPE string,
+           contents_url TYPE string,
+           patch TYPE string,
+           previous_filename TYPE string,
+         END OF diff_entry.
+
 * Component schema: commit, object
   TYPES: BEGIN OF subcommit_stats,
            additions TYPE i,
@@ -3423,21 +3438,6 @@ INTERFACE zif_githubcom PUBLIC.
            updated_at TYPE string,
            content_reports_enabled TYPE abap_bool,
          END OF community_profile.
-
-* Component schema: diff-entry, object
-  TYPES: BEGIN OF diff_entry,
-           sha TYPE string,
-           filename TYPE string,
-           status TYPE string,
-           additions TYPE i,
-           deletions TYPE i,
-           changes TYPE i,
-           blob_url TYPE string,
-           raw_url TYPE string,
-           contents_url TYPE string,
-           patch TYPE string,
-           previous_filename TYPE string,
-         END OF diff_entry.
 
 * Component schema: commit-comparison, object
   TYPES: BEGIN OF commit_comparison,
@@ -5777,18 +5777,21 @@ INTERFACE zif_githubcom PUBLIC.
            visibility TYPE string,
            selected_organization_ids TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            runners TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           allows_public_repositories TYPE abap_bool,
          END OF bodyenterprise_admin_create_se.
 
 * Component schema: bodyenterprise_admin_update_se, object
   TYPES: BEGIN OF bodyenterprise_admin_update_se,
            name TYPE string,
            visibility TYPE string,
+           allows_public_repositories TYPE abap_bool,
          END OF bodyenterprise_admin_update_se.
 
 * Component schema: bodyenterprise_admin_delete_se, object
   TYPES: BEGIN OF bodyenterprise_admin_delete_se,
            name TYPE string,
            visibility TYPE string,
+           allows_public_repositories TYPE abap_bool,
          END OF bodyenterprise_admin_delete_se.
 
 * Component schema: bodyenterprise_admin_set_org_a, object
@@ -5907,18 +5910,21 @@ INTERFACE zif_githubcom PUBLIC.
            visibility TYPE string,
            selected_repository_ids TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            runners TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+           allows_public_repositories TYPE abap_bool,
          END OF bodyactions_create_self_hosted.
 
 * Component schema: bodyactions_update_self_hosted, object
   TYPES: BEGIN OF bodyactions_update_self_hosted,
            name TYPE string,
            visibility TYPE string,
+           allows_public_repositories TYPE abap_bool,
          END OF bodyactions_update_self_hosted.
 
 * Component schema: bodyactions_delete_self_hosted, object
   TYPES: BEGIN OF bodyactions_delete_self_hosted,
            name TYPE string,
            visibility TYPE string,
+           allows_public_repositories TYPE abap_bool,
          END OF bodyactions_delete_self_hosted.
 
 * Component schema: bodyactions_set_repo_access_to, object
