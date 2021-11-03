@@ -708,13 +708,17 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(code_scanning_sarifs_status) TYPE zif_githubcom=>code_scanning_sarifs_status
       RAISING cx_static_check.
-    METHODS parse_codespace_machine
+    METHODS parse_nullable_codespace_machi
       IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(codespace_machine) TYPE zif_githubcom=>codespace_machine
+      RETURNING VALUE(nullable_codespace_machine) TYPE zif_githubcom=>nullable_codespace_machine
       RAISING cx_static_check.
     METHODS parse_codespace
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(codespace) TYPE zif_githubcom=>codespace
+      RAISING cx_static_check.
+    METHODS parse_codespace_machine
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(codespace_machine) TYPE zif_githubcom=>codespace_machine
       RAISING cx_static_check.
     METHODS parse_collaborator
       IMPORTING iv_prefix TYPE string
@@ -5619,7 +5623,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     check_run-name = mo_json->value_string( iv_prefix && '/name' ).
     check_run-check_suite-id = mo_json->value_string( iv_prefix && '/check_suite/id' ).
     check_run-app = parse_nullable_integration( iv_prefix ).
-    check_run-pull_requests = mo_json->value_string( iv_prefix && '/pull_requests' ).
+* todo, array, pull_requests
     check_run-deployment = parse_deployment_simple( iv_prefix ).
   ENDMETHOD.
 
@@ -5856,13 +5860,13 @@ CLASS zcl_githubcom IMPLEMENTATION.
     code_scanning_sarifs_status-analyses_url = mo_json->value_string( iv_prefix && '/analyses_url' ).
   ENDMETHOD.
 
-  METHOD parse_codespace_machine.
-    codespace_machine-name = mo_json->value_string( iv_prefix && '/name' ).
-    codespace_machine-display_name = mo_json->value_string( iv_prefix && '/display_name' ).
-    codespace_machine-operating_system = mo_json->value_string( iv_prefix && '/operating_system' ).
-    codespace_machine-storage_in_bytes = mo_json->value_string( iv_prefix && '/storage_in_bytes' ).
-    codespace_machine-memory_in_bytes = mo_json->value_string( iv_prefix && '/memory_in_bytes' ).
-    codespace_machine-cpus = mo_json->value_string( iv_prefix && '/cpus' ).
+  METHOD parse_nullable_codespace_machi.
+    nullable_codespace_machine-name = mo_json->value_string( iv_prefix && '/name' ).
+    nullable_codespace_machine-display_name = mo_json->value_string( iv_prefix && '/display_name' ).
+    nullable_codespace_machine-operating_system = mo_json->value_string( iv_prefix && '/operating_system' ).
+    nullable_codespace_machine-storage_in_bytes = mo_json->value_string( iv_prefix && '/storage_in_bytes' ).
+    nullable_codespace_machine-memory_in_bytes = mo_json->value_string( iv_prefix && '/memory_in_bytes' ).
+    nullable_codespace_machine-cpus = mo_json->value_string( iv_prefix && '/cpus' ).
   ENDMETHOD.
 
   METHOD parse_codespace.
@@ -5872,7 +5876,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     codespace-owner = parse_simple_user( iv_prefix ).
     codespace-billable_owner = parse_simple_user( iv_prefix ).
     codespace-repository = parse_minimal_repository( iv_prefix ).
-    codespace-machine = parse_codespace_machine( iv_prefix ).
+    codespace-machine = parse_nullable_codespace_machi( iv_prefix ).
     codespace-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
     codespace-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
     codespace-last_used_at = mo_json->value_string( iv_prefix && '/last_used_at' ).
@@ -5891,6 +5895,15 @@ CLASS zcl_githubcom IMPLEMENTATION.
     codespace-stop_url = mo_json->value_string( iv_prefix && '/stop_url' ).
     codespace-pulls_url = mo_json->value_string( iv_prefix && '/pulls_url' ).
 * todo, array, recent_folders
+  ENDMETHOD.
+
+  METHOD parse_codespace_machine.
+    codespace_machine-name = mo_json->value_string( iv_prefix && '/name' ).
+    codespace_machine-display_name = mo_json->value_string( iv_prefix && '/display_name' ).
+    codespace_machine-operating_system = mo_json->value_string( iv_prefix && '/operating_system' ).
+    codespace_machine-storage_in_bytes = mo_json->value_string( iv_prefix && '/storage_in_bytes' ).
+    codespace_machine-memory_in_bytes = mo_json->value_string( iv_prefix && '/memory_in_bytes' ).
+    codespace_machine-cpus = mo_json->value_string( iv_prefix && '/cpus' ).
   ENDMETHOD.
 
   METHOD parse_collaborator.

@@ -2885,7 +2885,7 @@ INTERFACE zif_githubcom PUBLIC.
            name TYPE string,
            check_suite TYPE subcheck_run_check_suite,
            app TYPE nullable_integration,
-           pull_requests TYPE string,
+           pull_requests TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            deployment TYPE deployment_simple,
          END OF check_run.
 
@@ -3130,15 +3130,15 @@ INTERFACE zif_githubcom PUBLIC.
            analyses_url TYPE string,
          END OF code_scanning_sarifs_status.
 
-* Component schema: codespace-machine, object
-  TYPES: BEGIN OF codespace_machine,
+* Component schema: nullable-codespace-machine, object
+  TYPES: BEGIN OF nullable_codespace_machine,
            name TYPE string,
            display_name TYPE string,
            operating_system TYPE string,
            storage_in_bytes TYPE i,
            memory_in_bytes TYPE i,
            cpus TYPE i,
-         END OF codespace_machine.
+         END OF nullable_codespace_machine.
 
 * Component schema: codespace, object
   TYPES: BEGIN OF subcodespace_git_status,
@@ -3155,7 +3155,7 @@ INTERFACE zif_githubcom PUBLIC.
            owner TYPE simple_user,
            billable_owner TYPE simple_user,
            repository TYPE minimal_repository,
-           machine TYPE codespace_machine,
+           machine TYPE nullable_codespace_machine,
            created_at TYPE string,
            updated_at TYPE string,
            last_used_at TYPE string,
@@ -3171,6 +3171,16 @@ INTERFACE zif_githubcom PUBLIC.
            pulls_url TYPE string,
            recent_folders TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF codespace.
+
+* Component schema: codespace-machine, object
+  TYPES: BEGIN OF codespace_machine,
+           name TYPE string,
+           display_name TYPE string,
+           operating_system TYPE string,
+           storage_in_bytes TYPE i,
+           memory_in_bytes TYPE i,
+           cpus TYPE i,
+         END OF codespace_machine.
 
 * Component schema: collaborator, object
   TYPES: BEGIN OF subcollaborator_permissions,
