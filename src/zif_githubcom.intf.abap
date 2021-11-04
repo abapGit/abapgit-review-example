@@ -19294,6 +19294,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Operation id: codespaces/list-for-authenticated-user
 * Parameter: per_page, optional, query
 * Parameter: page, optional, query
+* Parameter: repository_id, optional, query
 * Response: 200
 *     application/json, #/components/schemas/response_codespaces_list_for_authentica
 * Response: 304
@@ -19305,6 +19306,7 @@ INTERFACE zif_githubcom PUBLIC.
     IMPORTING
       per_page TYPE i DEFAULT 30
       page TYPE i DEFAULT 1
+      repository_id TYPE i OPTIONAL
     RETURNING
       VALUE(return_data) TYPE response_codespaces_list_for_a
     RAISING cx_static_check.
