@@ -24969,6 +24969,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     IF page IS SUPPLIED.
       mi_client->request->set_form_field( name = 'page' value = lv_temp ).
     ENDIF.
+    lv_temp = repository_id.
+    CONDENSE lv_temp.
+    IF repository_id IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'repository_id' value = lv_temp ).
+    ENDIF.
     mi_client->request->set_method( 'GET' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
