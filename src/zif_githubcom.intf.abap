@@ -695,6 +695,25 @@ INTERFACE zif_githubcom PUBLIC.
            minutes_used_breakdown TYPE subactions_billing_usage_minut,
          END OF actions_billing_usage.
 
+* Component schema: advanced-security-active-committers-user, object
+  TYPES: BEGIN OF advanced_security_active_commi,
+           user_login TYPE string,
+           last_pushed_date TYPE string,
+         END OF advanced_security_active_commi.
+
+* Component schema: advanced-security-active-committers-repository, object
+  TYPES: BEGIN OF advanced_security_active_com01,
+           name TYPE string,
+           advanced_security_committers TYPE i,
+           advanced_security_committers_b TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF advanced_security_active_com01.
+
+* Component schema: advanced-security-active-committers, object
+  TYPES: BEGIN OF advanced_security_active_com02,
+           total_advanced_security_commit TYPE i,
+           repositories TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF advanced_security_active_com02.
+
 * Component schema: packages-billing-usage, object
   TYPES: BEGIN OF packages_billing_usage,
            total_gigabytes_bandwidth_used TYPE i,
@@ -3138,6 +3157,7 @@ INTERFACE zif_githubcom PUBLIC.
            storage_in_bytes TYPE i,
            memory_in_bytes TYPE i,
            cpus TYPE i,
+           prebuild_availability TYPE string,
          END OF nullable_codespace_machine.
 
 * Component schema: codespace, object
@@ -3156,6 +3176,7 @@ INTERFACE zif_githubcom PUBLIC.
            billable_owner TYPE simple_user,
            repository TYPE minimal_repository,
            machine TYPE nullable_codespace_machine,
+           prebuild TYPE abap_bool,
            created_at TYPE string,
            updated_at TYPE string,
            last_used_at TYPE string,
@@ -3163,7 +3184,7 @@ INTERFACE zif_githubcom PUBLIC.
            url TYPE string,
            git_status TYPE subcodespace_git_status,
            location TYPE string,
-           auto_stop_delay_minutes TYPE i,
+           idle_timeout_minutes TYPE i,
            web_url TYPE string,
            machines_url TYPE string,
            start_url TYPE string,
@@ -3180,6 +3201,7 @@ INTERFACE zif_githubcom PUBLIC.
            storage_in_bytes TYPE i,
            memory_in_bytes TYPE i,
            cpus TYPE i,
+           prebuild_availability TYPE string,
          END OF codespace_machine.
 
 * Component schema: collaborator, object
@@ -8000,6 +8022,12 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: response_code_scanning_list_recent_anal, array
   TYPES response_code_scanning_list_re TYPE STANDARD TABLE OF code_scanning_analysis WITH DEFAULT KEY.
 
+* Component schema: response_codespaces_list_in_repository_, object
+  TYPES: BEGIN OF response_codespaces_list_in_re,
+           total_count TYPE i,
+           codespaces TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF response_codespaces_list_in_re.
+
 * Component schema: response_codespaces_repo_machines_for_a, object
   TYPES: BEGIN OF response_codespaces_repo_machi,
            total_count TYPE i,
@@ -9139,6 +9167,23 @@ INTERFACE zif_githubcom PUBLIC.
       enterprise TYPE string
     RETURNING
       VALUE(return_data) TYPE actions_billing_usage
+    RAISING cx_static_check.
+
+* GET - "Get GitHub Advanced Security active committers for an enterprise"
+* Operation id: billing/get-github-advanced-security-billing-ghe
+* Parameter: enterprise, required, path
+* Parameter: per_page, optional, query
+* Parameter: page, optional, query
+* Response: 200
+*     application/json, #/components/schemas/advanced-security-active-committers
+* Response: 403
+  METHODS billing_get_github_advanced_se
+    IMPORTING
+      enterprise TYPE string
+      per_page TYPE i DEFAULT 30
+      page TYPE i DEFAULT 1
+    RETURNING
+      VALUE(return_data) TYPE advanced_security_active_com02
     RAISING cx_static_check.
 
 * GET - "Get GitHub Packages billing for an enterprise"
@@ -11492,6 +11537,23 @@ INTERFACE zif_githubcom PUBLIC.
       org TYPE string
     RETURNING
       VALUE(return_data) TYPE actions_billing_usage
+    RAISING cx_static_check.
+
+* GET - "Get GitHub Advanced Security active committers for an organization"
+* Operation id: billing/get-github-advanced-security-billing-org
+* Parameter: org, required, path
+* Parameter: per_page, optional, query
+* Parameter: page, optional, query
+* Response: 200
+*     application/json, #/components/schemas/advanced-security-active-committers
+* Response: 403
+  METHODS billing_get_github_advanced_01
+    IMPORTING
+      org TYPE string
+      per_page TYPE i DEFAULT 30
+      page TYPE i DEFAULT 1
+    RETURNING
+      VALUE(return_data) TYPE advanced_security_active_com02
     RAISING cx_static_check.
 
 * GET - "Get GitHub Packages billing for an organization"
@@ -14489,6 +14551,28 @@ INTERFACE zif_githubcom PUBLIC.
       repo TYPE string
     RETURNING
       VALUE(return_data) TYPE code_scanning_sarifs_status
+    RAISING cx_static_check.
+
+* GET - "List codespaces in a Repository for the authenticated user"
+* Operation id: codespaces/list-in-repository-for-authenticated-user
+* Parameter: per_page, optional, query
+* Parameter: page, optional, query
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Response: 200
+*     application/json, #/components/schemas/response_codespaces_list_in_repository_
+* Response: 401
+* Response: 403
+* Response: 404
+* Response: 500
+  METHODS codespaces_list_in_repository_
+    IMPORTING
+      per_page TYPE i DEFAULT 30
+      page TYPE i DEFAULT 1
+      owner TYPE string
+      repo TYPE string
+    RETURNING
+      VALUE(return_data) TYPE response_codespaces_list_in_re
     RAISING cx_static_check.
 
 * POST - "Create a codespace in a repository"

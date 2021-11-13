@@ -152,6 +152,18 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(actions_billing_usage) TYPE zif_githubcom=>actions_billing_usage
       RAISING cx_static_check.
+    METHODS parse_advanced_security_active
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(advanced_security_active_commi) TYPE zif_githubcom=>advanced_security_active_commi
+      RAISING cx_static_check.
+    METHODS parse_advanced_security_acti01
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(advanced_security_active_com01) TYPE zif_githubcom=>advanced_security_active_com01
+      RAISING cx_static_check.
+    METHODS parse_advanced_security_acti02
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(advanced_security_active_com02) TYPE zif_githubcom=>advanced_security_active_com02
+      RAISING cx_static_check.
     METHODS parse_packages_billing_usage
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(packages_billing_usage) TYPE zif_githubcom=>packages_billing_usage
@@ -2620,6 +2632,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_code_scanning_list_re) TYPE zif_githubcom=>response_code_scanning_list_re
       RAISING cx_static_check.
+    METHODS parse_codespaces_list_in_repos
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_codespaces_list_in_re) TYPE zif_githubcom=>response_codespaces_list_in_re
+      RAISING cx_static_check.
     METHODS parse_codespaces_repo_machines
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_codespaces_repo_machi) TYPE zif_githubcom=>response_codespaces_repo_machi
@@ -3741,6 +3757,22 @@ CLASS zcl_githubcom IMPLEMENTATION.
     actions_billing_usage-minutes_used_breakdown-ubuntu = mo_json->value_string( iv_prefix && '/minutes_used_breakdown/UBUNTU' ).
     actions_billing_usage-minutes_used_breakdown-macos = mo_json->value_string( iv_prefix && '/minutes_used_breakdown/MACOS' ).
     actions_billing_usage-minutes_used_breakdown-windows = mo_json->value_string( iv_prefix && '/minutes_used_breakdown/WINDOWS' ).
+  ENDMETHOD.
+
+  METHOD parse_advanced_security_active.
+    advanced_security_active_commi-user_login = mo_json->value_string( iv_prefix && '/user_login' ).
+    advanced_security_active_commi-last_pushed_date = mo_json->value_string( iv_prefix && '/last_pushed_date' ).
+  ENDMETHOD.
+
+  METHOD parse_advanced_security_acti01.
+    advanced_security_active_com01-name = mo_json->value_string( iv_prefix && '/name' ).
+    advanced_security_active_com01-advanced_security_committers = mo_json->value_string( iv_prefix && '/advanced_security_committers' ).
+* todo, array, advanced_security_committers_b
+  ENDMETHOD.
+
+  METHOD parse_advanced_security_acti02.
+    advanced_security_active_com02-total_advanced_security_commit = mo_json->value_string( iv_prefix && '/total_advanced_security_committers' ).
+* todo, array, repositories
   ENDMETHOD.
 
   METHOD parse_packages_billing_usage.
@@ -5867,6 +5899,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     nullable_codespace_machine-storage_in_bytes = mo_json->value_string( iv_prefix && '/storage_in_bytes' ).
     nullable_codespace_machine-memory_in_bytes = mo_json->value_string( iv_prefix && '/memory_in_bytes' ).
     nullable_codespace_machine-cpus = mo_json->value_string( iv_prefix && '/cpus' ).
+    nullable_codespace_machine-prebuild_availability = mo_json->value_string( iv_prefix && '/prebuild_availability' ).
   ENDMETHOD.
 
   METHOD parse_codespace.
@@ -5877,6 +5910,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     codespace-billable_owner = parse_simple_user( iv_prefix ).
     codespace-repository = parse_minimal_repository( iv_prefix ).
     codespace-machine = parse_nullable_codespace_machi( iv_prefix ).
+    codespace-prebuild = mo_json->value_boolean( iv_prefix && '/prebuild' ).
     codespace-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
     codespace-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
     codespace-last_used_at = mo_json->value_string( iv_prefix && '/last_used_at' ).
@@ -5888,7 +5922,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     codespace-git_status-has_uncommitted_changes = mo_json->value_boolean( iv_prefix && '/git_status/has_uncommitted_changes' ).
     codespace-git_status-ref = mo_json->value_string( iv_prefix && '/git_status/ref' ).
     codespace-location = mo_json->value_string( iv_prefix && '/location' ).
-    codespace-auto_stop_delay_minutes = mo_json->value_string( iv_prefix && '/auto_stop_delay_minutes' ).
+    codespace-idle_timeout_minutes = mo_json->value_string( iv_prefix && '/idle_timeout_minutes' ).
     codespace-web_url = mo_json->value_string( iv_prefix && '/web_url' ).
     codespace-machines_url = mo_json->value_string( iv_prefix && '/machines_url' ).
     codespace-start_url = mo_json->value_string( iv_prefix && '/start_url' ).
@@ -5904,6 +5938,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     codespace_machine-storage_in_bytes = mo_json->value_string( iv_prefix && '/storage_in_bytes' ).
     codespace_machine-memory_in_bytes = mo_json->value_string( iv_prefix && '/memory_in_bytes' ).
     codespace_machine-cpus = mo_json->value_string( iv_prefix && '/cpus' ).
+    codespace_machine-prebuild_availability = mo_json->value_string( iv_prefix && '/prebuild_availability' ).
   ENDMETHOD.
 
   METHOD parse_collaborator.
@@ -9277,6 +9312,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
       code_scanning_analysis = parse_code_scanning_analysis( iv_prefix && '/' && lv_member ).
       APPEND code_scanning_analysis TO response_code_scanning_list_re.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD parse_codespaces_list_in_repos.
+    response_codespaces_list_in_re-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
+* todo, array, codespaces
   ENDMETHOD.
 
   METHOD parse_codespaces_repo_machines.
@@ -13970,6 +14010,29 @@ CLASS zcl_githubcom IMPLEMENTATION.
     return_data = parse_actions_billing_usage( '' ).
   ENDMETHOD.
 
+  METHOD zif_githubcom~billing_get_github_advanced_se.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/enterprises/{enterprise}/settings/billing/advanced-security'.
+    REPLACE ALL OCCURRENCES OF '{enterprise}' IN lv_uri WITH enterprise.
+    lv_temp = per_page.
+    CONDENSE lv_temp.
+    IF per_page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'per_page' value = lv_temp ).
+    ENDIF.
+    lv_temp = page.
+    CONDENSE lv_temp.
+    IF page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_advanced_security_acti02( '' ).
+  ENDMETHOD.
+
   METHOD zif_githubcom~billing_get_github_packages_bi.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -16771,6 +16834,29 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
     return_data = parse_actions_billing_usage( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~billing_get_github_advanced_01.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/orgs/{org}/settings/billing/advanced-security'.
+    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH org.
+    lv_temp = per_page.
+    CONDENSE lv_temp.
+    IF per_page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'per_page' value = lv_temp ).
+    ENDIF.
+    lv_temp = page.
+    CONDENSE lv_temp.
+    IF page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_advanced_security_acti02( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~billing_get_github_packages_01.
@@ -19913,6 +19999,30 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
     return_data = parse_code_scanning_sarifs_sta( '' ).
+  ENDMETHOD.
+
+  METHOD zif_githubcom~codespaces_list_in_repository_.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE '/repos/{owner}/{repo}/codespaces'.
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH owner.
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH repo.
+    lv_temp = per_page.
+    CONDENSE lv_temp.
+    IF per_page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'per_page' value = lv_temp ).
+    ENDIF.
+    lv_temp = page.
+    CONDENSE lv_temp.
+    IF page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+    return_data = parse_codespaces_list_in_repos( '' ).
   ENDMETHOD.
 
   METHOD zif_githubcom~codespaces_create_with_repo_fo.
