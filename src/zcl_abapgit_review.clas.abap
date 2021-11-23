@@ -305,7 +305,7 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
   METHOD find_ags_merge_requests.
     DATA: lv_query_url   TYPE string,
-          lt_merge_requests TYPE zags_merge_req_tt.
+          lt_merge_requests TYPE zagr_ags_merge_req_tt.
 
     FIND REGEX '(http|https):\/\/([\.\d\w]+)\/sap\/zabapgitserver\/git\/([-\d\w]+)(\.git)?'
       IN io_repo->get_url( ) SUBMATCHES DATA(lv_protocol) DATA(lv_host) DATA(lv_repo_name).
@@ -313,7 +313,8 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    lv_query_url = |{ lv_protocol }://{ lv_host }/sap/zabapgitserver/rest/find_merge_requests/{ lv_repo_name }/{ iv_branch_name }|.
+    lv_query_url = |{ lv_protocol }://{ lv_host }/sap/zabapgitserver/rest/| &&
+      |find_merge_requests/{ lv_repo_name }/{ iv_branch_name }|.
     TRY.
         cl_http_client=>create_by_url( EXPORTING url = lv_query_url
           IMPORTING client = DATA(lo_http_client) ).
@@ -325,7 +326,8 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
           RESULT data = lt_merge_requests.
 
         LOOP AT lt_merge_requests REFERENCE INTO DATA(lr_merge_req).
-          DATA(lv_merge_request_url) = |{ lv_protocol }://{ lv_host }/sap/zabapgitserver/{ lv_repo_name }/merge_request/{ lr_merge_req->*-id }|.
+          DATA(lv_merge_request_url) = |{ lv_protocol }://{ lv_host }/sap/zabapgitserver/| &&
+            |{ lv_repo_name }/merge_request/{ lr_merge_req->*-id }|.
           INSERT VALUE #( package = io_repo->get_package( ) url = lv_merge_request_url )
             INTO TABLE ct_result.
         ENDLOOP.
