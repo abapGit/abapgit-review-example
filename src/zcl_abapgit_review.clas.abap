@@ -305,7 +305,7 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
   METHOD find_ags_merge_requests.
     DATA: lv_query_url   TYPE string,
-          merge_requests TYPE zags_merge_req_tt.
+          lt_merge_requests TYPE zags_merge_req_tt.
 
     FIND REGEX '(http|https):\/\/([\.\d\w]+)\/sap\/zabapgitserver\/git\/([-\d\w]+)(\.git)?'
       IN io_repo->get_url( ) SUBMATCHES DATA(lv_protocol) DATA(lv_host) DATA(lv_repo_name).
@@ -316,29 +316,29 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
     lv_query_url = |{ lv_protocol }://{ lv_host }/sap/zabapgitserver/rest/find_merge_requests/{ lv_repo_name }/{ iv_branch_name }|.
     TRY.
         cl_http_client=>create_by_url( EXPORTING url = lv_query_url
-          IMPORTING client = DATA(http_client) ).
-        DATA(lo_http_rest_client) = NEW cl_rest_http_client( http_client ).
+          IMPORTING client = DATA(lo_http_client) ).
+        DATA(lo_http_rest_client) = NEW cl_rest_http_client( lo_http_client ).
         lo_http_rest_client->if_rest_resource~get( ).
-        DATA(response) = lo_http_rest_client->if_rest_client~get_response_entity( )->get_binary_data( ).
+        DATA(lv_response) = lo_http_rest_client->if_rest_client~get_response_entity( )->get_binary_data( ).
         CALL TRANSFORMATION id
-         SOURCE XML response
-         RESULT data = merge_requests.
+          SOURCE XML lv_response
+          RESULT data = lt_merge_requests.
 
-        LOOP AT merge_requests REFERENCE INTO DATA(merge_req).
-          DATA(merge_request_url) = |{ lv_protocol }://{ lv_host }/sap/zabapgitserver/{ lv_repo_name }/merge_request/{ merge_req->*-id }|.
-          INSERT VALUE #( package = io_repo->get_package( ) url = merge_request_url )
+        LOOP AT lt_merge_requests REFERENCE INTO DATA(lr_merge_req).
+          DATA(lv_merge_request_url) = |{ lv_protocol }://{ lv_host }/sap/zabapgitserver/{ lv_repo_name }/merge_request/{ lr_merge_req->*-id }|.
+          INSERT VALUE #( package = io_repo->get_package( ) url = lv_merge_request_url )
             INTO TABLE ct_result.
         ENDLOOP.
-      CATCH cx_transformation_error INTO DATA(lv_transformation_error).
+      CATCH cx_transformation_error INTO DATA(lo_transformation_error).
         RAISE EXCEPTION TYPE zcx_abapgit_review
           EXPORTING
             textid   = zcx_abapgit_review=>read_ags_merge_request
-            previous = lv_transformation_error.
-      CATCH cx_rest_client_exception INTO DATA(lv_http_exception).
+            previous = lo_transformation_error.
+      CATCH cx_rest_client_exception INTO DATA(lo_http_exception).
         RAISE EXCEPTION TYPE zcx_abapgit_review
           EXPORTING
             textid   = zcx_abapgit_review=>read_ags_merge_request
-            previous = lv_http_exception.
+            previous = lo_http_exception.
     ENDTRY.
 
   ENDMETHOD.
