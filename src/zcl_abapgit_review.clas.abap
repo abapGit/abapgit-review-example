@@ -8,7 +8,7 @@ CLASS zcl_abapgit_review DEFINITION
              package TYPE devclass,
              url     TYPE string,
            END OF ty_pull_url.
-    TYPES: tt_pull_urls TYPE STANDARD TABLE OF ty_pull_url WITH DEFAULT KEY.
+    TYPES: tt_pull_urls TYPE STANDARD TABLE OF ty_pull_url WITH NON-UNIQUE KEY package.
     TYPES: tt_repos TYPE STANDARD TABLE OF REF TO zcl_abapgit_repo.
     TYPES: tt_packages TYPE STANDARD TABLE OF devclass.
 

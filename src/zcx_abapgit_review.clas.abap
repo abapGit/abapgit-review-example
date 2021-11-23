@@ -7,21 +7,23 @@ CLASS zcx_abapgit_review DEFINITION
   PUBLIC SECTION.
 
     INTERFACES if_t100_message .
-    CONSTANTS: BEGIN OF read_ags_merge_request,
-      msgid TYPE symsgid VALUE 'ZABAPGIT_REVIEW',
-      msgno TYPE symsgno VALUE '000',
-      attr1 TYPE scx_attrname VALUE '',
-      attr2 TYPE scx_attrname VALUE '',
-      attr3 TYPE scx_attrname VALUE '',
-      attr4 TYPE scx_attrname VALUE '',
-    END OF read_ags_merge_request.
+
+    CONSTANTS:
+      BEGIN OF read_ags_merge_request,
+        msgid TYPE symsgid VALUE 'ZABAPGIT_REVIEW',
+        msgno TYPE symsgno VALUE '000',
+        attr1 TYPE scx_attrname VALUE '',
+        attr2 TYPE scx_attrname VALUE '',
+        attr3 TYPE scx_attrname VALUE '',
+        attr4 TYPE scx_attrname VALUE '',
+      END OF read_ags_merge_request .
 
     METHODS constructor
       IMPORTING
         !textid   LIKE if_t100_message=>t100key OPTIONAL
         !previous LIKE previous OPTIONAL .
-protected section.
-private section.
+PROTECTED SECTION.
+PRIVATE SECTION.
 ENDCLASS.
 
 
