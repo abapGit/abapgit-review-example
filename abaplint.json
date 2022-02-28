@@ -98,7 +98,7 @@
       "allowChained": false
     },
     "empty_statement": true,
-    "empty_structure": true,
+    "empty_structure": false,
     "exit_or_check": true,
     "exporting": true,
     "forbidden_identifier": {
