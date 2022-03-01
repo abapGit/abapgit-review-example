@@ -584,6 +584,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(actions_repository_permissions) TYPE zif_githubcom=>actions_repository_permissions
       RAISING cx_static_check.
+    METHODS parse_actions_workflow_access_
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(actions_workflow_access_to_rep) TYPE zif_githubcom=>actions_workflow_access_to_rep
+      RAISING cx_static_check.
     METHODS parse_pull_request_minimal
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(pull_request_minimal) TYPE zif_githubcom=>pull_request_minimal
@@ -5611,6 +5615,10 @@ CLASS zcl_githubcom IMPLEMENTATION.
     actions_repository_permissions-enabled = parse_actions_enabled( iv_prefix && '/enabled' ).
     actions_repository_permissions-allowed_actions = parse_allowed_actions( iv_prefix && '/allowed_actions' ).
     actions_repository_permissions-selected_actions_url = parse_selected_actions_url( iv_prefix && '/selected_actions_url' ).
+  ENDMETHOD.
+
+  METHOD parse_actions_workflow_access_.
+    actions_workflow_access_to_rep-access_level = mo_json->value_string( iv_prefix && '/access_level' ).
   ENDMETHOD.
 
   METHOD parse_pull_request_minimal.
@@ -21441,6 +21449,48 @@ CLASS zcl_githubcom IMPLEMENTATION.
     mi_client->request->set_method( 'PUT' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     mi_client->request->set_cdata( json_actions_set_github_acti01( body ) ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CASE lv_code.
+      WHEN 204. " Response
+    ENDCASE.
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_get_workflow_access_to.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE 'https://api.github.com/repos/{owner}/{repo}/actions/permissions/access'.
+    lv_temp = owner.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH lv_temp.
+    lv_temp = repo.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CASE lv_code.
+      WHEN 200. " Response
+" application/json,#/components/schemas/actions-workflow-access-to-repository
+        CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+        return_data = parse_actions_workflow_access_( '' ).
+    ENDCASE.
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_set_workflow_access_to.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE 'https://api.github.com/repos/{owner}/{repo}/actions/permissions/access'.
+    lv_temp = owner.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH lv_temp.
+    lv_temp = repo.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'PUT' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+* todo, set body, #/components/schemas/actions-workflow-access-to-repository
     lv_code = send_receive( ).
     WRITE / lv_code.
     CASE lv_code.

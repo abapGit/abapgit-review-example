@@ -2584,6 +2584,11 @@ INTERFACE zif_githubcom PUBLIC.
            selected_actions_url TYPE selected_actions_url,
          END OF actions_repository_permissions.
 
+* Component schema: actions-workflow-access-to-repository, object
+  TYPES: BEGIN OF actions_workflow_access_to_rep,
+           access_level TYPE string,
+         END OF actions_workflow_access_to_rep.
+
 * Component schema: pull-request-minimal, object
   TYPES: BEGIN OF subsubpull_request_minimal_bas,
            id TYPE i,
@@ -13450,6 +13455,33 @@ INTERFACE zif_githubcom PUBLIC.
       owner TYPE string
       repo TYPE string
       body TYPE bodyactions_set_github_actio01
+    RAISING cx_static_check.
+
+* GET - "Get the level of access for workflows outside of the repository"
+* Operation id: actions/get-workflow-access-to-repository
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Response: 200
+*     application/json, #/components/schemas/actions-workflow-access-to-repository
+  METHODS actions_get_workflow_access_to
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+    RETURNING
+      VALUE(return_data) TYPE actions_workflow_access_to_rep
+    RAISING cx_static_check.
+
+* PUT - "Set the level of access for workflows outside of the repository"
+* Operation id: actions/set-workflow-access-to-repository
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Response: 204
+* Body ref: #/components/schemas/actions-workflow-access-to-repository
+  METHODS actions_set_workflow_access_to
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      body TYPE actions_workflow_access_to_rep
     RAISING cx_static_check.
 
 * GET - "Get allowed actions for a repository"
