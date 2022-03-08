@@ -1072,6 +1072,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(timeline_unassigned_issue_even) TYPE zif_githubcom=>timeline_unassigned_issue_even
       RAISING cx_static_check.
+    METHODS parse_state_change_issue_event
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(state_change_issue_event) TYPE zif_githubcom=>state_change_issue_event
+      RAISING cx_static_check.
     METHODS parse_timeline_issue_events
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(timeline_issue_events) TYPE zif_githubcom=>timeline_issue_events
@@ -5569,6 +5573,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     full_repository-code_of_conduct = parse_code_of_conduct_simple( iv_prefix && '/code_of_conduct' ).
     full_repository-security_and_analysis-advanced_security-status = mo_json->value_string( iv_prefix && '/security_and_analysis/advanced_security/status' ).
     full_repository-security_and_analysis-secret_scanning-status = mo_json->value_string( iv_prefix && '/security_and_analysis/secret_scanning/status' ).
+    full_repository-security_and_analysis-secret_scanning_push_protectio-status = mo_json->value_string( iv_prefix && '/security_and_analysis/secret_scanning_push_protection/status' ).
   ENDMETHOD.
 
   METHOD parse_artifact.
@@ -5667,6 +5672,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, array, pull_requests
     workflow_run-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
     workflow_run-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
+    workflow_run-actor = parse_simple_user( iv_prefix && '/actor' ).
+    workflow_run-triggering_actor = parse_simple_user( iv_prefix && '/triggering_actor' ).
     workflow_run-run_started_at = mo_json->value_string( iv_prefix && '/run_started_at' ).
     workflow_run-jobs_url = mo_json->value_string( iv_prefix && '/jobs_url' ).
     workflow_run-logs_url = mo_json->value_string( iv_prefix && '/logs_url' ).
@@ -7216,6 +7223,18 @@ CLASS zcl_githubcom IMPLEMENTATION.
     timeline_unassigned_issue_even-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
     timeline_unassigned_issue_even-performed_via_github_app = parse_nullable_integration( iv_prefix && '/performed_via_github_app' ).
     timeline_unassigned_issue_even-assignee = parse_simple_user( iv_prefix && '/assignee' ).
+  ENDMETHOD.
+
+  METHOD parse_state_change_issue_event.
+    state_change_issue_event-id = mo_json->value_string( iv_prefix && '/id' ).
+    state_change_issue_event-node_id = mo_json->value_string( iv_prefix && '/node_id' ).
+    state_change_issue_event-url = mo_json->value_string( iv_prefix && '/url' ).
+    state_change_issue_event-actor = parse_simple_user( iv_prefix && '/actor' ).
+    state_change_issue_event-event = mo_json->value_string( iv_prefix && '/event' ).
+    state_change_issue_event-commit_id = mo_json->value_string( iv_prefix && '/commit_id' ).
+    state_change_issue_event-commit_url = mo_json->value_string( iv_prefix && '/commit_url' ).
+    state_change_issue_event-created_at = mo_json->value_string( iv_prefix && '/created_at' ).
+    state_change_issue_event-performed_via_github_app = parse_nullable_integration( iv_prefix && '/performed_via_github_app' ).
   ENDMETHOD.
 
   METHOD parse_timeline_issue_events.
@@ -22136,6 +22155,8 @@ CLASS zcl_githubcom IMPLEMENTATION.
 " application/json,#/components/schemas/response_actions_cancel_workflow_run
         CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
         parse_actions_cancel_workflow_( '' ).
+" todo, raise
+      WHEN 409.
 " todo, raise
     ENDCASE.
   ENDMETHOD.
