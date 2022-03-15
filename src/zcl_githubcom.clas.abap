@@ -24611,7 +24611,9 @@ CLASS zcl_githubcom IMPLEMENTATION.
     lv_temp = repo.
     lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
     REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH lv_temp.
-    mi_client->request->set_form_field( name = 'location' value = location ).
+    IF location IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'location' value = location ).
+    ENDIF.
     mi_client->request->set_method( 'GET' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
     lv_code = send_receive( ).
