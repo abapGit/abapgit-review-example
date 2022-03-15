@@ -9144,7 +9144,7 @@ INTERFACE zif_githubcom PUBLIC.
       org_id TYPE i
     RAISING cx_static_check.
 
-* GET - "Get allowed actions for an enterprise"
+* GET - "Get allowed actions and workflows for an enterprise"
 * Operation id: enterprise-admin/get-allowed-actions-enterprise
 * Parameter: enterprise, required, path
 * Response: 200
@@ -9156,7 +9156,7 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE selected_actions
     RAISING cx_static_check.
 
-* PUT - "Set allowed actions for an enterprise"
+* PUT - "Set allowed actions and workflows for an enterprise"
 * Operation id: enterprise-admin/set-allowed-actions-enterprise
 * Parameter: enterprise, required, path
 * Response: 204
@@ -10480,7 +10480,7 @@ INTERFACE zif_githubcom PUBLIC.
       repository_id TYPE i
     RAISING cx_static_check.
 
-* GET - "Get allowed actions for an organization"
+* GET - "Get allowed actions and workflows for an organization"
 * Operation id: actions/get-allowed-actions-organization
 * Parameter: org, required, path
 * Response: 200
@@ -10492,7 +10492,7 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE selected_actions
     RAISING cx_static_check.
 
-* PUT - "Set allowed actions for an organization"
+* PUT - "Set allowed actions and workflows for an organization"
 * Operation id: actions/set-allowed-actions-organization
 * Parameter: org, required, path
 * Response: 204
@@ -13511,7 +13511,7 @@ INTERFACE zif_githubcom PUBLIC.
       body TYPE actions_workflow_access_to_rep
     RAISING cx_static_check.
 
-* GET - "Get allowed actions for a repository"
+* GET - "Get allowed actions and workflows for a repository"
 * Operation id: actions/get-allowed-actions-repository
 * Parameter: owner, required, path
 * Parameter: repo, required, path
@@ -13525,7 +13525,7 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE selected_actions
     RAISING cx_static_check.
 
-* PUT - "Set allowed actions for a repository"
+* PUT - "Set allowed actions and workflows for a repository"
 * Operation id: actions/set-allowed-actions-repository
 * Parameter: owner, required, path
 * Parameter: repo, required, path
@@ -15421,7 +15421,7 @@ INTERFACE zif_githubcom PUBLIC.
 
 * GET - "List available machine types for a repository"
 * Operation id: codespaces/repo-machines-for-authenticated-user
-* Parameter: location, required, query
+* Parameter: location, optional, query
 * Parameter: owner, required, path
 * Parameter: repo, required, path
 * Response: 200
@@ -15433,7 +15433,7 @@ INTERFACE zif_githubcom PUBLIC.
 * Response: 500
   METHODS codespaces_repo_machines_for_a
     IMPORTING
-      location TYPE string
+      location TYPE string OPTIONAL
       owner TYPE string
       repo TYPE string
     RETURNING
