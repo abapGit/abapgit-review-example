@@ -548,6 +548,12 @@ INTERFACE zif_githubcom PUBLIC.
            html_url TYPE string,
          END OF code_of_conduct.
 
+* Component schema: actions-cache-usage-org-enterprise, object
+  TYPES: BEGIN OF actions_cache_usage_org_enterp,
+           total_active_caches_count TYPE i,
+           total_active_caches_size_in_by TYPE i,
+         END OF actions_cache_usage_org_enterp.
+
 * Component schema: enabled-organizations, string
   TYPES enabled_organizations TYPE string.
 
@@ -1641,6 +1647,13 @@ INTERFACE zif_githubcom PUBLIC.
            members_can_fork_private_repos TYPE abap_bool,
            updated_at TYPE string,
          END OF organization_full.
+
+* Component schema: actions-cache-usage-by-repository, object
+  TYPES: BEGIN OF actions_cache_usage_by_reposit,
+           full_name TYPE string,
+           active_caches_size_in_bytes TYPE i,
+           active_caches_count TYPE i,
+         END OF actions_cache_usage_by_reposit.
 
 * Component schema: enabled-repositories, string
   TYPES enabled_repositories TYPE string.
@@ -7905,6 +7918,12 @@ INTERFACE zif_githubcom PUBLIC.
            custom_roles TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF response_orgs_list_custom_role.
 
+* Component schema: response_actions_get_actions_cache_us02, object
+  TYPES: BEGIN OF response_actions_get_actions_c,
+           total_count TYPE i,
+           repository_cache_usages TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF response_actions_get_actions_c.
+
 * Component schema: response_actions_list_selected_reposito, object
   TYPES: BEGIN OF response_actions_list_selected,
            total_count TYPE f,
@@ -8522,6 +8541,9 @@ INTERFACE zif_githubcom PUBLIC.
 * Component schema: response_repos_list_release_assets, array
   TYPES response_repos_list_release_as TYPE STANDARD TABLE OF release_asset WITH DEFAULT KEY.
 
+* Component schema: response_reactions_list_for_release, array
+  TYPES response_reactions_list_for_re TYPE STANDARD TABLE OF reaction WITH DEFAULT KEY.
+
 * Component schema: response_secret_scanning_list_alerts_02, array
   TYPES response_secret_scanning_lis02 TYPE STANDARD TABLE OF secret_scanning_alert WITH DEFAULT KEY.
 
@@ -9070,6 +9092,18 @@ INTERFACE zif_githubcom PUBLIC.
   METHODS emojis_get
     RETURNING
       VALUE(return_data) TYPE response_emojis_get
+    RAISING cx_static_check.
+
+* GET - "Get GitHub Actions cache usage for an enterprise"
+* Operation id: actions/get-actions-cache-usage-for-enterprise
+* Parameter: enterprise, required, path
+* Response: 200
+*     application/json, #/components/schemas/actions-cache-usage-org-enterprise
+  METHODS actions_get_actions_cache_usag
+    IMPORTING
+      enterprise TYPE string
+    RETURNING
+      VALUE(return_data) TYPE actions_cache_usage_org_enterp
     RAISING cx_static_check.
 
 * GET - "Get GitHub Actions permissions for an enterprise"
@@ -10406,6 +10440,34 @@ INTERFACE zif_githubcom PUBLIC.
       body TYPE bodyorgs_update
     RETURNING
       VALUE(return_data) TYPE organization_full
+    RAISING cx_static_check.
+
+* GET - "Get GitHub Actions cache usage for an organization"
+* Operation id: actions/get-actions-cache-usage-for-org
+* Parameter: org, required, path
+* Response: 200
+*     application/json, #/components/schemas/actions-cache-usage-org-enterprise
+  METHODS actions_get_actions_cache_us01
+    IMPORTING
+      org TYPE string
+    RETURNING
+      VALUE(return_data) TYPE actions_cache_usage_org_enterp
+    RAISING cx_static_check.
+
+* GET - "List repositories with GitHub Actions cache usage for an organization"
+* Operation id: actions/get-actions-cache-usage-by-repo-for-org
+* Parameter: org, required, path
+* Parameter: per_page, optional, query
+* Parameter: page, optional, query
+* Response: 200
+*     application/json, #/components/schemas/response_actions_get_actions_cache_us02
+  METHODS actions_get_actions_cache_us02
+    IMPORTING
+      org TYPE string
+      per_page TYPE i DEFAULT 30
+      page TYPE i DEFAULT 1
+    RETURNING
+      VALUE(return_data) TYPE response_actions_get_actions_c
     RAISING cx_static_check.
 
 * GET - "Get GitHub Actions permissions for an organization"
@@ -13428,6 +13490,20 @@ INTERFACE zif_githubcom PUBLIC.
       artifact_id TYPE i
     RAISING cx_static_check.
 
+* GET - "Get GitHub Actions cache usage for a repository"
+* Operation id: actions/get-actions-cache-usage
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Response: 200
+*     application/json, #/components/schemas/actions-cache-usage-by-repository
+  METHODS actions_get_actions_cache_us03
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+    RETURNING
+      VALUE(return_data) TYPE actions_cache_usage_by_reposit
+    RAISING cx_static_check.
+
 * GET - "Get a job for a workflow run"
 * Operation id: actions/get-job-for-workflow-run
 * Parameter: owner, required, path
@@ -13455,6 +13531,23 @@ INTERFACE zif_githubcom PUBLIC.
       owner TYPE string
       repo TYPE string
       job_id TYPE i
+    RAISING cx_static_check.
+
+* POST - "Re-run a job from a workflow run"
+* Operation id: actions/re-run-job-for-workflow-run
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: job_id, required, path
+* Response: 201
+*     application/json, #/components/schemas/empty-object
+* Response: 403
+  METHODS actions_re_run_job_for_workflo
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      job_id TYPE i
+    RETURNING
+      VALUE(return_data) TYPE empty_object
     RAISING cx_static_check.
 
 * GET - "Get GitHub Actions permissions for a repository"
@@ -13980,6 +14073,22 @@ INTERFACE zif_githubcom PUBLIC.
       body TYPE bodyactions_review_pending_dep
     RETURNING
       VALUE(return_data) TYPE response_actions_review_pendin
+    RAISING cx_static_check.
+
+* POST - "Re-run failed jobs from a workflow run"
+* Operation id: actions/re-run-workflow-failed-jobs
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: run_id, required, path
+* Response: 201
+*     application/json, #/components/schemas/empty-object
+  METHODS actions_re_run_workflow_failed
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      run_id TYPE i
+    RETURNING
+      VALUE(return_data) TYPE empty_object
     RAISING cx_static_check.
 
 * GET - "Get workflow run usage"
@@ -19140,6 +19249,30 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE release_asset
     RAISING cx_static_check.
 
+* GET - "List reactions for a release"
+* Operation id: reactions/list-for-release
+* Parameter: content, optional, query
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: release_id, required, path
+* Parameter: per_page, optional, query
+* Parameter: page, optional, query
+* Response: 200
+*     application/json, #/components/schemas/response_reactions_list_for_release
+* Response: 404
+* Response: 415
+  METHODS reactions_list_for_release
+    IMPORTING
+      content TYPE string OPTIONAL
+      owner TYPE string
+      repo TYPE string
+      release_id TYPE i
+      per_page TYPE i DEFAULT 30
+      page TYPE i DEFAULT 1
+    RETURNING
+      VALUE(return_data) TYPE response_reactions_list_for_re
+    RAISING cx_static_check.
+
 * POST - "Create reaction for a release"
 * Operation id: reactions/create-for-release
 * Parameter: owner, required, path
@@ -19159,6 +19292,21 @@ INTERFACE zif_githubcom PUBLIC.
       body TYPE bodyreactions_create_for_relea
     RETURNING
       VALUE(return_data) TYPE reaction
+    RAISING cx_static_check.
+
+* DELETE - "Delete a release reaction"
+* Operation id: reactions/delete-for-release
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Parameter: release_id, required, path
+* Parameter: reaction_id, required, path
+* Response: 204
+  METHODS reactions_delete_for_release
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+      release_id TYPE i
+      reaction_id TYPE i
     RAISING cx_static_check.
 
 * GET - "List secret scanning alerts for a repository"

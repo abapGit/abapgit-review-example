@@ -104,6 +104,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(code_of_conduct) TYPE zif_githubcom=>code_of_conduct
       RAISING cx_static_check.
+    METHODS parse_actions_cache_usage_org_
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(actions_cache_usage_org_enterp) TYPE zif_githubcom=>actions_cache_usage_org_enterp
+      RAISING cx_static_check.
     METHODS parse_enabled_organizations
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(enabled_organizations) TYPE zif_githubcom=>enabled_organizations
@@ -319,6 +323,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_organization_full
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(organization_full) TYPE zif_githubcom=>organization_full
+      RAISING cx_static_check.
+    METHODS parse_actions_cache_usage_by_r
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(actions_cache_usage_by_reposit) TYPE zif_githubcom=>actions_cache_usage_by_reposit
       RAISING cx_static_check.
     METHODS parse_enabled_repositories
       IMPORTING iv_prefix TYPE string
@@ -2376,6 +2384,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_orgs_list_custom_role) TYPE zif_githubcom=>response_orgs_list_custom_role
       RAISING cx_static_check.
+    METHODS parse_actions_get_actions_cach
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_actions_get_actions_c) TYPE zif_githubcom=>response_actions_get_actions_c
+      RAISING cx_static_check.
     METHODS parse_actions_list_selected_re
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_actions_list_selected) TYPE zif_githubcom=>response_actions_list_selected
@@ -3007,6 +3019,10 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_repos_list_release_asset
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_repos_list_release_as) TYPE zif_githubcom=>response_repos_list_release_as
+      RAISING cx_static_check.
+    METHODS parse_reactions_list_for_relea
+      IMPORTING iv_prefix TYPE string
+      RETURNING VALUE(response_reactions_list_for_re) TYPE zif_githubcom=>response_reactions_list_for_re
       RAISING cx_static_check.
     METHODS parse_secret_scanning_list_a02
       IMPORTING iv_prefix TYPE string
@@ -3778,6 +3794,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
     code_of_conduct-url = mo_json->value_string( iv_prefix && '/url' ).
     code_of_conduct-body = mo_json->value_string( iv_prefix && '/body' ).
     code_of_conduct-html_url = mo_json->value_string( iv_prefix && '/html_url' ).
+  ENDMETHOD.
+
+  METHOD parse_actions_cache_usage_org_.
+    actions_cache_usage_org_enterp-total_active_caches_count = mo_json->value_string( iv_prefix && '/total_active_caches_count' ).
+    actions_cache_usage_org_enterp-total_active_caches_size_in_by = mo_json->value_string( iv_prefix && '/total_active_caches_size_in_bytes' ).
   ENDMETHOD.
 
   METHOD parse_enabled_organizations.
@@ -4752,6 +4773,12 @@ CLASS zcl_githubcom IMPLEMENTATION.
     organization_full-members_can_create_private_pag = mo_json->value_boolean( iv_prefix && '/members_can_create_private_pages' ).
     organization_full-members_can_fork_private_repos = mo_json->value_boolean( iv_prefix && '/members_can_fork_private_repositories' ).
     organization_full-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
+  ENDMETHOD.
+
+  METHOD parse_actions_cache_usage_by_r.
+    actions_cache_usage_by_reposit-full_name = mo_json->value_string( iv_prefix && '/full_name' ).
+    actions_cache_usage_by_reposit-active_caches_size_in_bytes = mo_json->value_string( iv_prefix && '/active_caches_size_in_bytes' ).
+    actions_cache_usage_by_reposit-active_caches_count = mo_json->value_string( iv_prefix && '/active_caches_count' ).
   ENDMETHOD.
 
   METHOD parse_enabled_repositories.
@@ -8747,6 +8774,11 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, array, custom_roles
   ENDMETHOD.
 
+  METHOD parse_actions_get_actions_cach.
+    response_actions_get_actions_c-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
+* todo, array, repository_cache_usages
+  ENDMETHOD.
+
   METHOD parse_actions_list_selected_re.
 * todo, number, total_count
 * todo, array, repositories
@@ -10263,6 +10295,18 @@ CLASS zcl_githubcom IMPLEMENTATION.
       CLEAR release_asset.
       release_asset = parse_release_asset( iv_prefix && '/' && lv_member ).
       APPEND release_asset TO response_repos_list_release_as.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD parse_reactions_list_for_relea.
+    DATA lt_members TYPE string_table.
+    DATA lv_member LIKE LINE OF lt_members.
+    DATA reaction TYPE zif_githubcom=>reaction.
+    lt_members = mo_json->members( iv_prefix && '/' ).
+    LOOP AT lt_members INTO lv_member.
+      CLEAR reaction.
+      reaction = parse_reaction( iv_prefix && '/' && lv_member ).
+      APPEND reaction TO response_reactions_list_for_re.
     ENDLOOP.
   ENDMETHOD.
 
@@ -14108,6 +14152,25 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ENDCASE.
   ENDMETHOD.
 
+  METHOD zif_githubcom~actions_get_actions_cache_usag.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE 'https://api.github.com/enterprises/{enterprise}/actions/cache/usage'.
+    lv_temp = enterprise.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{enterprise}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CASE lv_code.
+      WHEN 200. " Response
+" application/json,#/components/schemas/actions-cache-usage-org-enterprise
+        CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+        return_data = parse_actions_cache_usage_org_( '' ).
+    ENDCASE.
+  ENDMETHOD.
+
   METHOD zif_githubcom~enterprise_admin_get_github_ac.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -16383,6 +16446,54 @@ CLASS zcl_githubcom IMPLEMENTATION.
       WHEN 422. " Validation failed
 " application/json,
 " todo, raise
+    ENDCASE.
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_get_actions_cache_us01.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE 'https://api.github.com/orgs/{org}/actions/cache/usage'.
+    lv_temp = org.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CASE lv_code.
+      WHEN 200. " Response
+" application/json,#/components/schemas/actions-cache-usage-org-enterprise
+        CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+        return_data = parse_actions_cache_usage_org_( '' ).
+    ENDCASE.
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_get_actions_cache_us02.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE 'https://api.github.com/orgs/{org}/actions/cache/usage-by-repository'.
+    lv_temp = org.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH lv_temp.
+    lv_temp = per_page.
+    CONDENSE lv_temp.
+    IF per_page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'per_page' value = lv_temp ).
+    ENDIF.
+    lv_temp = page.
+    CONDENSE lv_temp.
+    IF page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CASE lv_code.
+      WHEN 200. " Response
+" application/json,#/components/schemas/response_actions_get_actions_cache_us02
+        CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+        return_data = parse_actions_get_actions_cach( '' ).
     ENDCASE.
   ENDMETHOD.
 
@@ -19962,7 +20073,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     lv_code = send_receive( ).
     WRITE / lv_code.
     CASE lv_code.
-      WHEN 200. " Response
+      WHEN 200. " Response when the reaction type has already been added to this team discussion comment
 " application/json,#/components/schemas/reaction
         CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
         return_data = parse_reaction( '' ).
@@ -21385,6 +21496,28 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ENDCASE.
   ENDMETHOD.
 
+  METHOD zif_githubcom~actions_get_actions_cache_us03.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE 'https://api.github.com/repos/{owner}/{repo}/actions/cache/usage'.
+    lv_temp = owner.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH lv_temp.
+    lv_temp = repo.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CASE lv_code.
+      WHEN 200. " Response
+" application/json,#/components/schemas/actions-cache-usage-by-repository
+        CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+        return_data = parse_actions_cache_usage_by_r( '' ).
+    ENDCASE.
+  ENDMETHOD.
+
   METHOD zif_githubcom~actions_get_job_for_workflow_r.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -21429,6 +21562,33 @@ CLASS zcl_githubcom IMPLEMENTATION.
     WRITE / lv_code.
     CASE lv_code.
       WHEN 302. " Response
+" todo, raise
+    ENDCASE.
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_re_run_job_for_workflo.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE 'https://api.github.com/repos/{owner}/{repo}/actions/jobs/{job_id}/rerun'.
+    lv_temp = owner.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH lv_temp.
+    lv_temp = repo.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH lv_temp.
+    lv_temp = job_id.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{job_id}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CASE lv_code.
+      WHEN 201. " Response
+" application/json,#/components/schemas/empty-object
+        CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+        return_data = parse_empty_object( '' ).
+      WHEN 403.
 " todo, raise
     ENDCASE.
   ENDMETHOD.
@@ -22296,6 +22456,31 @@ CLASS zcl_githubcom IMPLEMENTATION.
 " application/json,#/components/schemas/response_actions_review_pending_deploym
         CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
         return_data = parse_actions_review_pending_d( '' ).
+    ENDCASE.
+  ENDMETHOD.
+
+  METHOD zif_githubcom~actions_re_run_workflow_failed.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE 'https://api.github.com/repos/{owner}/{repo}/actions/runs/{run_id}/rerun-failed-jobs'.
+    lv_temp = owner.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH lv_temp.
+    lv_temp = repo.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH lv_temp.
+    lv_temp = run_id.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{run_id}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'POST' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CASE lv_code.
+      WHEN 201. " Response
+" application/json,#/components/schemas/empty-object
+        CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+        return_data = parse_empty_object( '' ).
     ENDCASE.
   ENDMETHOD.
 
@@ -24023,7 +24208,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     lv_code = send_receive( ).
     WRITE / lv_code.
     CASE lv_code.
-      WHEN 200. " when the suite already existed
+      WHEN 200. " Response when the suite already exists
 " application/json,#/components/schemas/check-suite
         CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
         return_data = parse_check_suite( '' ).
@@ -30621,6 +30806,48 @@ CLASS zcl_githubcom IMPLEMENTATION.
     ENDCASE.
   ENDMETHOD.
 
+  METHOD zif_githubcom~reactions_list_for_release.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE 'https://api.github.com/repos/{owner}/{repo}/releases/{release_id}/reactions'.
+    lv_temp = owner.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH lv_temp.
+    lv_temp = repo.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH lv_temp.
+    lv_temp = release_id.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{release_id}' IN lv_uri WITH lv_temp.
+    IF content IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'content' value = content ).
+    ENDIF.
+    lv_temp = per_page.
+    CONDENSE lv_temp.
+    IF per_page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'per_page' value = lv_temp ).
+    ENDIF.
+    lv_temp = page.
+    CONDENSE lv_temp.
+    IF page IS SUPPLIED.
+      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
+    ENDIF.
+    mi_client->request->set_method( 'GET' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CASE lv_code.
+      WHEN 200. " Response
+" application/json,#/components/schemas/response_reactions_list_for_release
+        CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
+        return_data = parse_reactions_list_for_relea( '' ).
+      WHEN 404.
+" todo, raise
+      WHEN 415.
+" todo, raise
+    ENDCASE.
+  ENDMETHOD.
+
   METHOD zif_githubcom~reactions_create_for_release.
     DATA lv_code TYPE i.
     DATA lv_temp TYPE string.
@@ -30650,6 +30877,31 @@ CLASS zcl_githubcom IMPLEMENTATION.
         return_data = parse_reaction( '' ).
       WHEN 422.
 " todo, raise
+    ENDCASE.
+  ENDMETHOD.
+
+  METHOD zif_githubcom~reactions_delete_for_release.
+    DATA lv_code TYPE i.
+    DATA lv_temp TYPE string.
+    DATA lv_uri TYPE string VALUE 'https://api.github.com/repos/{owner}/{repo}/releases/{release_id}/reactions/{reaction_id}'.
+    lv_temp = owner.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH lv_temp.
+    lv_temp = repo.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH lv_temp.
+    lv_temp = release_id.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{release_id}' IN lv_uri WITH lv_temp.
+    lv_temp = reaction_id.
+    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
+    REPLACE ALL OCCURRENCES OF '{reaction_id}' IN lv_uri WITH lv_temp.
+    mi_client->request->set_method( 'DELETE' ).
+    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
+    lv_code = send_receive( ).
+    WRITE / lv_code.
+    CASE lv_code.
+      WHEN 204. " Response
     ENDCASE.
   ENDMETHOD.
 
