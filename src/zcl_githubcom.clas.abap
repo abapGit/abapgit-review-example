@@ -104,10 +104,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(code_of_conduct) TYPE zif_githubcom=>code_of_conduct
       RAISING cx_static_check.
-    METHODS parse_actions_cache_usage_org_
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(actions_cache_usage_org_enterp) TYPE zif_githubcom=>actions_cache_usage_org_enterp
-      RAISING cx_static_check.
     METHODS parse_enabled_organizations
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(enabled_organizations) TYPE zif_githubcom=>enabled_organizations
@@ -323,10 +319,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_organization_full
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(organization_full) TYPE zif_githubcom=>organization_full
-      RAISING cx_static_check.
-    METHODS parse_actions_cache_usage_by_r
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(actions_cache_usage_by_reposit) TYPE zif_githubcom=>actions_cache_usage_by_reposit
       RAISING cx_static_check.
     METHODS parse_enabled_repositories
       IMPORTING iv_prefix TYPE string
@@ -1335,10 +1327,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_key_simple
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(key_simple) TYPE zif_githubcom=>key_simple
-      RAISING cx_static_check.
-    METHODS json_apps_create_from_manifest
-      IMPORTING data TYPE zif_githubcom=>bodyapps_create_from_manifest
-      RETURNING VALUE(json) TYPE string
       RAISING cx_static_check.
     METHODS json_apps_update_webhook_confi
       IMPORTING data TYPE zif_githubcom=>bodyapps_update_webhook_config
@@ -2383,10 +2371,6 @@ CLASS zcl_githubcom DEFINITION PUBLIC.
     METHODS parse_orgs_list_custom_roles
       IMPORTING iv_prefix TYPE string
       RETURNING VALUE(response_orgs_list_custom_role) TYPE zif_githubcom=>response_orgs_list_custom_role
-      RAISING cx_static_check.
-    METHODS parse_actions_get_actions_cach
-      IMPORTING iv_prefix TYPE string
-      RETURNING VALUE(response_actions_get_actions_c) TYPE zif_githubcom=>response_actions_get_actions_c
       RAISING cx_static_check.
     METHODS parse_actions_list_selected_re
       IMPORTING iv_prefix TYPE string
@@ -3796,11 +3780,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     code_of_conduct-html_url = mo_json->value_string( iv_prefix && '/html_url' ).
   ENDMETHOD.
 
-  METHOD parse_actions_cache_usage_org_.
-    actions_cache_usage_org_enterp-total_active_caches_count = mo_json->value_string( iv_prefix && '/total_active_caches_count' ).
-    actions_cache_usage_org_enterp-total_active_caches_size_in_by = mo_json->value_string( iv_prefix && '/total_active_caches_size_in_bytes' ).
-  ENDMETHOD.
-
   METHOD parse_enabled_organizations.
 * todo, handle type string
   ENDMETHOD.
@@ -4773,12 +4752,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     organization_full-members_can_create_private_pag = mo_json->value_boolean( iv_prefix && '/members_can_create_private_pages' ).
     organization_full-members_can_fork_private_repos = mo_json->value_boolean( iv_prefix && '/members_can_fork_private_repositories' ).
     organization_full-updated_at = mo_json->value_string( iv_prefix && '/updated_at' ).
-  ENDMETHOD.
-
-  METHOD parse_actions_cache_usage_by_r.
-    actions_cache_usage_by_reposit-full_name = mo_json->value_string( iv_prefix && '/full_name' ).
-    actions_cache_usage_by_reposit-active_caches_size_in_bytes = mo_json->value_string( iv_prefix && '/active_caches_size_in_bytes' ).
-    actions_cache_usage_by_reposit-active_caches_count = mo_json->value_string( iv_prefix && '/active_caches_count' ).
   ENDMETHOD.
 
   METHOD parse_enabled_repositories.
@@ -8774,11 +8747,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
 * todo, array, custom_roles
   ENDMETHOD.
 
-  METHOD parse_actions_get_actions_cach.
-    response_actions_get_actions_c-total_count = mo_json->value_string( iv_prefix && '/total_count' ).
-* todo, array, repository_cache_usages
-  ENDMETHOD.
-
   METHOD parse_actions_list_selected_re.
 * todo, number, total_count
 * todo, array, repositories
@@ -11013,12 +10981,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
       minimal_repository = parse_minimal_repository( iv_prefix && '/' && lv_member ).
       APPEND minimal_repository TO response_activity_list_repos_w.
     ENDLOOP.
-  ENDMETHOD.
-
-  METHOD json_apps_create_from_manifest.
-    json = json && '{'.
-    json = substring( val = json off = 0 len = strlen( json ) - 1 ).
-    json = json && '}'.
   ENDMETHOD.
 
   METHOD json_apps_update_webhook_confi.
@@ -13699,7 +13661,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     REPLACE ALL OCCURRENCES OF '{code}' IN lv_uri WITH lv_temp.
     mi_client->request->set_method( 'POST' ).
     mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    mi_client->request->set_cdata( json_apps_create_from_manifest( body ) ).
     lv_code = send_receive( ).
     WRITE / lv_code.
     CASE lv_code.
@@ -14149,25 +14110,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
         return_data = parse_emojis_get( '' ).
       WHEN 304.
 " todo, raise
-    ENDCASE.
-  ENDMETHOD.
-
-  METHOD zif_githubcom~actions_get_actions_cache_usag.
-    DATA lv_code TYPE i.
-    DATA lv_temp TYPE string.
-    DATA lv_uri TYPE string VALUE 'https://api.github.com/enterprises/{enterprise}/actions/cache/usage'.
-    lv_temp = enterprise.
-    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
-    REPLACE ALL OCCURRENCES OF '{enterprise}' IN lv_uri WITH lv_temp.
-    mi_client->request->set_method( 'GET' ).
-    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    lv_code = send_receive( ).
-    WRITE / lv_code.
-    CASE lv_code.
-      WHEN 200. " Response
-" application/json,#/components/schemas/actions-cache-usage-org-enterprise
-        CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-        return_data = parse_actions_cache_usage_org_( '' ).
     ENDCASE.
   ENDMETHOD.
 
@@ -16446,54 +16388,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
       WHEN 422. " Validation failed
 " application/json,
 " todo, raise
-    ENDCASE.
-  ENDMETHOD.
-
-  METHOD zif_githubcom~actions_get_actions_cache_us01.
-    DATA lv_code TYPE i.
-    DATA lv_temp TYPE string.
-    DATA lv_uri TYPE string VALUE 'https://api.github.com/orgs/{org}/actions/cache/usage'.
-    lv_temp = org.
-    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
-    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH lv_temp.
-    mi_client->request->set_method( 'GET' ).
-    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    lv_code = send_receive( ).
-    WRITE / lv_code.
-    CASE lv_code.
-      WHEN 200. " Response
-" application/json,#/components/schemas/actions-cache-usage-org-enterprise
-        CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-        return_data = parse_actions_cache_usage_org_( '' ).
-    ENDCASE.
-  ENDMETHOD.
-
-  METHOD zif_githubcom~actions_get_actions_cache_us02.
-    DATA lv_code TYPE i.
-    DATA lv_temp TYPE string.
-    DATA lv_uri TYPE string VALUE 'https://api.github.com/orgs/{org}/actions/cache/usage-by-repository'.
-    lv_temp = org.
-    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
-    REPLACE ALL OCCURRENCES OF '{org}' IN lv_uri WITH lv_temp.
-    lv_temp = per_page.
-    CONDENSE lv_temp.
-    IF per_page IS SUPPLIED.
-      mi_client->request->set_form_field( name = 'per_page' value = lv_temp ).
-    ENDIF.
-    lv_temp = page.
-    CONDENSE lv_temp.
-    IF page IS SUPPLIED.
-      mi_client->request->set_form_field( name = 'page' value = lv_temp ).
-    ENDIF.
-    mi_client->request->set_method( 'GET' ).
-    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    lv_code = send_receive( ).
-    WRITE / lv_code.
-    CASE lv_code.
-      WHEN 200. " Response
-" application/json,#/components/schemas/response_actions_get_actions_cache_us02
-        CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-        return_data = parse_actions_get_actions_cach( '' ).
     ENDCASE.
   ENDMETHOD.
 
@@ -21493,28 +21387,6 @@ CLASS zcl_githubcom IMPLEMENTATION.
     CASE lv_code.
       WHEN 302. " Response
 " todo, raise
-    ENDCASE.
-  ENDMETHOD.
-
-  METHOD zif_githubcom~actions_get_actions_cache_us03.
-    DATA lv_code TYPE i.
-    DATA lv_temp TYPE string.
-    DATA lv_uri TYPE string VALUE 'https://api.github.com/repos/{owner}/{repo}/actions/cache/usage'.
-    lv_temp = owner.
-    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
-    REPLACE ALL OCCURRENCES OF '{owner}' IN lv_uri WITH lv_temp.
-    lv_temp = repo.
-    lv_temp = cl_http_utility=>escape_url( condense( lv_temp ) ).
-    REPLACE ALL OCCURRENCES OF '{repo}' IN lv_uri WITH lv_temp.
-    mi_client->request->set_method( 'GET' ).
-    mi_client->request->set_header_field( name = '~request_uri' value = lv_uri ).
-    lv_code = send_receive( ).
-    WRITE / lv_code.
-    CASE lv_code.
-      WHEN 200. " Response
-" application/json,#/components/schemas/actions-cache-usage-by-repository
-        CREATE OBJECT mo_json EXPORTING iv_json = mi_client->response->get_cdata( ).
-        return_data = parse_actions_cache_usage_by_r( '' ).
     ENDCASE.
   ENDMETHOD.
 
