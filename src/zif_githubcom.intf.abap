@@ -548,6 +548,12 @@ INTERFACE zif_githubcom PUBLIC.
            html_url TYPE string,
          END OF code_of_conduct.
 
+* Component schema: actions-cache-usage-org-enterprise, object
+  TYPES: BEGIN OF actions_cache_usage_org_enterp,
+           total_active_caches_count TYPE i,
+           total_active_caches_size_in_by TYPE i,
+         END OF actions_cache_usage_org_enterp.
+
 * Component schema: enabled-organizations, string
   TYPES enabled_organizations TYPE string.
 
@@ -1641,6 +1647,13 @@ INTERFACE zif_githubcom PUBLIC.
            members_can_fork_private_repos TYPE abap_bool,
            updated_at TYPE string,
          END OF organization_full.
+
+* Component schema: actions-cache-usage-by-repository, object
+  TYPES: BEGIN OF actions_cache_usage_by_reposit,
+           full_name TYPE string,
+           active_caches_size_in_bytes TYPE i,
+           active_caches_count TYPE i,
+         END OF actions_cache_usage_by_reposit.
 
 * Component schema: enabled-repositories, string
   TYPES enabled_repositories TYPE string.
@@ -7900,6 +7913,12 @@ INTERFACE zif_githubcom PUBLIC.
            custom_roles TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF response_orgs_list_custom_role.
 
+* Component schema: response_actions_get_actions_cache_us02, object
+  TYPES: BEGIN OF response_actions_get_actions_c,
+           total_count TYPE i,
+           repository_cache_usages TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF response_actions_get_actions_c.
+
 * Component schema: response_actions_list_selected_reposito, object
   TYPES: BEGIN OF response_actions_list_selected,
            total_count TYPE f,
@@ -9066,6 +9085,18 @@ INTERFACE zif_githubcom PUBLIC.
   METHODS emojis_get
     RETURNING
       VALUE(return_data) TYPE response_emojis_get
+    RAISING cx_static_check.
+
+* GET - "Get GitHub Actions cache usage for an enterprise"
+* Operation id: actions/get-actions-cache-usage-for-enterprise
+* Parameter: enterprise, required, path
+* Response: 200
+*     application/json, #/components/schemas/actions-cache-usage-org-enterprise
+  METHODS actions_get_actions_cache_usag
+    IMPORTING
+      enterprise TYPE string
+    RETURNING
+      VALUE(return_data) TYPE actions_cache_usage_org_enterp
     RAISING cx_static_check.
 
 * GET - "Get GitHub Actions permissions for an enterprise"
@@ -10402,6 +10433,34 @@ INTERFACE zif_githubcom PUBLIC.
       body TYPE bodyorgs_update
     RETURNING
       VALUE(return_data) TYPE organization_full
+    RAISING cx_static_check.
+
+* GET - "Get GitHub Actions cache usage for an organization"
+* Operation id: actions/get-actions-cache-usage-for-org
+* Parameter: org, required, path
+* Response: 200
+*     application/json, #/components/schemas/actions-cache-usage-org-enterprise
+  METHODS actions_get_actions_cache_us01
+    IMPORTING
+      org TYPE string
+    RETURNING
+      VALUE(return_data) TYPE actions_cache_usage_org_enterp
+    RAISING cx_static_check.
+
+* GET - "List repositories with GitHub Actions cache usage for an organization"
+* Operation id: actions/get-actions-cache-usage-by-repo-for-org
+* Parameter: org, required, path
+* Parameter: per_page, optional, query
+* Parameter: page, optional, query
+* Response: 200
+*     application/json, #/components/schemas/response_actions_get_actions_cache_us02
+  METHODS actions_get_actions_cache_us02
+    IMPORTING
+      org TYPE string
+      per_page TYPE i DEFAULT 30
+      page TYPE i DEFAULT 1
+    RETURNING
+      VALUE(return_data) TYPE response_actions_get_actions_c
     RAISING cx_static_check.
 
 * GET - "Get GitHub Actions permissions for an organization"
@@ -13422,6 +13481,20 @@ INTERFACE zif_githubcom PUBLIC.
       owner TYPE string
       repo TYPE string
       artifact_id TYPE i
+    RAISING cx_static_check.
+
+* GET - "Get GitHub Actions cache usage for a repository"
+* Operation id: actions/get-actions-cache-usage
+* Parameter: owner, required, path
+* Parameter: repo, required, path
+* Response: 200
+*     application/json, #/components/schemas/actions-cache-usage-by-repository
+  METHODS actions_get_actions_cache_us03
+    IMPORTING
+      owner TYPE string
+      repo TYPE string
+    RETURNING
+      VALUE(return_data) TYPE actions_cache_usage_by_reposit
     RAISING cx_static_check.
 
 * GET - "Get a job for a workflow run"
