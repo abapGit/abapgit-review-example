@@ -1585,11 +1585,6 @@ INTERFACE zif_githubcom PUBLIC.
            name TYPE string,
          END OF organization_custom_repository.
 
-* Component schema: external-groups, object
-  TYPES: BEGIN OF external_groups,
-           groups TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
-         END OF external_groups.
-
 * Component schema: organization-full, object
   TYPES: BEGIN OF suborganization_full_plan,
            name TYPE string,
@@ -1866,6 +1861,11 @@ INTERFACE zif_githubcom PUBLIC.
            teams TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
            members TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
          END OF external_group.
+
+* Component schema: external-groups, object
+  TYPES: BEGIN OF external_groups,
+           groups TYPE STANDARD TABLE OF string WITH DEFAULT KEY, " todo, handle array
+         END OF external_groups.
 
 * Component schema: organization-invitation, object
   TYPES: BEGIN OF organization_invitation,
@@ -5832,6 +5832,7 @@ INTERFACE zif_githubcom PUBLIC.
            sha TYPE string,
            id TYPE string,
            export_url TYPE string,
+           html_url TYPE string,
          END OF codespace_export_details.
 
 * Component schema: email, object
@@ -10391,20 +10392,6 @@ INTERFACE zif_githubcom PUBLIC.
       VALUE(return_data) TYPE response_orgs_list_custom_role
     RAISING cx_static_check.
 
-* GET - "List a connection between an external group and a team"
-* Operation id: teams/list-linked-external-idp-groups-to-team-for-org
-* Parameter: org, required, path
-* Parameter: team_slug, required, path
-* Response: 200
-*     application/json, #/components/schemas/external-groups
-  METHODS teams_list_linked_external_idp
-    IMPORTING
-      org TYPE string
-      team_slug TYPE string
-    RETURNING
-      VALUE(return_data) TYPE external_groups
-    RAISING cx_static_check.
-
 * GET - "Get an organization"
 * Operation id: orgs/get
 * Parameter: org, required, path
@@ -12700,6 +12687,20 @@ INTERFACE zif_githubcom PUBLIC.
       team_slug TYPE string
       discussion_number TYPE i
       reaction_id TYPE i
+    RAISING cx_static_check.
+
+* GET - "List a connection between an external group and a team"
+* Operation id: teams/list-linked-external-idp-groups-to-team-for-org
+* Parameter: org, required, path
+* Parameter: team_slug, required, path
+* Response: 200
+*     application/json, #/components/schemas/external-groups
+  METHODS teams_list_linked_external_idp
+    IMPORTING
+      org TYPE string
+      team_slug TYPE string
+    RETURNING
+      VALUE(return_data) TYPE external_groups
     RAISING cx_static_check.
 
 * PATCH - "Update the connection between an external group and a team"
