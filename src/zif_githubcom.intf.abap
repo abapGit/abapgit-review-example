@@ -1040,6 +1040,7 @@ INTERFACE zif_githubcom PUBLIC.
            resolved_at TYPE string,
            resolved_by TYPE nullable_simple_user,
            secret_type TYPE string,
+           secret_type_display_name TYPE string,
            secret TYPE string,
            repository TYPE minimal_repository,
          END OF organization_secret_scanning_a.
@@ -5281,6 +5282,7 @@ INTERFACE zif_githubcom PUBLIC.
            resolved_at TYPE string,
            resolved_by TYPE nullable_simple_user,
            secret_type TYPE string,
+           secret_type_display_name TYPE string,
            secret TYPE string,
          END OF secret_scanning_alert.
 
