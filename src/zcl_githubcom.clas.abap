@@ -4251,6 +4251,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     organization_secret_scanning_a-resolved_at = mo_json->value_string( iv_prefix && '/resolved_at' ).
     organization_secret_scanning_a-resolved_by = parse_nullable_simple_user( iv_prefix && '/resolved_by' ).
     organization_secret_scanning_a-secret_type = mo_json->value_string( iv_prefix && '/secret_type' ).
+    organization_secret_scanning_a-secret_type_display_name = mo_json->value_string( iv_prefix && '/secret_type_display_name' ).
     organization_secret_scanning_a-secret = mo_json->value_string( iv_prefix && '/secret' ).
     organization_secret_scanning_a-repository = parse_minimal_repository( iv_prefix && '/repository' ).
   ENDMETHOD.
@@ -7864,6 +7865,7 @@ CLASS zcl_githubcom IMPLEMENTATION.
     secret_scanning_alert-resolved_at = mo_json->value_string( iv_prefix && '/resolved_at' ).
     secret_scanning_alert-resolved_by = parse_nullable_simple_user( iv_prefix && '/resolved_by' ).
     secret_scanning_alert-secret_type = mo_json->value_string( iv_prefix && '/secret_type' ).
+    secret_scanning_alert-secret_type_display_name = mo_json->value_string( iv_prefix && '/secret_type_display_name' ).
     secret_scanning_alert-secret = mo_json->value_string( iv_prefix && '/secret' ).
   ENDMETHOD.
 
