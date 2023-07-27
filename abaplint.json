@@ -1,7 +1,6 @@
 {
   "global": {
     "files": "/src/**/*.*",
-    "exclude": [],
     "skipGeneratedGatewayClasses": true,
     "skipGeneratedPersistentClasses": true,
     "skipGeneratedFunctionGroups": true,
@@ -27,9 +26,7 @@
   ],
   "syntax": {
     "version": "v740sp08",
-    "errorNamespace": "^(Z|Y|LCL_|TY_|LIF_)",
-    "globalConstants": [],
-    "globalMacros": []
+    "errorNamespace": "^(Z|Y|LCL_|TY_|LIF_)"
   },
   "rules": {
     "7bit_ascii": true,
@@ -45,12 +42,10 @@
       "exclude": ["zif_github"],
       "severity": "Error",
       "define": true,
-      "endselect": true,
-      "execSQL": true,
-      "kernelCall": true,
-      "communication": true,
       "statics": true,
-      "systemCall": true,
+      "testSeams": true,
+      "exportToMemory": true,
+      "exportToDatabase": true,
       "defaultKey": true,
       "break": true,
       "describeLines": true
@@ -63,7 +58,6 @@
     "check_comments": false,
     "check_ddic": true,
     "check_include": true,
-    "check_no_handler_pragma": true,
     "check_subrc": true,
     "check_syntax": true,
     "check_text_elements": true,
@@ -79,6 +73,7 @@
       "spaces": 1
     },
     "cyclomatic_complexity": {
+      "max": 25,
       "exclude": ["github.com"]
     },
     "definitions_top": true,
@@ -136,7 +131,7 @@
     "keep_single_parameter_on_one_line": true,
     "keyword_case": true,
     "line_break_multiple_parameters": false,
-    "line_break_style": true,
+    "line_break_style": false,
     "line_length": {
       "exclude": ["zcl_github"],
       "length": 120,
@@ -144,10 +139,8 @@
     },
     "line_only_punc": true,
     "local_class_naming": true,
-    "local_testclass_location": true,
     "local_variable_names": false,
     "main_file_contents": true,
-    "many_parenthesis": true,
     "max_one_statement": true,
     "message_exists": true,
     "method_implemented_twice": true,
