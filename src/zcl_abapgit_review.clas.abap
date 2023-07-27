@@ -94,7 +94,7 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
   METHOD create_branch_if_missing.
 
-    DATA(lv_full_name) = |{ zif_abapgit_definitions=>c_git_branch-heads_prefix }{ iv_branch_name }|.
+    DATA(lv_full_name) = |{ zif_abapgit_git_definitions=>c_git_branch-heads_prefix }{ iv_branch_name }|.
     DATA(lo_branches) = zcl_abapgit_git_transport=>branches( io_repo->get_url( ) ).
     TRY.
         lo_branches->find_by_name( lv_full_name ).
