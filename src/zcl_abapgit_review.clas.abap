@@ -258,7 +258,7 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
 
     io_repo->select_branch( |refs/heads/{ iv_branch_name }| ).
 
-    DATA(ls_files) = zcl_abapgit_factory=>get_stage_logic( )->get( io_repo ).
+    DATA(ls_files) = zcl_abapgit_stage_logic=>get_stage_logic( )->get( io_repo ).
     DATA(lt_file_status) = zcl_abapgit_repo_status=>calculate( io_repo ).
 
     DATA(lo_stage) = NEW zcl_abapgit_stage( ).
