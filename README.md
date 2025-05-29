@@ -1,7 +1,7 @@
 # abap-review
 abapGit example
 
-Prereq:
+Prerequisites:
 * abapgit dev edition installed
 * v740sp08 or above
 * connectivity setup, machine user setup?
