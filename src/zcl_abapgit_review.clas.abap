@@ -4,12 +4,27 @@ CLASS zcl_abapgit_review DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    TYPES: BEGIN OF ty_pull_url,
+             package TYPE devclass,
+             url     TYPE string,
+           END OF ty_pull_url.
+    TYPES: tt_pull_urls TYPE STANDARD TABLE OF ty_pull_url WITH NON-UNIQUE KEY package.
+    TYPES: tt_repos TYPE STANDARD TABLE OF REF TO zcl_abapgit_repo.
+    TYPES: tt_packages TYPE STANDARD TABLE OF devclass.
 
     METHODS release
       IMPORTING
         !iv_trkorr TYPE trkorr
       RAISING
         cx_static_check .
+    METHODS find_pull_request_urls
+      IMPORTING
+        !iv_trkorr       TYPE trkorr
+      EXPORTING
+        et_pull_requests TYPE tt_pull_urls
+        et_packages      TYPE tt_packages
+      RAISING
+        cx_static_check.
   PROTECTED SECTION.
 
     TYPES:
@@ -20,6 +35,11 @@ CLASS zcl_abapgit_review DEFINITION
       END OF ty_tadir .
     TYPES:
       ty_tadir_tt TYPE STANDARD TABLE OF ty_tadir WITH EMPTY KEY .
+    TYPES:
+      BEGIN OF ty_repo,
+        package TYPE devclass,
+        repo    TYPE REF TO zcl_abapgit_repo,
+      END OF ty_repo.
 
     CONSTANTS gc_workbench TYPE e070-trfunction VALUE 'K' ##NO_TEXT.
     CONSTANTS gc_development TYPE e070-trfunction VALUE 'S' ##NO_TEXT.
@@ -57,6 +77,35 @@ CLASS zcl_abapgit_review DEFINITION
         VALUE(ro_repo) TYPE REF TO zcl_abapgit_repo_online
       RAISING
         cx_static_check .
+    METHODS find_abapgit_repos
+      IMPORTING
+        !iv_trkorr TYPE trkorr
+      EXPORTING
+        et_repos   TYPE tt_repos
+      RAISING
+        cx_static_check.
+    METHODS find_pull_requests
+      IMPORTING
+                it_repos         TYPE tt_repos
+                iv_branch_name   TYPE string
+      RETURNING VALUE(rt_result) TYPE tt_pull_urls
+      RAISING   cx_static_check.
+    METHODS find_ags_merge_requests
+      IMPORTING
+        io_repo        TYPE REF TO zcl_abapgit_repo_online
+        iv_branch_name TYPE string
+      CHANGING
+        ct_result      TYPE tt_pull_urls
+      RAISING
+        zcx_abapgit_review.
+    METHODS find_github_pull_requests
+      IMPORTING
+        io_repo        TYPE REF TO zcl_abapgit_repo_online
+        iv_branch_name TYPE string
+      CHANGING
+        ct_result      TYPE tt_pull_urls
+      RAISING
+        cx_static_check.
     METHODS list_objects
       IMPORTING
         !iv_request     TYPE trkorr
@@ -194,7 +243,7 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
       FOR ALL ENTRIES IN @it_tadir
       WHERE pgmid = @it_tadir-pgmid
       AND object = @it_tadir-object
-      AND obj_name = @it_tadir-obj_name. "#EC CI_SUBRC
+      AND obj_name = @it_tadir-obj_name.                  "#EC CI_SUBRC
 
     DATA(lt_repos) = zcl_abapgit_repo_srv=>get_instance( )->list( ).
     LOOP AT lt_packages INTO DATA(lv_package).
@@ -219,6 +268,136 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD find_abapgit_repos.
+    DATA: lt_repos TYPE HASHED TABLE OF ty_repo WITH UNIQUE KEY package.
+
+    DATA(lt_objects) = list_objects( iv_trkorr ).
+    IF lt_objects IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    SELECT DISTINCT devclass FROM tadir INTO TABLE @DATA(lt_packages)
+      FOR ALL ENTRIES IN @lt_objects
+      WHERE pgmid = @lt_objects-pgmid
+      AND object = @lt_objects-object
+      AND obj_name = @lt_objects-obj_name.                "#EC CI_SUBRC
+
+    DATA(lt_abapgit_repos) = zcl_abapgit_repo_srv=>get_instance( )->list( ).
+    LOOP AT lt_packages INTO DATA(lv_package).
+      DATA(lt_supers) = zcl_abapgit_factory=>get_sap_package( lv_package-devclass )->list_superpackages( ).
+      LOOP AT lt_supers INTO DATA(lv_super).
+        LOOP AT lt_abapgit_repos INTO DATA(lo_abapgit_repo).
+          IF lo_abapgit_repo->is_offline( ) = abap_true.
+            CONTINUE.
+          ELSEIF lo_abapgit_repo->get_package( ) = lv_super.
+            INSERT VALUE #(
+              package = lo_abapgit_repo->get_package( )
+              repo = lo_abapgit_repo ) INTO TABLE lt_repos.
+          ENDIF.
+        ENDLOOP.
+      ENDLOOP.
+    ENDLOOP.
+
+    et_repos = VALUE #( FOR ls_repo IN lt_repos ( ls_repo-repo ) ).
+
+  ENDMETHOD.
+
+
+  METHOD find_ags_merge_requests.
+    DATA: lv_query_url   TYPE string,
+          lt_merge_requests TYPE zagr_ags_merge_req_tt.
+
+    FIND REGEX '(http|https):\/\/([\.\d\w]+)\/sap\/zabapgitserver\/git\/([-\d\w]+)(\.git)?'
+      IN io_repo->get_url( ) SUBMATCHES DATA(lv_protocol) DATA(lv_host) DATA(lv_repo_name).
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+    lv_query_url = |{ lv_protocol }://{ lv_host }/sap/zabapgitserver/rest/| &&
+      |find_merge_requests/{ lv_repo_name }/{ iv_branch_name }|.
+    TRY.
+        cl_http_client=>create_by_url( EXPORTING url = lv_query_url
+          IMPORTING client = DATA(lo_http_client) ).
+        DATA(lo_http_rest_client) = NEW cl_rest_http_client( lo_http_client ).
+        lo_http_rest_client->if_rest_resource~get( ).
+        DATA(lv_response) = lo_http_rest_client->if_rest_client~get_response_entity( )->get_binary_data( ).
+        CALL TRANSFORMATION id
+          SOURCE XML lv_response
+          RESULT data = lt_merge_requests.
+
+        LOOP AT lt_merge_requests REFERENCE INTO DATA(lr_merge_req).
+          DATA(lv_merge_request_url) = |{ lv_protocol }://{ lv_host }/sap/zabapgitserver/| &&
+            |{ lv_repo_name }/merge_request/{ lr_merge_req->*-id }|.
+          INSERT VALUE #( package = io_repo->get_package( ) url = lv_merge_request_url )
+            INTO TABLE ct_result.
+        ENDLOOP.
+      CATCH cx_transformation_error INTO DATA(lo_transformation_error).
+        RAISE EXCEPTION TYPE zcx_abapgit_review
+          EXPORTING
+            textid   = zcx_abapgit_review=>read_ags_merge_request
+            previous = lo_transformation_error.
+      CATCH cx_rest_client_exception INTO DATA(lo_http_exception).
+        RAISE EXCEPTION TYPE zcx_abapgit_review
+          EXPORTING
+            textid   = zcx_abapgit_review=>read_ags_merge_request
+            previous = lo_http_exception.
+    ENDTRY.
+
+  ENDMETHOD.
+
+
+  METHOD find_github_pull_requests.
+
+    FIND REGEX 'https:\/\/github\.com\/([-\d\w]+)\/([-\d\w]+)(\.git)?'
+      IN io_repo->get_url( ) SUBMATCHES DATA(lv_owner) DATA(lv_repo).
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+    DATA(li_github) = CAST zif_githubcom( NEW zcl_githubcom( create_http_client( ) ) ).
+    DATA(lt_pr) = li_github->pulls_list(
+      owner       = lv_owner
+      repo        = lv_repo
+      head        = |{ lv_owner }:{ iv_branch_name }| ).
+    LOOP AT lt_pr REFERENCE INTO DATA(lr_pr).
+      INSERT VALUE #( package = io_repo->get_package( ) url = lr_pr->*-html_url )
+        INTO TABLE ct_result.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD find_pull_requests.
+
+    LOOP AT it_repos INTO DATA(lo_repo).
+      find_github_pull_requests( EXPORTING
+        io_repo = CAST zcl_abapgit_repo_online( lo_repo )
+        iv_branch_name = iv_branch_name
+        CHANGING ct_result = rt_result ).
+      find_ags_merge_requests( EXPORTING
+        io_repo = CAST zcl_abapgit_repo_online( lo_repo )
+        iv_branch_name = iv_branch_name
+        CHANGING ct_result = rt_result ).
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD find_pull_request_urls.
+
+    find_abapgit_repos(
+      EXPORTING
+        iv_trkorr = iv_trkorr
+      IMPORTING
+        et_repos = DATA(lt_repos) ).
+    et_pull_requests = find_pull_requests(
+      it_repos = lt_repos
+      iv_branch_name = CONV string( iv_trkorr ) ).
+    et_packages = VALUE #( FOR lo_repo IN lt_repos ( lo_repo->get_package( ) ) ).
+
+  ENDMETHOD.
+
+
   METHOD list_objects.
 
     SELECT trkorr FROM e070
@@ -232,7 +411,7 @@ CLASS ZCL_ABAPGIT_REVIEW IMPLEMENTATION.
     SELECT pgmid, object, obj_name FROM e071
       INTO TABLE @DATA(lt_e071)
       FOR ALL ENTRIES IN @lt_e070
-      WHERE trkorr = @lt_e070-trkorr. "#EC CI_SUBRC
+      WHERE trkorr = @lt_e070-trkorr.                     "#EC CI_SUBRC
     SORT lt_e071 BY pgmid object obj_name.
     DELETE ADJACENT DUPLICATES FROM lt_e071 COMPARING pgmid object obj_name.
 
